@@ -1,37 +1,72 @@
 :root {
-    --my-white: #ffffff;
-    --my-white-h: #dadce0;
-    --my-icy-blue: #D6E1F3;
-    --my-blue: #0566EB;
-    --my-dark-blue: #1D3259;
-    --my-gray: #7C7C7C;
-    --my-green: #46993F;
-    --my-red: #E50303;
-    --my-yellow: #EED202;
-    --my-background: #F1F1F1;
+    /* ================================================
+       PALETTE  –  Tonalità blu chiaro
+       ================================================
+       --blue-50   sfondo pagina, superfici leggerissime
+       --blue-100  hover sfondo, bordi leggeri
+       --blue-200  input border, badge outline, divider
+       --blue-400  colore accent / icone secondarie
+       --blue-500  colore principale (bottoni, link)
+       --blue-600  hover bottoni, navbar
+       --blue-700  header, titoli su fondo scuro
+       --blue-900  testo body su sfondi chiari
+       ================================================ */
+    --blue-50:  #EFF6FF;
+    --blue-100: #DBEAFE;
+    --blue-200: #BFDBFE;
+    --blue-400: #60A5FA;
+    --blue-500: #3B82F6;
+    --blue-600: #2563EB;
+    --blue-700: #1D4ED8;
+    --blue-900: #1E3A5F;
 
+    /* Alias semantici – usati in tutto il codice */
+    --color-primary:        var(--blue-600);
+    --color-primary-hover:  var(--blue-700);
+    --color-secondary:      var(--blue-400);
+    --color-accent:         var(--blue-200);
+    --color-surface:        var(--blue-50);
+    --color-surface-hover:  var(--blue-100);
 
-    --hex-dark-blue: #1E3A8A;
+    /* Compatibilità con nomi storici */
+    --my-white:      #ffffff;
+    --my-white-h:    var(--blue-100);
+    --my-icy-blue:   var(--blue-100);
+    --my-blue:       var(--blue-600);
+    --my-dark-blue:  var(--blue-900);
+    --my-gray:       #6B7280;
+    --my-green:      #16A34A;
+    --my-red:        #DC2626;
+    --my-yellow:     #EAB308;
+    --my-background: var(--blue-50);
+    --pro:           var(--blue-400);
 
-    --hex-red: #CC0000;
-    --hex-orange: #FF4D00;
-    --hex-yellow: #FFCC00;
-    --hex-dark-green: #2E8B57;
-    --hex-light-green: #93C572;
-    --hex-light-blue: #0095B6;
-    --hex-blue: #0F52BA;
-    --hex-purple: #9F00FF;
+    --hex-dark-blue:   var(--blue-700);
+    --hex-red:         #DC2626;
+    --hex-orange:      #F97316;
+    --hex-yellow:      #EAB308;
+    --hex-dark-green:  #16A34A;
+    --hex-light-green: #86EFAC;
+    --hex-light-blue:  var(--blue-400);
+    --hex-blue:        var(--blue-600);
+    --hex-purple:      #7C3AED;
 
-    --radius: 30px;
-    --radius-1: 20px;
+    /* Layout */
+    --radius:   30px;
+    --radius-1: 16px;
 
-
-    --header-color: var(--hex-dark-blue);
+    --header-color:       var(--blue-700);
+    --header-color-hover: var(--blue-900);
+    --footer-color:       var(--blue-800, #1E40AF);
+    --text-on-light:      var(--blue-900);
+    --text-on-primary:    #ffffff;
+    --link-color:         var(--blue-600);
+    --link-hover-color:   var(--blue-700);
     --header-height: 6.5rem;
+
     margin: 0;
     padding: 0;
     font-family: 'Poppins', sans-serif;
-
 
     /* Dimensioni font */
     --h1: 3rem;
@@ -47,6 +82,7 @@
 
 body {
     background: var(--my-background);
+    color: var(--text-on-light);
     padding: 0;
     margin: 0;
 }
@@ -60,9 +96,9 @@ header {
 
 footer {
     width: 100%;
-    background: var(--my-gray);
+    background: var(--blue-700);
     padding: 2rem 0;
-    color: var(--my-white);
+    color: var(--text-on-primary);
 }
 
 .footer-container {
@@ -119,7 +155,7 @@ footer {
 
 h1, h2, h3, h4, p, a {
     margin: 0;
-    color: var(--my-white);
+    color: inherit;
 }
 
 h1 {
@@ -145,6 +181,14 @@ h4 {
 p, a {
     font-size: var(--p);
     font-weight: normal;
+}
+
+a {
+    color: var(--link-color);
+}
+
+a:hover {
+    color: var(--link-hover-color);
 }
 
 

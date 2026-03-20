@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="vetrina.css">
     <link rel="stylesheet" href="style_custom.css">
-</head>
+    <script src="vetrina.js" defer></script>
 <body>
 </body>
 </html>

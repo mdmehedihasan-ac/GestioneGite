@@ -2,7 +2,7 @@
     border: 1px solid var(--my-gray);
 
     h1, h2, h3, h4, p {
-        color: var(--my-dark-blue);
+        color: var(--my-blue);
         margin-left: 2rem;
     }
 }
@@ -72,13 +72,17 @@
     color: var(--my-white);
     text-decoration: none;
     font-weight: 500;
-    transition: opacity 0.2s;
+    transition: color 0.18s, background 0.18s;
     font-size: 1rem;
+    padding: 0.3rem 0.8rem;
+    border-radius: var(--radius);
 }
 
 .header-nav a:hover {
-    opacity: 0.8;
-    text-decoration: underline;
+    background: rgba(255,255,255,0.18);
+    color: white;
+    text-decoration: none;
+    opacity: 1;
 }
 
 /*SEZIONE PROFILO*/
@@ -88,81 +92,119 @@
     border-radius: var(--radius);
     height: var(--container-height);
     max-height: 3.5rem;
-    background: var(--my-blue);
+    background: var(--blue-500);
     display: flex;
-    gap: 1rem;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0 0.9rem 0 0.6rem;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.18s;
+}
 
-    * {
-        margin-left: 0;
-    }
+.profile-container .profile-picture {
+    --width: 2.1rem;
+    width: var(--width);
+    height: var(--width);
+    min-width: var(--width);
+    background: rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.5);
+    flex-shrink: 0;
+}
 
-    .profile-picture {
-        --width: calc(var(--header-height) / 3);
-        width: var(--width);
-        height: var(--width);
-        background: grey;
-        border-radius: 90px;
-        /*Il margine sinistro è pari alla differenza tra l'altezza del container e l'altezza della foto, diviso per 2
-          Quindi, il margine sinistro è uguale a quello superiore ed inferiore
-        */
-        margin-left: calc(var(--container-height) / 2 - var(--width) / 2);
-    }
+.profile-container .profile-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
 
-    .profile-arrow svg {
-        filter: drop-shadow(0 2px rgba(0, 0, 0, 0.2));
-        transition: all 0.2s ease-in-out;
-    }
+.profile-container .profile-info .user-name {
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+    display: block;
+}
 
-    .profile-arrow.open svg {
-        rotate: 180deg;
-    }
+.profile-container .profile-info .user-role {
+    color: rgba(255,255,255,0.75);
+    font-size: 0.72rem;
+    line-height: 1.3;
+    display: block;
+}
 
+.profile-container .profile-arrow {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.profile-container .profile-arrow svg {
+    transition: rotate 0.22s ease;
+    display: block;
+}
+
+.profile-container .profile-arrow.open svg {
+    rotate: 180deg;
 }
 
 .profile-container:hover {
-    cursor: pointer;
+    background: var(--blue-400);
 }
 
 .profile-modal {
     width: 14rem;
     background: white;
     position: absolute;
+    top: calc(var(--header-height) / 2 + 0.6rem);
+    right: 0;
     border-radius: var(--radius-1);
-    margin-top: calc(var(--header-height) / 3 + 1.5rem);
     display: flex;
-    box-sizing: border-box;
     flex-direction: column;
     overflow: hidden;
+    z-index: 999;
+    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.18);
+    border: 1px solid var(--blue-100);
+}
 
-    * {
-        align-items: center;
-        display: flex;
-        color: black;
-    }
-
-
-    hr {
-        width: 90%;
-        margin: auto;
-        border-top: thin solid #243588;
-        height: 0;
-        background-color: var(--my-gray);
-    }
+.profile-modal hr {
+    width: 90%;
+    margin: 0 auto;
+    border: none;
+    border-top: 1px solid var(--blue-200);
 }
 
 .profile-modal-row {
     width: 100%;
     box-sizing: border-box;
     padding: 0 1rem;
-    height: calc(var(--header-height) / 2);
+    height: 3rem;
     text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: background 0.15s;
+}
 
-    svg {
-        width: 1.5rem;
-        color: var(--my-blue);
-        fill: var(--my-blue);
-        margin-right: 0.5rem;
-    }
+.profile-modal-row svg {
+    width: 1.3rem;
+    height: 1.3rem;
+    min-width: 1.3rem;
+    fill: var(--blue-600);
+    flex-shrink: 0;
+    display: block;
+}
+
+.profile-modal-row p {
+    color: #1e293b;
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: block;
 }
 
 .profile-modal-row:visited {
@@ -170,31 +212,42 @@
 }
 
 .profile-modal-row:hover {
-    cursor: pointer;
-    background: rgba(0, 0, 0, 0.05);
+    background: var(--blue-50);
+}
 
-    p {
-        color: var(--my-blue);
-    }
+.profile-modal-row:hover p {
+    color: var(--blue-700);
+}
+
+.profile-modal-row:hover svg {
+    fill: var(--blue-700);
 }
 
 .profile-modal-row-exit svg {
-    fill: var(--my-red);
+    fill: #DC2626;
 }
+
+.profile-modal-row-exit p {
+    color: #DC2626;
+}
+
+.profile-modal-row-exit:hover {
+    background: #FEF2F2;
+}
+
 .profile-modal-row-settings svg {
     fill: var(--hex-dark-green);
 }
-
 /*FINE SEZIONE PROFILO*/
 /*SEZIONE PULSANTI*/
 button.m, button, .button {
     border-radius: var(--radius);
     border: none;
-    background: var(--hex-dark-blue);
+    background: var(--blue-600);
     color: white;
     height: 3.5rem;
     min-width: 8.5rem;
-    padding: 0 0.5rem;
+    padding: 0 1.2rem;
     box-sizing: border-box;
     font-family: inherit;
     font-size: 1rem;
@@ -203,15 +256,16 @@ button.m, button, .button {
     justify-content: center;
     cursor: pointer;
     text-decoration: none;
+    transition: background 0.18s ease, box-shadow 0.18s ease, transform 0.1s ease;
 }
 
 button:hover, .button:hover {
-    transition: all 0.1s ease-in-out;
-    cursor: pointer;
-    background: var(--my-blue);
+    background: var(--blue-700);
     color: white;
-    filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.3));
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+    transform: translateY(-1px);
     text-decoration: none;
+    filter: none;
 }
 
 button.cancel, .button.cancel {
@@ -272,13 +326,15 @@ button.full-width, .button.full-width {
 
 button.outline, .button.outline {
     background: transparent;
-    border: 2px solid var(--hex-dark-blue);
-    color: var(--hex-dark-blue);
+    border: 2px solid var(--blue-600);
+    color: var(--blue-600);
 }
 
 button.outline:hover, .button.outline:hover {
-    background: var(--hex-dark-blue);
+    background: var(--blue-600);
     color: white;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+    transform: translateY(-1px);
 }
 
 /*FINE SEZIONE PULSANTI*/
@@ -317,7 +373,8 @@ button.outline:hover, .button.outline:hover {
 
     input:focus, select:focus, textarea:focus {
         outline: none;
-        border: 1px solid var(--hex-dark-blue);
+        border: 1px solid var(--blue-500);
+        box-shadow: 0 0 0 3px var(--blue-100);
     }
 
     .text-input-10 {
@@ -368,19 +425,20 @@ button.outline:hover, .button.outline:hover {
 .card {
     background: var(--my-white);
     border-radius: var(--radius-1);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 12px rgba(59, 130, 246, 0.10);
+    border: 1px solid var(--blue-100);
     padding: 2rem;
     display: flex;
     flex-direction: column;
     gap: 1rem;
     
     h1, h2, h3, h4 {
-        color: var(--my-dark-blue);
+        color: var(--blue-700);
         margin-bottom: 1rem;
     }
     
     p {
-        color: #333;
+        color: var(--blue-900);
     }
 }
 
@@ -442,7 +500,7 @@ button.outline:hover, .button.outline:hover {
         align-items: center;
         
         h3 {
-            color: var(--my-dark-blue);
+            color: var(--blue-700);
             margin: 0;
         }
         
@@ -467,10 +525,10 @@ button.outline:hover, .button.outline:hover {
     
     .modal-body {
         padding: 1.5rem;
-        color: #333;
+        color: var(--blue-900);
 
         p {
-            color: #333;
+            color: var(--blue-900);
         }
     }
     
@@ -512,9 +570,9 @@ button.outline:hover, .button.outline:hover {
 }
 
 .alert-info {
-    background-color: var(--my-icy-blue);
-    color: var(--my-dark-blue);
-    border: 1px solid var(--my-blue);
+    background-color: var(--blue-100);
+    color: var(--blue-900);
+    border: 1px solid var(--blue-400);
 }
 
 .alert-success {
@@ -547,7 +605,7 @@ button.outline:hover, .button.outline:hover {
 }
 
 .badge-primary {
-    background-color: var(--my-blue);
+    background-color: var(--blue-600);
     color: white;
 }
 
@@ -592,13 +650,13 @@ table {
     }
     
     th {
-        background-color: var(--header-color);
+        background-color: var(--blue-600);
         color: white;
         font-weight: 600;
     }
     
     tr:hover {
-        background-color: rgba(0,0,0,0.02);
+        background-color: var(--blue-50);
     }
     
     tr:last-child td {
@@ -616,7 +674,7 @@ table {
     
     label {
         font-weight: 600;
-        color: var(--my-dark-blue);
+        color: var(--blue-700);
         margin-left: 0.5rem;
     }
     
@@ -633,7 +691,8 @@ table {
     
     input:focus, select:focus, textarea:focus {
         outline: none;
-        border: 2px solid var(--my-blue);
+        border: 2px solid var(--blue-500);
+        box-shadow: 0 0 0 3px var(--blue-100);
     }
     
     .helper-text {

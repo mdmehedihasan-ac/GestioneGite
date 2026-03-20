@@ -1,7 +1,11 @@
-function toggleProfile() {
-    const arrow = document.getElementsByClassName("profile-arrow")[0];
-    const modal = document.getElementsByClassName("profile-modal")[0];
-    if(arrow.classList.contains("open")) {
+function toggleProfile(e) {
+    if (e) e.stopPropagation();
+    const arrow = document.querySelector(".profile-arrow");
+    const modal = document.querySelector(".profile-modal");
+    if (!arrow || !modal) return;
+
+    const isOpen = arrow.classList.contains("open");
+    if (isOpen) {
         arrow.classList.remove("open");
         modal.classList.add("hidden");
     } else {
@@ -9,6 +13,18 @@ function toggleProfile() {
         modal.classList.remove("hidden");
     }
 }
+
+// Chiudi il dropdown profilo cliccando fuori
+document.addEventListener("click", function(e) {
+    const container = document.querySelector(".profile-container");
+    const modal = document.querySelector(".profile-modal");
+    const arrow = document.querySelector(".profile-arrow");
+    if (!container || !modal) return;
+    if (!container.contains(e.target)) {
+        modal.classList.add("hidden");
+        if (arrow) arrow.classList.remove("open");
+    }
+});
 
 // Funzioni Modali
 function openModal(modalId) {

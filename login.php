@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <title>Login - Gestione Gite</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="vetrina.css">
     <link rel="stylesheet" href="style_custom.css">
-    <style>
+    <script src="vetrina.js" defer></script>
         /* Rende il body un contenitore colonna */
         body {
             display: flex;
