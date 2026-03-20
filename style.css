@@ -1,16 +1,5 @@
-:root {
-    /* ================================================
-       PALETTE  –  Tonalità blu chiaro
-       ================================================
-       --blue-50   sfondo pagina, superfici leggerissime
-       --blue-100  hover sfondo, bordi leggeri
-       --blue-200  input border, badge outline, divider
-       --blue-400  colore accent / icone secondarie
-       --blue-500  colore principale (bottoni, link)
-       --blue-600  hover bottoni, navbar
-       --blue-700  header, titoli su fondo scuro
-       --blue-900  testo body su sfondi chiari
-       ================================================ */
+﻿:root {
+    
     --blue-50:  #EFF6FF;
     --blue-100: #DBEAFE;
     --blue-200: #BFDBFE;
@@ -20,7 +9,7 @@
     --blue-700: #1D4ED8;
     --blue-900: #1E3A5F;
 
-    /* Alias semantici – usati in tutto il codice */
+    
     --color-primary:        var(--blue-600);
     --color-primary-hover:  var(--blue-700);
     --color-secondary:      var(--blue-400);
@@ -28,7 +17,7 @@
     --color-surface:        var(--blue-50);
     --color-surface-hover:  var(--blue-100);
 
-    /* Compatibilità con nomi storici */
+    
     --my-white:      #ffffff;
     --my-white-h:    var(--blue-100);
     --my-icy-blue:   var(--blue-100);
@@ -51,7 +40,7 @@
     --hex-blue:        var(--blue-600);
     --hex-purple:      #7C3AED;
 
-    /* Layout */
+    
     --radius:   30px;
     --radius-1: 16px;
 
@@ -68,7 +57,7 @@
     padding: 0;
     font-family: 'Poppins', sans-serif;
 
-    /* Dimensioni font */
+    
     --h1: 3rem;
     --h2: 2.5rem;
     --h3: 2rem;
@@ -195,7 +184,6 @@ a:hover {
 .header-container {
     display: flex;
     flex-grow: 1;
-    border: 1px solid red;
 
     h2 {
         line-height: var(--header-height);
@@ -206,21 +194,15 @@ a:hover {
 
 .header-left {
     margin-left: 2rem;
-
+    display: flex;
+    align-items: center;
 }
 
 .header-right {
     margin-right: 2rem;
-
-    * {
-        margin-left: auto;
-        margin-top: auto;
-        margin-bottom: auto;
-    }
-
-    h2 {
-
-    }
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
 }
 
 .container {
@@ -235,4 +217,5 @@ a:hover {
     flex-grow: 1;
     width: 100%;
 }
+
 

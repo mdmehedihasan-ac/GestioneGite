@@ -1,70 +1,61 @@
 function toggleProfile(e) {
     if (e) e.stopPropagation();
-    const arrow = document.querySelector(".profile-arrow");
-    const modal = document.querySelector(".profile-modal");
-    if (!arrow || !modal) return;
+    var freccia = document.querySelector(".profile-arrow");
+    var menu = document.querySelector(".profile-modal");
+    if (!freccia || !menu) return;
 
-    const isOpen = arrow.classList.contains("open");
-    if (isOpen) {
-        arrow.classList.remove("open");
-        modal.classList.add("hidden");
+    if (freccia.classList.contains("open")) {
+        freccia.classList.remove("open");
+        menu.classList.add("hidden");
     } else {
-        arrow.classList.add("open");
-        modal.classList.remove("hidden");
+        freccia.classList.add("open");
+        menu.classList.remove("hidden");
     }
 }
 
-// Chiudi il dropdown profilo cliccando fuori
 document.addEventListener("click", function(e) {
-    const container = document.querySelector(".profile-container");
-    const modal = document.querySelector(".profile-modal");
-    const arrow = document.querySelector(".profile-arrow");
-    if (!container || !modal) return;
-    if (!container.contains(e.target)) {
-        modal.classList.add("hidden");
-        if (arrow) arrow.classList.remove("open");
+    var contenitore = document.querySelector(".profile-container");
+    var menu = document.querySelector(".profile-modal");
+    var freccia = document.querySelector(".profile-arrow");
+    if (!contenitore || !menu) return;
+    if (!contenitore.contains(e.target)) {
+        menu.classList.add("hidden");
+        if (freccia) freccia.classList.remove("open");
     }
 });
 
-// Funzioni Modali
-function openModal(modalId) {
-    const modalOverlay = document.getElementById(modalId);
-    if (modalOverlay) {
-        modalOverlay.classList.remove("hidden");
-        document.body.style.overflow = "hidden"; // Impedisci lo scorrimento dietro il modale
+function openModal(idModale) {
+    var modale = document.getElementById(idModale);
+    if (modale) {
+        modale.classList.remove("hidden");
+        document.body.style.overflow = "hidden";
     }
 }
 
-function closeModal(modalId) {
-    const modalOverlay = document.getElementById(modalId);
-    if (modalOverlay) {
-        modalOverlay.classList.add("hidden");
-        document.body.style.overflow = ""; // Ripristina lo scorrimento
+function closeModal(idModale) {
+    var modale = document.getElementById(idModale);
+    if (modale) {
+        modale.classList.add("hidden");
+        document.body.style.overflow = "";
     }
 }
 
-// Chiudi il modale cliccando fuori
-window.addEventListener('click', function(event) {
-    if (event.target.classList.contains('modal-overlay')) {
-        event.target.classList.add('hidden');
+window.addEventListener('click', function(e) {
+    if (e.target.classList.contains('modal-overlay')) {
+        e.target.classList.add('hidden');
         document.body.style.overflow = "";
     }
 });
 
-// Inizializzazione
-document.addEventListener('DOMContentLoaded', () => {
-    // Aggiungi listener ai pulsanti di chiusura
-    const closeButtons = document.querySelectorAll('.close-btn');
-    closeButtons.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const modalOverlay = e.target.closest('.modal-overlay');
-            if (modalOverlay) {
-                modalOverlay.classList.add('hidden');
+document.addEventListener('DOMContentLoaded', function() {
+    var bottoniChiudi = document.querySelectorAll('.close-btn');
+    for (var i = 0; i < bottoniChiudi.length; i++) {
+        bottoniChiudi[i].addEventListener('click', function(e) {
+            var modale = e.target.closest('.modal-overlay');
+            if (modale) {
+                modale.classList.add('hidden');
                 document.body.style.overflow = "";
             }
         });
-    });
-
-
-
+    }
 });

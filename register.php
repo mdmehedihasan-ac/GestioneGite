@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="vetrina.css">
     <link rel="stylesheet" href="style_custom.css">
     <script src="vetrina.js" defer></script>
+    <style>
         body {
             display: flex;
             flex-direction: column;
@@ -26,8 +27,12 @@
         }
 
         .register-container {
+            width: min(100%, 460px);
+        }
+
+        .register-container .card {
             width: 100%;
-            max-width: 500px;
+            box-sizing: border-box;
         }
     </style>
 </head>

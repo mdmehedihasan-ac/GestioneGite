@@ -13,18 +13,19 @@
     <link rel="stylesheet" href="vetrina.css">
     <link rel="stylesheet" href="style_custom.css">
     <script src="vetrina.js" defer></script>
+</head>
 <body>
 
 
     <div class="container">
         <main class="content home-padding">
             
-            <section class="hero-section">
+            <div class="hero-section">
                 <h1>Gite in Programma</h1>
                 <p>Elenco generale di tutte le gite organizzate e il loro stato di avanzamento. Monitora le date, i partecipanti e le approvazioni.</p>
-            </section>
+            </div>
 
-            <section class="table-section" style="margin-top: 2rem;">
+            <div class="table-section" style="margin-top: 2rem;">
                 <div class="table-container">
                     <table>
                         <thead>
@@ -86,7 +87,7 @@
                         </tbody>
                     </table>
                 </div>
-            </section>
+            </div>
 
         </main>
 
@@ -94,7 +95,6 @@
             <div class="footer-container">
                 <div class="footer-left">
                     <p><strong>Gestione Gite Scolastiche</strong></p>
-                    <p class="footer-copyright">© 2026 - Piattaforma Interna</p>
                 </div>
             </div>
         </footer>

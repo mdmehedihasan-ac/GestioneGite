@@ -19,10 +19,10 @@
     <div class="container">
         <main class="content home-padding">
             
-            <section class="hero-section">
+            <div class="hero-section">
                 <h1>Sistema Gestione Gite</h1>
                 <p>Benvenuto nel portale per l'organizzazione dei viaggi d'istruzione. Seleziona una sezione per procedere.</p>
-            </section>
+            </div>
 
             <div class="home-grid">
                 
@@ -58,7 +58,6 @@
             <div class="footer-container">
                 <div class="footer-left">
                     <p><strong>Gestione Gite Scolastiche</strong></p>
-                    <p class="footer-copyright">© 2026 - Piattaforma Interna</p>
                 </div>
             </div>
         </footer>

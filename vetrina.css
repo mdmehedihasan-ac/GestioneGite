@@ -1,4 +1,4 @@
-.font-examples {
+﻿.font-examples {
     border: 1px solid var(--my-gray);
 
     h1, h2, h3, h4, p {
@@ -61,7 +61,7 @@
     }
 }
 
-/*SEZIONE NAVIGAZIONE*/
+
 .header-nav {
     display: flex;
     gap: 2rem;
@@ -85,7 +85,7 @@
     opacity: 1;
 }
 
-/*SEZIONE PROFILO*/
+
 .profile-container {
     --container-height: calc(var(--header-height) / 2);
     width: 14rem;
@@ -116,6 +116,7 @@
 .profile-container .profile-info {
     display: flex;
     flex-direction: column;
+    justify-content: center;
     flex: 1;
     min-width: 0;
 }
@@ -187,6 +188,7 @@
     text-decoration: none;
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     gap: 0.75rem;
     transition: background 0.15s;
 }
@@ -205,6 +207,8 @@
     font-size: 0.9rem;
     font-weight: 500;
     display: block;
+    text-align: left;
+    margin: 0;
 }
 
 .profile-modal-row:visited {
@@ -238,8 +242,8 @@
 .profile-modal-row-settings svg {
     fill: var(--hex-dark-green);
 }
-/*FINE SEZIONE PROFILO*/
-/*SEZIONE PULSANTI*/
+
+
 button.m, button, .button {
     border-radius: var(--radius);
     border: none;
@@ -337,7 +341,7 @@ button.outline:hover, .button.outline:hover {
     transform: translateY(-1px);
 }
 
-/*FINE SEZIONE PULSANTI*/
+
 
 .inputs {
     border: 1px solid var(--my-gray);
@@ -421,7 +425,7 @@ button.outline:hover, .button.outline:hover {
     }
 }
 
-/* SEZIONE CARD */
+
 .card {
     background: var(--my-white);
     border-radius: var(--radius-1);
@@ -461,9 +465,9 @@ button.outline:hover, .button.outline:hover {
     justify-content: flex-end;
     gap: 1rem;
 }
-/* FINE SEZIONE CARD */
 
-/* SEZIONE MODALE */
+
+
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -551,9 +555,9 @@ button.outline:hover, .button.outline:hover {
         transform: translateY(0);
     }
 }
-/* FINE SEZIONE MODALE */
 
-/* SEZIONE AVVISI */
+
+
 .alert {
     padding: 1rem 1.5rem;
     border-radius: var(--radius);
@@ -592,9 +596,9 @@ button.outline:hover, .button.outline:hover {
     color: var(--hex-red);
     border: 1px solid var(--my-red);
 }
-/* FINE SEZIONE AVVISI */
 
-/* SEZIONE BADGE */
+
+
 .badge {
     display: inline-block;
     padding: 0.25rem 0.75rem;
@@ -628,9 +632,9 @@ button.outline:hover, .button.outline:hover {
     background-color: var(--hex-yellow);
     color: black;
 }
-/* FINE SEZIONE BADGE */
 
-/* SEZIONE TABELLE */
+
+
 .table-container {
     overflow-x: auto;
     border-radius: var(--radius-1);
@@ -663,9 +667,9 @@ table {
         border-bottom: none;
     }
 }
-/* FINE SEZIONE TABELLE */
 
-/* SEZIONE FORM */
+
+
 .form-group {
     margin-bottom: 1.5rem;
     display: flex;
@@ -718,7 +722,7 @@ table {
         color: #333;
     }
 }
-/* FINE SEZIONE FORM */
+
 
 .divider {
     display: flex;
@@ -743,3 +747,4 @@ table {
 .divider::after {
     margin-left: 1em;
 }
+

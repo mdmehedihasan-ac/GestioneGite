@@ -1,4 +1,4 @@
-<header>
+﻿<header>
     <div class="header-container header-left" style="flex: 1; flex-basis: 0;">
         <h2>Gestione Gite</h2>
     </div>
@@ -7,8 +7,9 @@
         <a href="catalogo.php">Catalogo</a>
         <a href="mieGite.php">Le mie Gite</a>
         <a href="inProgramma.php">In Programma</a>
-        <a href="login.php">login</a>
-        <a href="register.php">re</a>
+        <a href="elencoBozze.php" >Bozze</a>
+        <a href="login.php">Login</a>
+        <a href="register.php">Registrati</a>
     </nav>
 
     <div class="header-container header-right" style="flex: 1; flex-basis: 0; position: relative;">

@@ -22,6 +22,7 @@ $nome_utente = $_SESSION['username'] ?? 'Utente Sconosciuto';
                     <a href="catalogo.php">Catalogo</a>
                     <a href="mieGite.php">Le mie Gite</a>
                     <a href="inProgramma.php">In Programma</a>
+                    <a href="elencoBozze.php" >Bozze</a>
                 </nav>
 
                 <div class="header-container header-right" style="flex: 1; flex-basis: 0; position: relative;">

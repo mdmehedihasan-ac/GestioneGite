@@ -12,24 +12,25 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="vetrina.css">
     <link rel="stylesheet" href="style_custom.css">
-    <script src="vetrina.js" defer></script>
+    <script src="vetrina.js"></script>
+</head>
 <body>
 
     <div class="container">
-        <main class="content home-padding">
+        <main class="content bozze-padding">
             
-            <section class="hero-section" style="display: flex; justify-content: space-between; align-items: flex-end;">
+            <div class="hero-section" style="display: flex; justify-content: space-between; align-items: flex-end;">
                 <div>
                     <h1>Catalogo Proposte</h1>
                     <p>Elenco delle mete approvate dalla Commissione. Scegli una proposta per organizzare la gita.</p>
                 </div>
                 <div>
-                    <button class="button" id="btnNuovaProposta">Nuova Proposta</button>
+                    <button class="button" id="btnNuova">Nuova Proposta</button>
                 </div>
-            </section>
+            </div>
 
-            <section class="table-section" style="margin-top: 2rem;">
-                <div class="table-container">
+            <div class="table-section" style="margin-top: 2rem;">
+                <div class="table-container table-catalogo">
                     <table>
                         <thead>
                             <tr>
@@ -70,7 +71,7 @@
                         </tbody>
                     </table>
                 </div>
-            </section>
+            </div>
         </main>
 
         <div class="modal-overlay hidden" id="modalOverlay">
@@ -104,7 +105,7 @@
 
                         <div class="form-group">
                             <label for="costo">Costo Stimato (€)</label>
-                            <input type="number" id="costo" step="0.01" placeholder="0.00">
+                            <input type="number" id="costo" placeholder="0">
                         </div>
 
                         <div class="form-group">
@@ -130,81 +131,65 @@
             <div class="footer-container">
                 <div class="footer-left">
                     <p><strong>Gestione Gite Scolastiche</strong></p>
-                    <p class="footer-copyright">© 2026 - Piattaforma Interna</p>
                 </div>
             </div>
         </footer>
     </div>
 
     <script>
-        const modal = document.getElementById('modalOverlay');
-        const openBtn = document.getElementById('btnNuovaProposta');
-        const closeBtn = document.getElementById('closeModal');
-        const cancelBtn = document.getElementById('cancelModal');
-        
-        // Nuovi riferimenti per il modulo e i testi
-        const form = document.getElementById('formNuovaProposta');
-        const modalTitle = document.getElementById('modalTitle');
-        const submitModalBtn = document.getElementById('submitModalBtn');
+        var modale = document.getElementById('modalOverlay');
+        var btnApri = document.getElementById('btnNuova');
+        var btnChiudi = document.getElementById('closeModal');
+        var btnAnnulla = document.getElementById('cancelModal');
+        var modulo = document.getElementById('formNuovaProposta');
+        var titolo = document.getElementById('modalTitle');
+        var btnInvia = document.getElementById('submitModalBtn');
 
-        // 1. APRI MODALE IN MODALITÀ "NUOVA PROPOSTA"
-        openBtn.addEventListener('click', () => {
-            form.reset(); // Svuota tutti i campi
-            modalTitle.innerText = "Nuova Proposta di Gita";
-            submitModalBtn.innerText = "Registra Proposta";
-            modal.classList.remove('hidden');
+        btnApri.addEventListener('click', function() {
+            modulo.reset();
+            titolo.innerText = "Nuova Proposta di Gita";
+            btnInvia.innerText = "Registra Proposta";
+            modale.classList.remove('hidden');
         });
-        
-        // 2. APRI MODALE IN MODALITÀ "MODIFICA"
-        const btnModificaList = document.querySelectorAll('.btn-modifica');
-        
-        btnModificaList.forEach(btn => {
-            btn.addEventListener('click', function() {
-                // Trova la riga (tr) della tabella corrispondente al bottone cliccato
-                const riga = this.closest('tr');
-                const celle = riga.querySelectorAll('td');
 
-                // Estrae i testi dalle colonne della tabella
-                const valDestinazione = celle[0].innerText;
-                const valMezzo = celle[1].innerText;
-                const valPeriodo = celle[2].innerText;
-                const valMinPart = celle[3].innerText;
-                const valMaxPart = celle[4].innerText;
-                // Pulisce il costo (toglie € e trasforma la virgola in punto per l'input number)
-                const valCosto = celle[5].innerText.replace('€', '').trim().replace(',', '.');
+        var listaModifica = document.querySelectorAll('.btn-modifica');
+        for (var i = 0; i < listaModifica.length; i++) {
+            listaModifica[i].addEventListener('click', function() {
+                var riga = this.closest('tr');
+                var celle = riga.querySelectorAll('td');
 
-                // Inserisce i valori estratti nei campi di input della modale
-                document.getElementById('destinazione').value = valDestinazione;
-                document.getElementById('periodo').value = valPeriodo;
-                document.getElementById('minPart').value = valMinPart;
-                document.getElementById('maxPart').value = valMaxPart;
-                document.getElementById('costo').value = parseFloat(valCosto);
+                document.getElementById('destinazione').value = celle[0].innerText;
+                document.getElementById('periodo').value = celle[2].innerText;
+                document.getElementById('minPart').value = celle[3].innerText;
+                document.getElementById('maxPart').value = celle[4].innerText;
 
-                // Seleziona l'opzione corretta nel menu a tendina (select)
-                const selectMezzo = document.getElementById('mezzo');
-                for(let i = 0; i < selectMezzo.options.length; i++) {
-                    if(selectMezzo.options[i].text.includes(valMezzo) || selectMezzo.options[i].value === valMezzo) {
-                        selectMezzo.selectedIndex = i;
+                var costoTesto = celle[5].innerText.replace('€', '').trim().replace(',', '.');
+                document.getElementById('costo').value = Number(costoTesto);
+
+                var selectMezzo = document.getElementById('mezzo');
+                var valMezzo = celle[1].innerText;
+                for (var j = 0; j < selectMezzo.options.length; j++) {
+                    if (selectMezzo.options[j].text.indexOf(valMezzo) >= 0 || selectMezzo.options[j].value === valMezzo) {
+                        selectMezzo.selectedIndex = j;
                         break;
                     }
                 }
 
-                // Cambia il titolo e il bottone
-                modalTitle.innerText = "Modifica Proposta di Gita";
-                submitModalBtn.innerText = "Salva Modifiche";
-
-                // Mostra la modale
-                modal.classList.remove('hidden');
+                titolo.innerText = "Modifica Proposta di Gita";
+                btnInvia.innerText = "Salva Modifiche";
+                modale.classList.remove('hidden');
             });
-        });
+        }
 
-        // FUNZIONI DI CHIUSURA MODALE
-        const closeModal = () => modal.classList.add('hidden');
-        closeBtn.addEventListener('click', closeModal);
-        cancelBtn.addEventListener('click', closeModal);
+        function chiudiModale() {
+            modale.classList.add('hidden');
+        }
 
-        window.addEventListener('click', (e) => {
-            if (e.target === modal) closeModal();
+        btnChiudi.addEventListener('click', chiudiModale);
+        btnAnnulla.addEventListener('click', chiudiModale);
+
+        window.addEventListener('click', function(e) {
+            if (e.target === modale) chiudiModale();
         });
     </script>
 </body>

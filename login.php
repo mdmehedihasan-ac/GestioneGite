@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="vetrina.css">
     <link rel="stylesheet" href="style_custom.css">
     <script src="vetrina.js" defer></script>
-        /* Rende il body un contenitore colonna */
+    <style>
         body {
             display: flex;
             flex-direction: column;
@@ -18,7 +18,6 @@
             margin: 0;
         }
 
-        /* La login-container occupa tutto lo spazio rimanente e centra la card */
         .login-wrapper {
             flex-grow: 1;
             display: flex;
@@ -28,8 +27,12 @@
         }
 
         .login-container {
+            width: min(100%, 460px);
+        }
+
+        .login-container .card {
             width: 100%;
-            max-width: 400px;
+            box-sizing: border-box;
         }
     </style>
 </head>
