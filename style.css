@@ -81,6 +81,8 @@ header {
     height: var(--header-height);
     background: var(--header-color);
     display: flex;
+    align-items: center;
+    overflow: hidden;
 }
 
 footer {

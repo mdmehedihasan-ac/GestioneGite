@@ -1,3 +1,7 @@
+<?php
+    include('nav.php');
+    include('config.php');
+?>
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -22,24 +26,44 @@
             flex-grow: 1;
             display: flex;
             justify-content: center;
-            align-items: center;
-            padding: 2rem 1rem;
+            align-items: flex-start;
+            padding: 0.5rem 1rem;
+            overflow-y: auto;
         }
 
         .register-container {
             width: min(100%, 460px);
+            margin: auto;
         }
 
         .register-container .card {
             width: 100%;
             box-sizing: border-box;
+            padding: 1rem !important;
+            gap: 0.5rem !important;
+        }
+
+        .register-container .card-header {
+            padding-bottom: 0.5rem !important;
+            margin-bottom: 0.25rem !important;
+        }
+
+        .register-container .card-header h2 {
+            margin-bottom: 0.25rem !important;
+        }
+
+        .register-container .form-group {
+            margin-bottom: 0.4rem !important;
+        }
+
+        .register-container .card-footer {
+            padding-top: 0.25rem !important;
+            margin-top: 0.25rem !important;
         }
     </style>
 </head>
 <body>
-
-    <?php include('nav.php'); ?>
-
+    
     <div class="register-wrapper">
         <div class="register-container">
             <div class="card centered">
@@ -75,6 +99,10 @@
                     </div>
                     
                     <button type="submit" class="m full-width">Registrati</button>
+
+                    <div class="divider">oppure</div>
+
+                    <button type="button" class="m full-width outline" onclick="alert('Funzionalità Portale Calvino non ancora disponibile')">Registrati con Portale Calvino</button>
                 </form>
                 
                 <div class="card-footer" style="justify-content: center; border: none; padding-top: 0;">

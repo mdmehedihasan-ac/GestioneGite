@@ -1,3 +1,7 @@
+<?php 
+    include('nav.php');
+    include('config.php');
+?>
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -22,23 +26,37 @@
             flex-grow: 1;
             display: flex;
             justify-content: center;
-            align-items: center;
-            padding: 2rem 1rem;
+            align-items: flex-start;
+            padding: 0.5rem 1rem;
+            overflow-y: auto;
         }
 
         .login-container {
             width: min(100%, 460px);
+            margin: auto;
         }
 
         .login-container .card {
             width: 100%;
             box-sizing: border-box;
         }
+
+        .login-container .card-header {
+            padding-bottom: 0.5rem !important;
+        }
+
+        .login-container .form-group {
+            margin-bottom: 0.5rem !important;
+        }
+
+        .login-container .card-footer {
+            padding-top: 0.25rem !important;
+        }
     </style>
 </head>
 <body>
 
-    <?php include('nav.php'); ?>
+    
 
     <div class="login-wrapper">
         <div class="login-container">
@@ -68,7 +86,8 @@
                     
                     <div class="divider">oppure</div>
 
-                    <button type="button" class="m full-width outline">Accedi con Portale Calvino</button>
+                    <button type="button" class="m full-width outline" onclick="alert('Funzionalità Portale Calvino non ancora disponibile')">Accedi con Portale Calvino</button>
+
                 </form>
                 
                 <div class="card-footer" style="justify-content: center; border: none; padding-top: 0;">
