@@ -1,7 +1,16 @@
-<?php 
-    include('nav.php');
+<?php
+    session_start();
     include('config.php');
+    
+    // Controllo login
+    if (!isset($_SESSION['id_utente'])) {
+        header("Location: login.php");
+        exit;
+    }
+    
+    $idUtenteLoggato = $_SESSION['id_utente'];
 ?>
+<?php include('nav.php'); ?>
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -27,136 +36,71 @@
             <div style="margin-top: 2rem;">
                 <h2 style="margin-bottom: 1rem; color: var(--blue-700);">Gite create da me</h2>
                 <div class="miegite-grid">
+                    <?php 
+                        $queryMie = "
+                            SELECT g.*, p.Destinazione, s.Stato 
+                            FROM gitaorganizzata g 
+                            JOIN propostagita p ON g.IDProposta = p.IDProposta 
+                            JOIN statogita s ON g.IDStato = s.IDStato 
+                            WHERE g.IDUtente = $idUtenteLoggato
+                            ORDER BY g.DataInizio ASC
+                        ";
+                        $resultMie = mysqli_query($conn, $queryMie);
 
-                    <div class="miegite-card"
-                         data-dest="Roma - Musei Vaticani"
-                         data-stato="Approvata"
-                         data-classe="5AII"
-                         data-inizio="15/04/2026"
-                         data-fine="18/04/2026"
-                         data-mezzo="Treno Alta Velocit&#224;"
-                         data-alunni="45"
-                         data-docenti="4"
-                         data-costo="&#8364; 8.100,00"
-                         data-note="Visita guidata ai Musei Vaticani, Cappella Sistina e Colosseo. Pernottamento in hotel 3 stelle.">
-                        <div class="miegite-card-header">
-                            <h3 class="miegite-card-title">Roma - Musei Vaticani</h3>
-                            <span class="badge badge-success">Approvata</span>
-                        </div>
-                        <div class="miegite-card-body">
-                            <div class="miegite-card-info">
-                                <span><strong>Classe:</strong> 5AII</span>
-                                <span><strong>Date:</strong> 15/04/2026 &#8211; 18/04/2026</span>
-                                <span><strong>Mezzo:</strong> Treno Alta Velocit&#224;</span>
-                                <span><strong>Partecipanti:</strong> 45 alunni, 4 docenti</span>
-                                <span><strong>Costo:</strong> &#8364; 8.100,00</span>
-                            </div>
-                        </div>
-                        <div class="miegite-card-footer">
-                            <button class="xs outline btn-dettagli-gita">Dettagli</button>
-                            <button class="xs outline btn-modifica-gita">Modifica</button>
-                            <button class="xs cancel btn-elimina-gita">Elimina</button>
-                        </div>
-                    </div>
-
-                    <div class="miegite-card"
-                         data-dest="Napoli e Pompei"
-                         data-stato="Inserita"
-                         data-classe="4BEA"
-                         data-inizio="10/05/2026"
-                         data-fine="12/05/2026"
-                         data-mezzo="Pullman GT"
-                         data-alunni="40"
-                         data-docenti="3"
-                         data-costo="&#8364; 4.800,00"
-                         data-note="Tour archeologico di Pompei e visita al centro storico di Napoli. Pranzo incluso.">
-                        <div class="miegite-card-header">
-                            <h3 class="miegite-card-title">Napoli e Pompei</h3>
-                            <span class="badge badge-warning">Inserita</span>
-                        </div>
-                        <div class="miegite-card-body">
-                            <div class="miegite-card-info">
-                                <span><strong>Classe:</strong> 4BEA</span>
-                                <span><strong>Date:</strong> 10/05/2026 &#8211; 12/05/2026</span>
-                                <span><strong>Mezzo:</strong> Pullman GT</span>
-                                <span><strong>Partecipanti:</strong> 40 alunni, 3 docenti</span>
-                                <span><strong>Costo:</strong> &#8364; 4.800,00</span>
-                            </div>
-                        </div>
-                        <div class="miegite-card-footer">
-                            <button class="xs outline btn-dettagli-gita">Dettagli</button>
-                            <button class="xs outline btn-modifica-gita">Modifica</button>
-                            <button class="xs cancel btn-elimina-gita">Elimina</button>
-                        </div>
-                    </div>
-
-                    <div class="miegite-card"
-                         data-dest="CERN di Ginevra"
-                         data-stato="Bozza"
-                         data-classe="5CL"
-                         data-inizio="20/02/2026"
-                         data-fine="23/02/2026"
-                         data-mezzo="Aereo"
-                         data-alunni="20"
-                         data-docenti="2"
-                         data-costo="&#8364; 7.000,00"
-                         data-note="Visita al CERN, laboratori di fisica delle particelle. Volo diretto Milano-Ginevra.">
-                        <div class="miegite-card-header">
-                            <h3 class="miegite-card-title">CERN di Ginevra</h3>
-                            <span class="badge badge-secondary">Bozza</span>
-                        </div>
-                        <div class="miegite-card-body">
-                            <div class="miegite-card-info">
-                                <span><strong>Classe:</strong> 5CL</span>
-                                <span><strong>Date:</strong> 20/02/2026 &#8211; 23/02/2026</span>
-                                <span><strong>Mezzo:</strong> Aereo</span>
-                                <span><strong>Partecipanti:</strong> 20 alunni, 2 docenti</span>
-                                <span><strong>Costo:</strong> &#8364; 7.000,00</span>
-                            </div>
-                        </div>
-                        <div class="miegite-card-footer">
-                            <button class="xs outline btn-dettagli-gita">Dettagli</button>
-                            <button class="xs outline btn-modifica-gita">Modifica</button>
-                            <button class="xs cancel btn-elimina-gita">Elimina</button>
-                        </div>
-                    </div>
-
+                        if (mysqli_num_rows($resultMie) > 0) {
+                            while ($row = mysqli_fetch_assoc($resultMie)) {
+                                $dataInizio = date('d/m/Y', strtotime($row['DataInizio']));
+                                $dataFine = date('d/m/Y', strtotime($row['DataFine']));
+                                
+                                $badgeClass = 'badge-secondary';
+                                if ($row['Stato'] == 'Approvata') $badgeClass = 'badge-success';
+                                if ($row['Stato'] == 'Inserita') $badgeClass = 'badge-warning';
+                                if ($row['Stato'] == 'Conclusa') $badgeClass = 'badge-primary';
+                                if ($row['Stato'] == 'NonApprovata') $badgeClass = 'badge-danger';
+                                
+                                $mezzo = htmlspecialchars($row['Destinazione']); // Semplicemente destinazione
+                                ?>
+                                <div class="miegite-card"
+                                     data-dest="<?php echo htmlspecialchars($row['Destinazione']); ?>"
+                                     data-stato="<?php echo htmlspecialchars($row['Stato']); ?>"
+                                     data-classe="N/D"
+                                     data-inizio="<?php echo $dataInizio; ?>"
+                                     data-fine="<?php echo $dataFine; ?>"
+                                     data-mezzo=""
+                                     data-alunni="<?php echo $row['NumAlunni']; ?>"
+                                     data-docenti="<?php echo $row['NumDocentiAccompagnatori']; ?>"
+                                     data-costo="<?php echo number_format($row['CostoTot'], 2, ',', '.'); ?>"
+                                     data-note="">
+                                    <div class="miegite-card-header">
+                                        <h3 class="miegite-card-title"><?php echo htmlspecialchars($row['Destinazione']); ?></h3>
+                                        <span class="badge <?php echo $badgeClass; ?>"><?php echo htmlspecialchars($row['Stato']); ?></span>
+                                    </div>
+                                    <div class="miegite-card-body">
+                                        <div class="miegite-card-info">
+                                            <span><strong>Date:</strong> <?php echo $dataInizio; ?> &#8211; <?php echo $dataFine; ?></span>
+                                            <span><strong>Partecipanti:</strong> <?php echo $row['NumAlunni']; ?> alunni, <?php echo $row['NumDocentiAccompagnatori']; ?> docenti</span>
+                                            <span><strong>Costo:</strong> &#8364; <?php echo number_format($row['CostoTot'], 2, ',', '.'); ?></span>
+                                        </div>
+                                    </div>
+                                    <div class="miegite-card-footer">
+                                        <button class="xs outline btn-dettagli-gita">Dettagli</button>
+                                        <button class="xs outline btn-modifica-gita">Modifica</button>
+                                        <button class="xs cancel btn-elimina-gita">Elimina</button>
+                                    </div>
+                                </div>
+                                <?php
+                            }
+                        } else {
+                            echo "<p>Non hai ancora creato nessuna gita.</p>";
+                        }
+                    ?>
                 </div>
             </div>
 
             <div style="margin-top: 3rem;">
                 <h2 style="margin-bottom: 1rem; color: var(--blue-700);">Gite a cui partecipo</h2>
                 <div class="miegite-grid">
-
-                    <div class="miegite-card"
-                         data-dest="Firenze Rinascimentale"
-                         data-stato="Conclusa"
-                         data-classe="5AII"
-                         data-inizio="10/10/2025"
-                         data-fine="12/10/2025"
-                         data-mezzo="Pullman GT"
-                         data-alunni="24"
-                         data-docenti="2"
-                         data-costo="&#8364; 3.500,00"
-                         data-note="Tour della Galleria degli Uffizi, Duomo e Ponte Vecchio. Gita conclusa con successo.">
-                        <div class="miegite-card-header">
-                            <h3 class="miegite-card-title">Firenze Rinascimentale</h3>
-                            <span class="badge badge-primary">Conclusa</span>
-                        </div>
-                        <div class="miegite-card-body">
-                            <div class="miegite-card-info">
-                                <span><strong>Classe:</strong> 5AII</span>
-                                <span><strong>Date:</strong> 10/10/2025 &#8211; 12/10/2025</span>
-                                <span><strong>Mezzo:</strong> Pullman GT</span>
-                                <span><strong>Partecipanti:</strong> 24 alunni, 2 docenti</span>
-                                <span><strong>Costo:</strong> &#8364; 3.500,00</span>
-                            </div>
-                        </div>
-                        <div class="miegite-card-footer">
-                            <button class="xs outline btn-dettagli-gita">Dettagli</button>
-                        </div>
-                    </div>
-
+                    <p style="color: grey;">Nessuna gita a cui partecipi al momento.</p>
                 </div>
             </div>
 

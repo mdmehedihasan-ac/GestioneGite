@@ -32,7 +32,7 @@
             </div>
 
             <div class="alert alert-info" style="margin-top: 1.5rem;">
-                <span style="font-size: 1.2rem;">ℹ️</span>
+                <span style="font-size: 1.2rem; font-weight: bold;">[i]</span>
                 <p>Le azioni di approvazione e bocciatura aggiornano lo stato della gita in tutto il sistema.</p>
             </div>
 
@@ -67,8 +67,8 @@
                                 <td>€ 7.000,00</td>
                                 <td>05/01/2026</td>
                                 <td class="azioni-cell">
-                                    <button class="xs btn-approva" title="Approva">✔ Approva</button>
-                                    <button class="xs btn-boccia" title="Boccia">✘ Boccia</button>
+                                    <button class="xs btn-approva" title="Approva">Approva</button>
+                                    <button class="xs btn-boccia" title="Boccia">Boccia</button>
                                 </td>
                             </tr>
                             <tr data-id="2">
@@ -125,7 +125,7 @@
             </div>
 
             <div class="empty-state hidden" id="vuoto">
-                <span style="font-size: 3rem; color: var(--blue-200);">✔</span>
+                <span style="font-size: 3rem; color: var(--blue-200);">OK</span>
                 <h3>Nessuna gita in attesa</h3>
                 <p>Tutte le proposte sono state elaborate. Torna più tardi.</p>
             </div>
@@ -140,7 +140,7 @@
                 </div>
                 <div class="modal-body" style="text-align: center;">
                     <div style="margin-bottom: 1rem;">
-                        <span style="font-size: 2.5rem; color: var(--my-green);">✔</span>
+                        <span style="font-size: 2.5rem; color: var(--my-green);">OK</span>
                     </div>
                     <p>Stai per <strong>approvare</strong> la gita</p>
                     <p style="margin-top: 0.5rem;"><strong id="approvaDestLabel"></strong></p>
@@ -161,7 +161,7 @@
                 </div>
                 <div class="modal-body" style="text-align: center;">
                     <div style="margin-bottom: 1rem;">
-                        <span style="font-size: 2.5rem; color: var(--hex-red);">✘</span>
+                        <span style="font-size: 2.5rem; color: var(--hex-red);">X</span>
                     </div>
                     <p>Stai per <strong>bocciare</strong> la gita</p>
                     <p style="margin-top: 0.5rem;"><strong id="bocciaDestLabel"></strong></p>

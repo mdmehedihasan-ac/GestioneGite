@@ -1,7 +1,37 @@
-<?php 
-    include('nav.php');
+<?php
+    session_start();
     include('config.php');
+
+    $errore = "";
+
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+        $email = trim($_POST['email'] ?? '');
+        $password = $_POST['password'] ?? '';
+
+        $stmt = mysqli_prepare($conn, "SELECT IDUtente, Nome, Cognome, Password, IDTipo FROM utente WHERE Mail = ?");
+        mysqli_stmt_bind_param($stmt, "s", $email);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        
+        if ($row = mysqli_fetch_assoc($result)) {
+            if (password_verify($password, $row['Password'])) {
+                // Login effettuato
+                $_SESSION['id_utente'] = $row['IDUtente'];
+                $_SESSION['username'] = $row['Nome'] . " " . $row['Cognome'];
+                $_SESSION['ruolo'] = $row['IDTipo'];
+                
+                header("Location: index.php");
+                exit;
+            } else {
+                $errore = "Password errata.";
+            }
+        } else {
+            $errore = "Nessun account trovato con questa email.";
+        }
+        mysqli_stmt_close($stmt);
+    }
 ?>
+<?php include('nav.php'); ?>
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -66,7 +96,13 @@
                     <p>Inserisci le tue credenziali per accedere</p>
                 </div>
                 
-                <form style="width: 100%;">
+                <?php if($errore): ?>
+                    <div style="background-color: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin-bottom: 10px; font-size: 0.9rem;">
+                        <?php echo $errore; ?>
+                    </div>
+                <?php endif; ?>
+
+                <form action="login.php" method="POST" style="width: 100%;">
                     <div class="form-group">
                         <label for="email">Email</label>
                         <input type="email" id="email" name="email" placeholder="mario.rossi@esempio.it" required>

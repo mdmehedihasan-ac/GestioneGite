@@ -1,7 +1,37 @@
-<?php 
-    include('nav.php');
+<?php
+    session_start();
     include('config.php');
+    
+    // Assicurarsi che l'utente sia loggato
+    if (!isset($_SESSION['id_utente'])) {
+        header("Location: login.php");
+        exit;
+    }
+
+    $messaggio = "";
+
+    // Gestione inserimento nuova proposta
+    if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'nuova_proposta') {
+        $destinazione = $_POST['destinazione'] ?? '';
+        $mezzo = $_POST['mezzo'] ?? '';
+        $periodo = $_POST['periodo'] ?? '';
+        $costo = $_POST['costo'] ?? 0;
+        $minPart = $_POST['minPart'] ?? 0;
+        $maxPart = $_POST['maxPart'] ?? 0;
+        $idUtente = $_SESSION['id_utente'];
+
+        $stmt = mysqli_prepare($conn, "INSERT INTO propostagita (Destinazione, MezzoDiTrasporto, Periodo, MinPartecipanti, MaxPartecipanti, Costo, IDUtente) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        mysqli_stmt_bind_param($stmt, "sssiidi", $destinazione, $mezzo, $periodo, $minPart, $maxPart, $costo, $idUtente);
+        
+        if (mysqli_stmt_execute($stmt)) {
+            $messaggio = "<div style='background-color: #d4edda; color: #155724; padding: 10px; margin-bottom: 20px; border-radius: 5px;'>Proposta aggiunta con successo.</div>";
+        } else {
+            $messaggio = "<div style='background-color: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 20px; border-radius: 5px;'>Errore durante l'aggiunta della proposta.</div>";
+        }
+        mysqli_stmt_close($stmt);
+    }
 ?>
+<?php include('nav.php'); ?>
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -30,6 +60,8 @@
                 </div>
             </div>
 
+            <?php echo $messaggio; ?>
+
             <div class="table-section" style="margin-top: 2rem;">
                 <div class="table-container table-catalogo">
                     <table>
@@ -47,28 +79,28 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>Roma - Musei Vaticani</td>
-                                <td>Treno Alta Velocità</td>
-                                <td>Marzo - Aprile</td>
-                                <td>20</td>
-                                <td>50</td>
-                                <td>€ 180,00</td>
-                                <td><button class="xs outline btn-modifica">Modifica</button></td>
-                                <td><button class="xs cancel">Elimina</button></td>
-                                <td><button class="xs">Crea Gita</button></td>
-                            </tr>
-                            <tr>
-                                <td>Napoli e Pompei</td>
-                                <td>Pullman GT</td>
-                                <td>Maggio</td>
-                                <td>40</td>
-                                <td>100</td>
-                                <td>€ 120,00</td>
-                                <td><button class="xs outline btn-modifica">Modifica</button></td>
-                                <td><button class="xs cancel">Elimina</button></td>
-                                <td><button class="xs">Crea Gita</button></td>
-                            </tr>
+                            <?php 
+                                $query = "SELECT * FROM propostagita ORDER BY IDProposta DESC";
+                                $result = mysqli_query($conn, $query);
+
+                                if (mysqli_num_rows($result) > 0) {
+                                    while ($row = mysqli_fetch_assoc($result)) {
+                                        echo "<tr>";
+                                        echo "<td>" . htmlspecialchars($row['Destinazione']) . "</td>";
+                                        echo "<td>" . htmlspecialchars($row['MezzoDiTrasporto']) . "</td>";
+                                        echo "<td>" . htmlspecialchars($row['Periodo']) . "</td>";
+                                        echo "<td>" . htmlspecialchars($row['MinPartecipanti']) . "</td>";
+                                        echo "<td>" . htmlspecialchars($row['MaxPartecipanti']) . "</td>";
+                                        echo "<td>€ " . number_format($row['Costo'], 2, ',', '.') . "</td>";
+                                        echo "<td><button class='xs outline btn-modifica' data-id='".$row['IDProposta']."'>Modifica</button></td>";
+                                        echo "<td><button class='xs cancel' onclick='alert(\"Eliminazione prototipo non attiva\")'>Elimina</button></td>";
+                                        echo "<td><button class='xs' onclick='alert(\"Creazione prototipo non attiva\")'>Crea Gita</button></td>";
+                                        echo "</tr>";
+                                    }
+                                } else {
+                                    echo "<tr><td colspan='9' style='text-align:center;'>Nessuna proposta presente.</td></tr>";
+                                }
+                            ?>
                         </tbody>
                     </table>
                 </div>
@@ -82,16 +114,16 @@
                     <button class="close-btn" id="closeModal">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <form id="formNuovaProposta" class="form-grid">
-                        
+                    <form id="formNuovaProposta" class="form-grid" method="POST" action="catalogo.php">
+                        <input type="hidden" name="action" value="nuova_proposta">
                         <div class="form-group">
                             <label for="destinazione">Destinazione</label>
-                            <input type="text" id="destinazione" placeholder="es. Parigi">
+                            <input type="text" id="destinazione" name="destinazione" placeholder="es. Parigi" required>
                         </div>
                         
                         <div class="form-group">
                             <label for="mezzo">Mezzo di Trasporto</label>
-                            <select id="mezzo">
+                            <select id="mezzo" name="mezzo">
                                 <option value="Autobus">Autobus GT</option>
                                 <option value="Treno">Treno Alta Velocità</option>
                                 <option value="Aereo">Aereo</option>
@@ -101,22 +133,22 @@
 
                         <div class="form-group">
                             <label for="periodo">Periodo Ideale</label>
-                            <input type="text" id="periodo" placeholder="es. Aprile 2026">
+                            <input type="text" id="periodo" name="periodo" placeholder="es. Aprile 2026" required>
                         </div>
 
                         <div class="form-group">
                             <label for="costo">Costo Stimato (€)</label>
-                            <input type="number" id="costo" placeholder="0">
+                            <input type="number" step="0.01" id="costo" name="costo" placeholder="0" required>
                         </div>
 
                         <div class="form-group">
                             <label for="minPart">Minimo Partecipanti</label>
-                            <input type="number" id="minPart" placeholder="es. 15">
+                            <input type="number" id="minPart" name="minPart" placeholder="es. 15" required>
                         </div>
 
                         <div class="form-group">
                             <label for="maxPart">Massimo Partecipanti</label>
-                            <input type="number" id="maxPart" placeholder="es. 30">
+                            <input type="number" id="maxPart" name="maxPart" placeholder="es. 30" required>
                         </div>
 
                     </form>

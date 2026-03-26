@@ -1,7 +1,49 @@
 <?php
-    include('nav.php');
+    session_start();
     include('config.php');
+
+    $errore = "";
+    $successo = "";
+
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+        $nome = trim($_POST['nome'] ?? '');
+        $cognome = trim($_POST['cognome'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $password = $_POST['password'] ?? '';
+        $conferma_password = $_POST['confirm-password'] ?? '';
+
+        if ($password !== $conferma_password) {
+            $errore = "Le password non coincidono.";
+        } elseif (strlen($password) < 6) {
+            $errore = "La password deve contenere almeno 6 caratteri.";
+        } else {
+            // Controllo email esistente
+            $stmt_check = mysqli_prepare($conn, "SELECT Mail FROM utente WHERE Mail = ?");
+            mysqli_stmt_bind_param($stmt_check, "s", $email);
+            mysqli_stmt_execute($stmt_check);
+            mysqli_stmt_store_result($stmt_check);
+            
+            if (mysqli_stmt_num_rows($stmt_check) > 0) {
+                $errore = "L'indirizzo email è già in uso.";
+            } else {
+                $hash = password_hash($password, PASSWORD_DEFAULT);
+                $idTipo = 1; // Docente
+                
+                $stmt = mysqli_prepare($conn, "INSERT INTO utente (Nome, Cognome, Mail, Password, IDTipo) VALUES (?, ?, ?, ?, ?)");
+                mysqli_stmt_bind_param($stmt, "ssssi", $nome, $cognome, $email, $hash, $idTipo);
+                
+                if (mysqli_stmt_execute($stmt)) {
+                    $successo = "Registrazione completata! Puoi ora accedere.";
+                } else {
+                    $errore = "Errore durante la registrazione.";
+                }
+                mysqli_stmt_close($stmt);
+            }
+            mysqli_stmt_close($stmt_check);
+        }
+    }
 ?>
+<?php include('nav.php'); ?>
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -72,10 +114,27 @@
                     <p>Inserisci i tuoi dati per registrarti</p>
                 </div>
                 
-                <form style="width: 100%;">
-                    <div class="form-group">
-                        <label for="name">Nome Completo</label>
-                        <input type="text" id="name" name="name" placeholder="Mario Rossi" required>
+                <?php if($errore): ?>
+                    <div style="background-color: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin-bottom: 10px; font-size: 0.9rem;">
+                        <?php echo $errore; ?>
+                    </div>
+                <?php endif; ?>
+                <?php if($successo): ?>
+                    <div style="background-color: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin-bottom: 10px; font-size: 0.9rem;">
+                        <?php echo $successo; ?>
+                    </div>
+                <?php endif; ?>
+
+                <form action="register.php" method="POST" style="width: 100%;">
+                    <div class="form-group" style="display: flex; gap: 0.5rem; flex-direction: row !important;">
+                        <div style="flex: 1; display: flex; flex-direction: column;">
+                            <label for="nome">Nome</label>
+                            <input type="text" id="nome" name="nome" placeholder="Mario" required>
+                        </div>
+                        <div style="flex: 1; display: flex; flex-direction: column;">
+                            <label for="cognome">Cognome</label>
+                            <input type="text" id="cognome" name="cognome" placeholder="Rossi" required>
+                        </div>
                     </div>
                     
                     <div class="form-group">
