@@ -1,42 +1,69 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestione Gite - Catalogo Proposte</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="vetrina.css">
-    <link rel="stylesheet" href="style_custom.css">
-    <script src="vetrina.js"></script>
-</head>
-<body>
-    <?php 
-        include('nav.php'); 
-        $messaggio = "";
+<?php 
+include('nav.php'); 
+$messaggio = "";
 
-        // nuova proposta
-        if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'nuova_proposta') {
-            $destinazione = $_POST['destinazione'] ?? '';
-            $mezzo = $_POST['mezzo'] ?? '';
-            $periodo = $_POST['periodo'] ?? '';
-            $costo = $_POST['costo'] ?? 0;
-            $minPart = $_POST['minPart'] ?? 0;
-            $maxPart = $_POST['maxPart'] ?? 0;
-            $idUtente = $_SESSION['id_utente'];
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
+    if ($_POST['action'] == 'nuova_proposta') {
+        $destinazione = $_POST['destinazione'] ?? '';
+        $mezzo = $_POST['mezzo'] ?? '';
+        $periodo = $_POST['periodo'] ?? '';
+        $costo = $_POST['costo'] ?? 0;
+        $minPart = $_POST['minPart'] ?? 0;
+        $maxPart = $_POST['maxPart'] ?? 0;
+        $idUtente = $_SESSION['id_utente'] ?? 0;
 
-            $istruzione = mysqli_prepare($conn, "INSERT INTO propostagita (Destinazione, MezzoDiTrasporto, Periodo, MinPartecipanti, MaxPartecipanti, Costo, IDUtente) VALUES (?, ?, ?, ?, ?, ?, ?)");
-            mysqli_stmt_bind_param($istruzione, "sssiidi", $destinazione, $mezzo, $periodo, $minPart, $maxPart, $costo, $idUtente);
-            
-            if (mysqli_stmt_execute($istruzione)) {
-                $messaggio = "<div style='background-color: #d4edda; color: #155724; padding: 10px; margin-bottom: 20px; border-radius: 5px;'>Proposta aggiunta con successo.</div>";
-            } else {
-                $messaggio = "<div style='background-color: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 20px; border-radius: 5px;'>Errore durante l'aggiunta della proposta.</div>";
-            }
-            mysqli_stmt_close($istruzione);
+        $istruzione = mysqli_prepare($conn, "INSERT INTO propostagita (Destinazione, MezzoDiTrasporto, Periodo, MinPartecipanti, MaxPartecipanti, Costo, IDUtente) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        mysqli_stmt_bind_param($istruzione, "sssiidi", $destinazione, $mezzo, $periodo, $minPart, $maxPart, $costo, $idUtente);
+        
+        if (mysqli_stmt_execute($istruzione)) {
+            $messaggio = "<div style='background-color: #d4edda; color: #155724; padding: 10px; margin-bottom: 20px; border-radius: 5px;'>Proposta aggiunta con successo.</div>";
+        } else {
+            $messaggio = "<div style='background-color: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 20px; border-radius: 5px;'>Errore durante l'aggiunta della proposta.</div>";
         }
-    ?>
+        mysqli_stmt_close($istruzione);
+
+    } elseif ($_POST['action'] == 'modifica_proposta') {
+        $idProposta = $_POST['idProposta'] ?? 0;
+        $destinazione = $_POST['destinazione'] ?? '';
+        $mezzo = $_POST['mezzo'] ?? '';
+        $periodo = $_POST['periodo'] ?? '';
+        $costo = $_POST['costo'] ?? 0;
+        $minPart = $_POST['minPart'] ?? 0;
+        $maxPart = $_POST['maxPart'] ?? 0;
+
+        $istruzione = mysqli_prepare($conn, "UPDATE propostagita SET Destinazione=?, MezzoDiTrasporto=?, Periodo=?, MinPartecipanti=?, MaxPartecipanti=?, Costo=? WHERE IDProposta=?");
+        mysqli_stmt_bind_param($istruzione, "sssiidi", $destinazione, $mezzo, $periodo, $minPart, $maxPart, $costo, $idProposta);
+        
+        if (mysqli_stmt_execute($istruzione)) {
+            $messaggio = "<div style='background-color: #d4edda; color: #155724; padding: 10px; margin-bottom: 20px; border-radius: 5px;'>Proposta modificata con successo.</div>";
+        } else {
+            $messaggio = "<div style='background-color: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 20px; border-radius: 5px;'>Errore durante la modifica della proposta.</div>";
+        }
+        mysqli_stmt_close($istruzione);
+        
+    } elseif ($_POST['action'] == 'elimina_proposta') {
+        $idProposta = $_POST['idProposta'] ?? 0;
+
+        // Elimino a cascata le gite organizzate dipendenti per evitare l'errore Foreign Key
+        $delGite = mysqli_prepare($conn, "DELETE FROM gitaorganizzata WHERE IDProposta=?");
+        mysqli_stmt_bind_param($delGite, "i", $idProposta);
+        mysqli_stmt_execute($delGite);
+        mysqli_stmt_close($delGite);
+
+        // Ora elimino la proposta principale
+        $istruzione = mysqli_prepare($conn, "DELETE FROM propostagita WHERE IDProposta=?");
+        mysqli_stmt_bind_param($istruzione, "i", $idProposta);
+        
+        if (mysqli_stmt_execute($istruzione)) {
+            $messaggio = "<div style='background-color: #d4edda; color: #155724; padding: 10px; margin-bottom: 20px; border-radius: 5px;'>Proposta (e tutte le gite collegate) eliminata con successo.</div>";
+        } else {
+            $errore = mysqli_stmt_error($istruzione);
+            $messaggio = "<div style='background-color: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 20px; border-radius: 5px;'>Errore durante l'eliminazione della proposta: " . htmlspecialchars($errore) . "</div>";
+        }
+        mysqli_stmt_close($istruzione);
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -98,7 +125,7 @@
                                         echo "<td>" . htmlspecialchars($row['MaxPartecipanti']) . "</td>";
                                         echo "<td>€ " . number_format($row['Costo'], 2, ',', '.') . "</td>";
                                         echo "<td><button class='xs outline btn-modifica' data-id='".$row['IDProposta']."'>Modifica</button></td>";
-                                        echo "<td><button class='xs cancel' onclick='alert(\"Eliminazione prototipo non attiva\")'>Elimina</button></td>";
+                                        echo "<td><button class='xs cancel btn-elimina' data-id='".$row['IDProposta']."'>Elimina</button></td>";
                                         echo "<td><button class='xs' onclick='alert(\"Creazione prototipo non attiva\")'>Crea Gita</button></td>";
                                         echo "</tr>";
                                     }
@@ -120,7 +147,8 @@
                 </div>
                 <div class="modal-body">
                     <form id="formNuovaProposta" class="form-grid" method="POST" action="catalogo.php">
-                        <input type="hidden" name="action" value="nuova_proposta">
+                        <input type="hidden" name="action" id="formAction" value="nuova_proposta">
+                        <input type="hidden" name="idProposta" id="formIdProposta" value="">
                         <div class="form-group">
                             <label for="destinazione">Destinazione</label>
                             <input type="text" id="destinazione" name="destinazione" placeholder="es. Parigi" required>
@@ -165,6 +193,26 @@
             </div>
         </div>
 
+        <div class="modal-overlay hidden" id="modalDeleteOverlay">
+            <div class="modal">
+                <div class="modal-header">
+                    <h3>Conferma Eliminazione</h3>
+                    <button class="close-btn" id="closeDeleteModal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p style="margin-bottom: 20px;">Sei sicuro di voler eliminare questa proposta? L'operazione non può essere annullata.</p>
+                </div>
+                <div class="modal-footer">
+                    <form id="formEliminaProposta" method="POST" action="catalogo.php" style="display: flex; gap: 10px; width: 100%; justify-content: flex-end; margin: 0;">
+                        <input type="hidden" name="action" value="elimina_proposta">
+                        <input type="hidden" name="idProposta" id="formDeleteIdProposta" value="">
+                        <button type="button" class="button outline" id="cancelDeleteModal">Annulla</button>
+                        <button type="submit" class="button cancel">Sì, Elimina</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
         <footer>
             <div class="footer-container">
                 <div class="footer-left">
@@ -182,9 +230,13 @@
         var modulo = document.getElementById('formNuovaProposta');
         var titolo = document.getElementById('modalTitle');
         var btnInvia = document.getElementById('submitModalBtn');
+        var formAction = document.getElementById('formAction');
+        var formIdProposta = document.getElementById('formIdProposta');
 
         btnApri.addEventListener('click', function() {
             modulo.reset();
+            formAction.value = 'nuova_proposta';
+            formIdProposta.value = '';
             titolo.innerText = "Nuova Proposta di Gita";
             btnInvia.innerText = "Registra Proposta";
             modale.classList.remove('hidden');
@@ -213,6 +265,8 @@
                     }
                 }
 
+                formAction.value = 'modifica_proposta';
+                formIdProposta.value = this.getAttribute('data-id');
                 titolo.innerText = "Modifica Proposta di Gita";
                 btnInvia.innerText = "Salva Modifiche";
                 modale.classList.remove('hidden');
@@ -226,8 +280,29 @@
         btnChiudi.addEventListener('click', chiudiModale);
         btnAnnulla.addEventListener('click', chiudiModale);
 
+        var modaleDelete = document.getElementById('modalDeleteOverlay');
+        var btnChiudiDelete = document.getElementById('closeDeleteModal');
+        var btnAnnullaDelete = document.getElementById('cancelDeleteModal');
+        var formDeleteIdProposta = document.getElementById('formDeleteIdProposta');
+
+        var listaElimina = document.querySelectorAll('.btn-elimina');
+        for (var k = 0; k < listaElimina.length; k++) {
+            listaElimina[k].addEventListener('click', function() {
+                formDeleteIdProposta.value = this.getAttribute('data-id');
+                modaleDelete.classList.remove('hidden');
+            });
+        }
+
+        function chiudiModaleDelete() {
+            modaleDelete.classList.add('hidden');
+        }
+
+        btnChiudiDelete.addEventListener('click', chiudiModaleDelete);
+        btnAnnullaDelete.addEventListener('click', chiudiModaleDelete);
+
         window.addEventListener('click', function(e) {
             if (e.target === modale) chiudiModale();
+            if (e.target === modaleDelete) chiudiModaleDelete();
         });
     </script>
 </body>
