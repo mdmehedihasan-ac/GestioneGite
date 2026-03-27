@@ -1,37 +1,42 @@
-<?php
-    session_start();
-    include('config.php');
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestione Gite - Catalogo Proposte</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    // Assicurarsi che l'utente sia loggato
-    if (!isset($_SESSION['id_utente'])) {
-        header("Location: login.php");
-        exit;
-    }
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="vetrina.css">
+    <link rel="stylesheet" href="style_custom.css">
+    <script src="vetrina.js"></script>
+</head>
+<body>
+    <?php 
+        include('nav.php'); 
+        $messaggio = "";
 
-    $messaggio = "";
+        // nuova proposta
+        if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'nuova_proposta') {
+            $destinazione = $_POST['destinazione'] ?? '';
+            $mezzo = $_POST['mezzo'] ?? '';
+            $periodo = $_POST['periodo'] ?? '';
+            $costo = $_POST['costo'] ?? 0;
+            $minPart = $_POST['minPart'] ?? 0;
+            $maxPart = $_POST['maxPart'] ?? 0;
+            $idUtente = $_SESSION['id_utente'];
 
-    // Gestione inserimento nuova proposta
-    if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'nuova_proposta') {
-        $destinazione = $_POST['destinazione'] ?? '';
-        $mezzo = $_POST['mezzo'] ?? '';
-        $periodo = $_POST['periodo'] ?? '';
-        $costo = $_POST['costo'] ?? 0;
-        $minPart = $_POST['minPart'] ?? 0;
-        $maxPart = $_POST['maxPart'] ?? 0;
-        $idUtente = $_SESSION['id_utente'];
-
-        $stmt = mysqli_prepare($conn, "INSERT INTO propostagita (Destinazione, MezzoDiTrasporto, Periodo, MinPartecipanti, MaxPartecipanti, Costo, IDUtente) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        mysqli_stmt_bind_param($stmt, "sssiidi", $destinazione, $mezzo, $periodo, $minPart, $maxPart, $costo, $idUtente);
-        
-        if (mysqli_stmt_execute($stmt)) {
-            $messaggio = "<div style='background-color: #d4edda; color: #155724; padding: 10px; margin-bottom: 20px; border-radius: 5px;'>Proposta aggiunta con successo.</div>";
-        } else {
-            $messaggio = "<div style='background-color: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 20px; border-radius: 5px;'>Errore durante l'aggiunta della proposta.</div>";
+            $istruzione = mysqli_prepare($conn, "INSERT INTO propostagita (Destinazione, MezzoDiTrasporto, Periodo, MinPartecipanti, MaxPartecipanti, Costo, IDUtente) VALUES (?, ?, ?, ?, ?, ?, ?)");
+            mysqli_stmt_bind_param($istruzione, "sssiidi", $destinazione, $mezzo, $periodo, $minPart, $maxPart, $costo, $idUtente);
+            
+            if (mysqli_stmt_execute($istruzione)) {
+                $messaggio = "<div style='background-color: #d4edda; color: #155724; padding: 10px; margin-bottom: 20px; border-radius: 5px;'>Proposta aggiunta con successo.</div>";
+            } else {
+                $messaggio = "<div style='background-color: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 20px; border-radius: 5px;'>Errore durante l'aggiunta della proposta.</div>";
+            }
+            mysqli_stmt_close($istruzione);
         }
-        mysqli_stmt_close($stmt);
-    }
-?>
-<?php include('nav.php'); ?>
+    ?>
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -52,7 +57,7 @@
             
             <div class="hero-section" style="display: flex; justify-content: space-between; align-items: flex-end;">
                 <div>
-                    <h1>Catalogo Proposte</h1>
+                    <h2 style="margin-bottom: 1rem; color: var(--blue-700);">Catalogo Proposte</h2>
                     <p>Elenco delle mete approvate dalla Commissione. Scegli una proposta per organizzare la gita.</p>
                 </div>
                 <div>

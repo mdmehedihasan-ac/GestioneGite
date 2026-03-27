@@ -1,7 +1,3 @@
-<?php 
-    include('nav.php');
-    include('config.php');
-?>
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -16,6 +12,7 @@
     <script src="vetrina.js" defer></script>
 </head>
 <body>
+    <?php include('nav.php'); ?>
 
     <div class="container">
         <main class="content home-padding">

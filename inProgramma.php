@@ -1,14 +1,3 @@
-<?php
-    session_start();
-    include('config.php');
-    
-    // Controllo login
-    if (!isset($_SESSION['id_utente'])) {
-        header("Location: login.php");
-        exit;
-    }
-?>
-<?php include('nav.php'); ?>
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -23,13 +12,14 @@
     <script src="vetrina.js" defer></script>
 </head>
 <body>
+    <?php include('nav.php'); ?>
 
 
     <div class="container">
         <main class="content home-padding">
             
             <div class="hero-section">
-                <h1>Gite in Programma</h1>
+                <h2 style="margin-bottom: 1rem; color: var(--blue-700);">Gite in Programma</h2>
                 <p>Elenco generale di tutte le gite organizzate e il loro stato di avanzamento. Monitora le date, i partecipanti e le approvazioni.</p>
             </div>
 
@@ -49,8 +39,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <?php 
-                                // Seleziona tutte le gite e unisce le tabelle per avere Destinazione e Stato
+                            <?php
                                 $query = "
                                     SELECT g.*, p.Destinazione, s.Stato 
                                     FROM gitaorganizzata g 
@@ -62,16 +51,24 @@
 
                                 if (mysqli_num_rows($result) > 0) {
                                     while ($row = mysqli_fetch_assoc($result)) {
-                                        // Formatter date
+                                      
                                         $dataInizio = date('d/m/Y', strtotime($row['DataInizio']));
                                         $dataFine = date('d/m/Y', strtotime($row['DataFine']));
                                         
-                                        // Badge css basato sullo stato
+                                   
                                         $badgeClass = 'badge-secondary';
-                                        if ($row['Stato'] == 'Approvata') $badgeClass = 'badge-success';
-                                        if ($row['Stato'] == 'Inserita') $badgeClass = 'badge-warning';
-                                        if ($row['Stato'] == 'Conclusa') $badgeClass = 'badge-primary';
-                                        if ($row['Stato'] == 'NonApprovata') $badgeClass = 'badge-danger';
+                                        if ($row['Stato'] == 'Approvata'){
+                                            $badgeClass = 'badge-success';
+                                        } 
+                                        if ($row['Stato'] == 'Inserita'){
+                                            $badgeClass = 'badge-warning';
+                                        }
+                                        if ($row['Stato'] == 'Conclusa'){
+                                            $badgeClass = 'badge-primary';
+                                        }
+                                        if ($row['Stato'] == 'NonApprovata'){
+                                            $badgeClass = 'badge-danger';
+                                        }
                                         
                                         echo "<tr>";
                                         echo "<td>" . htmlspecialchars($row['Destinazione']) . "</td>";

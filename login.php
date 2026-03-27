@@ -8,14 +8,14 @@
         $email = trim($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
 
-        $stmt = mysqli_prepare($conn, "SELECT IDUtente, Nome, Cognome, Password, IDTipo FROM utente WHERE Mail = ?");
-        mysqli_stmt_bind_param($stmt, "s", $email);
-        mysqli_stmt_execute($stmt);
-        $result = mysqli_stmt_get_result($stmt);
+        $istruzione = mysqli_prepare($conn, "SELECT IDUtente, Nome, Cognome, Password, IDTipo FROM utente WHERE Mail = ?");
+        mysqli_stmt_bind_param($istruzione, "s", $email);
+        mysqli_stmt_execute($istruzione);
+        $result = mysqli_stmt_get_result($istruzione);
         
         if ($row = mysqli_fetch_assoc($result)) {
             if (password_verify($password, $row['Password'])) {
-                // Login effettuato
+                
                 $_SESSION['id_utente'] = $row['IDUtente'];
                 $_SESSION['username'] = $row['Nome'] . " " . $row['Cognome'];
                 $_SESSION['ruolo'] = $row['IDTipo'];
@@ -28,7 +28,7 @@
         } else {
             $errore = "Nessun account trovato con questa email.";
         }
-        mysqli_stmt_close($stmt);
+        mysqli_stmt_close($istruzione);
     }
 ?>
 <?php include('nav.php'); ?>

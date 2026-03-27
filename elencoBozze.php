@@ -1,7 +1,24 @@
 <?php
-    include('nav.php');
+    session_start();
     include('config.php');
+    
+
+    $messaggio = "";
+
+    
+    if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['id_gita'])) {
+        $idGita = (int)$_POST['id_gita'];
+        $nuovoStato = ($_POST['azione'] == 'approva') ? 3 : 4; // 3=approva, 4=boccia
+        
+        $queryAzione = "UPDATE gitaorganizzata SET IDStato = $nuovoStato WHERE IDGita = $idGita";
+        if (mysqli_query($conn, $queryAzione)) {
+            $messaggio = "<div class='alert alert-success'>Operazione completata con successo.</div>";
+        } else {
+            $messaggio = "<div class='alert alert-danger'>Errore durante l'aggiornamento.</div>";
+        }
+    }
 ?>
+<?php include('nav.php'); ?>
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -22,14 +39,20 @@
             <div class="hero-section" style="display: flex; justify-content: space-between; align-items: flex-end;">
                 <div>
                     <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.4rem;">
-                        <h1>Elenco Bozze</h1>
+                        <h2 style="margin-bottom: 1rem; color: var(--blue-700);">Elenco Bozze</h2>
                     </div>
                     <p>Gite inviate in attesa di approvazione. Approva o boccia ogni proposta per aggiornarne lo stato.</p>
                 </div>
                 <div style="font-size: 0.9rem; color: var(--my-gray);">
-                    <strong id="contatore">4</strong> gite in attesa
+                    <?php 
+                        $resCount = mysqli_query($conn, "SELECT COUNT(*) as totale FROM gitaorganizzata WHERE IDStato = 2");
+                        $rowCount = mysqli_fetch_assoc($resCount);
+                    ?>
+                    <strong id="contatore"><?php echo $rowCount['totale']; ?></strong> gite in attesa
                 </div>
             </div>
+
+            <?php echo $messaggio; ?>
 
             <div class="alert alert-info" style="margin-top: 1.5rem;">
                 <span style="font-size: 1.2rem; font-weight: bold;">[i]</span>
@@ -55,70 +78,50 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr data-id="1">
-                                <td><strong>CERN di Ginevra</strong></td>
-                                <td>Prof. Bianchi</td>
-                                <td>5CL</td>
-                                <td>20/02/2026</td>
-                                <td>23/02/2026</td>
-                                <td>20</td>
-                                <td>2</td>
-                                <td>Aereo</td>
-                                <td>€ 7.000,00</td>
-                                <td>05/01/2026</td>
-                                <td class="azioni-cell">
-                                    <button class="xs btn-approva" title="Approva">Approva</button>
-                                    <button class="xs btn-boccia" title="Boccia">Boccia</button>
-                                </td>
-                            </tr>
-                            <tr data-id="2">
-                                <td><strong>Barcellona - Architettura Gaudì</strong></td>
-                                <td>Prof.ssa Verdi</td>
-                                <td>4AEA</td>
-                                <td>12/03/2026</td>
-                                <td>16/03/2026</td>
-                                <td>32</td>
-                                <td>3</td>
-                                <td>Aereo</td>
-                                <td>€ 12.500,00</td>
-                                <td>08/01/2026</td>
-                                <td class="azioni-cell">
-                                    <button class="xs btn-approva" title="Approva">✔ Approva</button>
-                                    <button class="xs btn-boccia" title="Boccia">✘ Boccia</button>
-                                </td>
-                            </tr>
-                            <tr data-id="3">
-                                <td><strong>Berlino - Storia del Novecento</strong></td>
-                                <td>Prof. Neri</td>
-                                <td>5BL</td>
-                                <td>05/04/2026</td>
-                                <td>09/04/2026</td>
-                                <td>28</td>
-                                <td>3</td>
-                                <td>Aereo</td>
-                                <td>€ 9.800,00</td>
-                                <td>10/01/2026</td>
-                                <td class="azioni-cell">
-                                    <button class="xs btn-approva" title="Approva">✔ Approva</button>
-                                    <button class="xs btn-boccia" title="Boccia">✘ Boccia</button>
-                                </td>
-                            </tr>
-                            <tr data-id="4">
-                                <td><strong>Londra - Scienza e Tecnologia</strong></td>
-                                <td>Prof.ssa Russo</td>
-                                <td>5AII</td>
-                                <td>18/05/2026</td>
-                                <td>22/05/2026</td>
-                                <td>25</td>
-                                <td>2</td>
-                                <td>Aereo</td>
-                                <td>€ 11.200,00</td>
-                                <td>12/01/2026</td>
-                                <td class="azioni-cell">
-                                    <button class="xs btn-approva" title="Approva">✔ Approva</button>
-                                    <button class="xs btn-boccia" title="Boccia">✘ Boccia</button>
-                                </td>
-                            </tr>
+                            <?php 
+                                $queryBozze = "
+                                    SELECT g.*, p.Destinazione, p.MezzoDiTrasporto, u.Nome, u.Cognome 
+                                    FROM gitaorganizzata g 
+                                    JOIN propostagita p ON g.IDProposta = p.IDProposta 
+                                    JOIN utente u ON g.IDUtente = u.IDUtente 
+                                    WHERE g.IDStato = 2
+                                    ORDER BY g.IDGita DESC
+                                ";
+                                $resultBozze = mysqli_query($conn, $queryBozze);
+
+                                if (mysqli_num_rows($resultBozze) > 0) {
+                                    while ($row = mysqli_fetch_assoc($resultBozze)) {
+                                        $idGita = $row['IDGita'];
+                                        $dest = htmlspecialchars($row['Destinazione']);
+                                        $nomeCompleto = htmlspecialchars($row['Nome'] . ' ' . $row['Cognome']);
+                                        $dataInizio = date('d/m/Y', strtotime($row['DataInizio']));
+                                        $dataFine = date('d/m/Y', strtotime($row['DataFine']));
+                                        $mezzo = htmlspecialchars($row['MezzoDiTrasporto']);
+                                        $costo = number_format($row['CostoTot'], 2, ',', '.');
+                                        $dataInvio = date('d/m/Y', strtotime($row['DataInizio'] . ' -7 days'));
+                                        $destEscaped = addslashes($row['Destinazione']);
+
+                                        echo "<tr data-id='$idGita'>";
+                                        echo "<td><strong>$dest</strong></td>";
+                                        echo "<td>$nomeCompleto</td>";
+                                        echo "<td>N/D</td>";
+                                        echo "<td>$dataInizio</td>";
+                                        echo "<td>$dataFine</td>";
+                                        echo "<td>{$row['NumAlunni']}</td>";
+                                        echo "<td>{$row['NumDocentiAccompagnatori']}</td>";
+                                        echo "<td>$mezzo</td>";
+                                        echo "<td>€ $costo</td>";
+                                        echo "<td>$dataInvio</td>";
+                                        echo "<td class='azioni-cell'>";
+                                        echo "<button class='xs btn-approva' title='Approva' onclick=\"prepareAction($idGita, '$destEscaped', 'approva')\">Approva</button> ";
+                                        echo "<button class='xs btn-boccia' title='Boccia' onclick=\"prepareAction($idGita, '$destEscaped', 'boccia')\">Boccia</button>";
+                                        echo "</td>";
+                                        echo "</tr>";
+                                    }
+                                } else {
+                                    echo "<tr><td colspan='11' style='text-align:center;'>Nessuna gita in attesa di approvazione.</td></tr>";
+                                }
+                            ?>
                         </tbody>
                     </table>
                 </div>
@@ -142,13 +145,17 @@
                     <div style="margin-bottom: 1rem;">
                         <span style="font-size: 2.5rem; color: var(--my-green);">OK</span>
                     </div>
-                    <p>Stai per <strong>approvare</strong> la gita</p>
-                    <p style="margin-top: 0.5rem;"><strong id="approvaDestLabel"></strong></p>
-                    <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--my-gray);">Lo stato passerà a <span class="badge badge-success">Approvata</span></p>
+                    <form method="POST" action="elencoBozze.php">
+                        <input type="hidden" name="id_gita" id="approvaGitaId">
+                        <input type="hidden" name="azione" value="approva">
+                        <p>Stai per <strong>approvare</strong> la gita</p>
+                        <p style="margin-top: 0.5rem;"><strong id="approvaDestLabel"></strong></p>
+                        <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--my-gray);">Lo stato passerà a <span class="badge badge-success">Approvata</span></p>
+                    </form>
                 </div>
                 <div class="modal-footer" style="justify-content: center; gap: 1rem;">
                     <button class="button outline" onclick="closeModal('modalApprova')">Annulla</button>
-                    <button class="button btn-conferma-approva">Conferma Approvazione</button>
+                    <button class="button" onclick="document.querySelector('#modalApprova form').submit()">Conferma Approvazione</button>
                 </div>
             </div>
         </div>
@@ -163,17 +170,21 @@
                     <div style="margin-bottom: 1rem;">
                         <span style="font-size: 2.5rem; color: var(--hex-red);">X</span>
                     </div>
-                    <p>Stai per <strong>bocciare</strong> la gita</p>
-                    <p style="margin-top: 0.5rem;"><strong id="bocciaDestLabel"></strong></p>
-                    <div class="form-group" style="margin-top: 1rem; text-align: left;">
-                        <label for="motivazione">Motivazione (opzionale)</label>
-                        <textarea id="motivazione" rows="3" placeholder="Inserisci una motivazione per il docente..." style="width:100%; border-radius: var(--radius); border: 1px solid var(--my-gray); padding: 0.75rem; font-family: inherit; font-size: 0.9rem; resize: vertical; box-sizing: border-box;"></textarea>
-                    </div>
-                    <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--my-gray);">Lo stato verrà rimosso dall'elenco bozze.</p>
+                    <form method="POST" action="elencoBozze.php">
+                        <input type="hidden" name="id_gita" id="bocciaGitaId">
+                        <input type="hidden" name="azione" value="boccia">
+                        <p>Stai per <strong>bocciare</strong> la gita</p>
+                        <p style="margin-top: 0.5rem;"><strong id="bocciaDestLabel"></strong></p>
+                        <div class="form-group" style="margin-top: 1rem; text-align: left;">
+                            <label for="motivazione">Motivazione (opzionale)</label>
+                            <textarea id="motivazione" name="motivazione" rows="3" placeholder="Inserisci una motivazione per il docente..." style="width:100%; border-radius: var(--radius); border: 1px solid var(--my-gray); padding: 0.75rem; font-family: inherit; font-size: 0.9rem; resize: vertical; box-sizing: border-box;"></textarea>
+                        </div>
+                        <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--my-gray);">Lo stato verrà rimosso dall'elenco bozze.</p>
+                    </form>
                 </div>
                 <div class="modal-footer" style="justify-content: center; gap: 1rem;">
                     <button class="button outline" onclick="closeModal('modalBoccia')">Annulla</button>
-                    <button class="button cancel btn-conferma-boccia">Conferma Bocciatura</button>
+                    <button class="button cancel" onclick="document.querySelector('#modalBoccia form').submit()">Conferma Bocciatura</button>
                 </div>
             </div>
         </div>
@@ -189,67 +200,16 @@
     </div>
 
     <script>
-        var rigaScelta = null;
-
-        var bottoniApprova = document.querySelectorAll('.btn-approva');
-        for (var i = 0; i < bottoniApprova.length; i++) {
-            bottoniApprova[i].addEventListener('click', function() {
-                rigaScelta = this.closest('tr');
-                var dest = rigaScelta.querySelector('td strong').innerText;
+        function prepareAction(id, dest, type) {
+            if (type === 'approva') {
+                document.getElementById('approvaGitaId').value = id;
                 document.getElementById('approvaDestLabel').innerText = dest;
                 openModal('modalApprova');
-            });
-        }
-
-        document.querySelector('.btn-conferma-approva').addEventListener('click', function() {
-            if (!rigaScelta) return;
-            var riga = rigaScelta;
-            riga.style.transition = 'opacity 0.4s';
-            riga.style.opacity = '0';
-            setTimeout(function() {
-                riga.remove();
-                aggiornaContatore();
-                controllaVuoto();
-            }, 400);
-            closeModal('modalApprova');
-            rigaScelta = null;
-        });
-
-        var bottoniBoccia = document.querySelectorAll('.btn-boccia');
-        for (var i = 0; i < bottoniBoccia.length; i++) {
-            bottoniBoccia[i].addEventListener('click', function() {
-                rigaScelta = this.closest('tr');
-                var dest = rigaScelta.querySelector('td strong').innerText;
+            } else {
+                document.getElementById('bocciaGitaId').value = id;
                 document.getElementById('bocciaDestLabel').innerText = dest;
                 document.getElementById('motivazione').value = '';
                 openModal('modalBoccia');
-            });
-        }
-
-        document.querySelector('.btn-conferma-boccia').addEventListener('click', function() {
-            if (!rigaScelta) return;
-            var riga = rigaScelta;
-            riga.style.transition = 'opacity 0.4s';
-            riga.style.opacity = '0';
-            setTimeout(function() {
-                riga.remove();
-                aggiornaContatore();
-                controllaVuoto();
-            }, 400);
-            closeModal('modalBoccia');
-            rigaScelta = null;
-        });
-
-        function aggiornaContatore() {
-            var righe = document.querySelectorAll('#tabellaBozze tbody tr');
-            document.getElementById('contatore').innerText = righe.length;
-        }
-
-        function controllaVuoto() {
-            var righe = document.querySelectorAll('#tabellaBozze tbody tr');
-            if (righe.length === 0) {
-                document.querySelector('.table-section').classList.add('hidden');
-                document.getElementById('vuoto').classList.remove('hidden');
             }
         }
     </script>

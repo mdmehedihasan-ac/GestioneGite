@@ -1,16 +1,3 @@
-<?php
-    session_start();
-    include('config.php');
-    
-    // Controllo login
-    if (!isset($_SESSION['id_utente'])) {
-        header("Location: login.php");
-        exit;
-    }
-    
-    $idUtenteLoggato = $_SESSION['id_utente'];
-?>
-<?php include('nav.php'); ?>
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -24,13 +11,18 @@
     <script src="vetrina.js" defer></script>
 </head>
 <body>
+    <?php 
+        include('nav.php'); 
+        $idUtenteLoggato = $_SESSION['id_utente'];
+    ?>
 
     <div class="container">
         <main class="content home-padding">
 
             <div class="hero-section">
-                <h1>Le Mie Gite</h1>
-                <p>Tutte le gite che hai creato o a cui partecipi. Controlla lo stato, modifica i dettagli o elimina quelle non più necessarie.</p>
+                <h2 style="margin-bottom: 1rem; color: var(--blue-700);">Le Mie Gite</h2>
+                <p>Tutte le gite che hai creato o a cui partecipi.
+                Controlla lo stato, modifica i dettagli o elimina quelle non più necessarie.</p>
             </div>
 
             <div style="margin-top: 2rem;">
@@ -60,25 +52,26 @@
                                 
                                 $mezzo = htmlspecialchars($row['Destinazione']); // Semplicemente destinazione
                                 ?>
-                                <div class="miegite-card"
-                                     data-dest="<?php echo htmlspecialchars($row['Destinazione']); ?>"
-                                     data-stato="<?php echo htmlspecialchars($row['Stato']); ?>"
-                                     data-classe="N/D"
-                                     data-inizio="<?php echo $dataInizio; ?>"
-                                     data-fine="<?php echo $dataFine; ?>"
-                                     data-mezzo=""
-                                     data-alunni="<?php echo $row['NumAlunni']; ?>"
-                                     data-docenti="<?php echo $row['NumDocentiAccompagnatori']; ?>"
-                                     data-costo="<?php echo number_format($row['CostoTot'], 2, ',', '.'); ?>"
-                                     data-note="">
+                                <div class="miegite-card" <?php 
+                                     echo 'data-dest="' . htmlspecialchars($row['Destinazione']) . '" ';
+                                     echo 'data-stato="' . htmlspecialchars($row['Stato']) . '" ';
+                                     echo 'data-classe="N/D" ';
+                                     echo 'data-inizio="' . $dataInizio . '" ';
+                                     echo 'data-fine="' . $dataFine . '" ';
+                                     echo 'data-mezzo="" ';
+                                     echo 'data-alunni="' . $row['NumAlunni'] . '" ';
+                                     echo 'data-docenti="' . $row['NumDocentiAccompagnatori'] . '" ';
+                                     echo 'data-costo="' . number_format($row['CostoTot'], 2, ',', '.') . '" ';
+                                     echo 'data-note=""';
+                                ?>>
                                     <div class="miegite-card-header">
                                         <h3 class="miegite-card-title"><?php echo htmlspecialchars($row['Destinazione']); ?></h3>
                                         <span class="badge <?php echo $badgeClass; ?>"><?php echo htmlspecialchars($row['Stato']); ?></span>
                                     </div>
                                     <div class="miegite-card-body">
                                         <div class="miegite-card-info">
-                                            <span><strong>Date:</strong> <?php echo $dataInizio; ?> &#8211; <?php echo $dataFine; ?></span>
-                                            <span><strong>Partecipanti:</strong> <?php echo $row['NumAlunni']; ?> alunni, <?php echo $row['NumDocentiAccompagnatori']; ?> docenti</span>
+                                            <span><strong>Date:</strong> <?php echo $dataInizio . ' &#8211; ' . $dataFine; ?></span>
+                                            <span><strong>Partecipanti:</strong> <?php echo $row['NumAlunni'] . ' alunni, ' . $row['NumDocentiAccompagnatori'] . ' docenti'; ?></span>
                                             <span><strong>Costo:</strong> &#8364; <?php echo number_format($row['CostoTot'], 2, ',', '.'); ?></span>
                                         </div>
                                     </div>
