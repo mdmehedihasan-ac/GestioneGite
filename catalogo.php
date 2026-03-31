@@ -12,15 +12,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
         $maxPart = $_POST['maxPart'] ?? 0;
         $idUtente = $_SESSION['id_utente'] ?? 0;
 
-        $istruzione = mysqli_prepare($conn, "INSERT INTO propostagita (Destinazione, MezzoDiTrasporto, Periodo, MinPartecipanti, MaxPartecipanti, Costo, IDUtente) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        mysqli_stmt_bind_param($istruzione, "sssiidi", $destinazione, $mezzo, $periodo, $minPart, $maxPart, $costo, $idUtente);
-        
-        if (mysqli_stmt_execute($istruzione)) {
-            $messaggio = "<div style='background-color: #d4edda; color: #155724; padding: 10px; margin-bottom: 20px; border-radius: 5px;'>Proposta aggiunta con successo.</div>";
+        $istr = mysqli_prepare($conn, "INSERT INTO propostagita (Destinazione, MezzoDiTrasporto, Periodo, MinPartecipanti, MaxPartecipanti, Costo, IDUtente) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        mysqli_stmt_bind_param($istr, "sssiidi", $destinazione, $mezzo, $periodo, $minPart, $maxPart, $costo, $idUtente);
+
+        $mostraSuccesso = false;
+
+        if (mysqli_stmt_execute($istr)) {
+            $idNuovaProposta = mysqli_insert_id($conn);
+            $stato = 1;
+            $alunni = 0;
+            $docenti = 0;
+            $costoTotale = $costo;
+
+            $istrGita = mysqli_prepare($conn, "INSERT INTO gitaorganizzata (IDProposta, IDUtente, DataInizio, DataFine, NumAlunni, NumDocentiAccompagnatori, CostoTot, IDStato) VALUES (?, ?, CURDATE(), CURDATE(), ?, ?, ?, ?)");
+            mysqli_stmt_bind_param($istrGita, "iiiidi", $idNuovaProposta, $idUtente, $alunni, $docenti, $costoTotale, $stato);
+            mysqli_stmt_execute($istrGita);
+            mysqli_stmt_close($istrGita);
+
+            $mostraSuccesso = true;
         } else {
             $messaggio = "<div style='background-color: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 20px; border-radius: 5px;'>Errore durante l'aggiunta della proposta.</div>";
         }
-        mysqli_stmt_close($istruzione);
+        mysqli_stmt_close($istr);
 
     } elseif ($_POST['action'] == 'modifica_proposta') {
         $idProposta = $_POST['idProposta'] ?? 0;
@@ -31,36 +44,57 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
         $minPart = $_POST['minPart'] ?? 0;
         $maxPart = $_POST['maxPart'] ?? 0;
 
-        $istruzione = mysqli_prepare($conn, "UPDATE propostagita SET Destinazione=?, MezzoDiTrasporto=?, Periodo=?, MinPartecipanti=?, MaxPartecipanti=?, Costo=? WHERE IDProposta=?");
-        mysqli_stmt_bind_param($istruzione, "sssiidi", $destinazione, $mezzo, $periodo, $minPart, $maxPart, $costo, $idProposta);
-        
-        if (mysqli_stmt_execute($istruzione)) {
+        $istr = mysqli_prepare($conn, "UPDATE propostagita SET Destinazione=?, MezzoDiTrasporto=?, Periodo=?, MinPartecipanti=?, MaxPartecipanti=?, Costo=? WHERE IDProposta=?");
+        mysqli_stmt_bind_param($istr, "sssiidi", $destinazione, $mezzo, $periodo, $minPart, $maxPart, $costo, $idProposta);
+
+        if (mysqli_stmt_execute($istr)) {
             $messaggio = "<div style='background-color: #d4edda; color: #155724; padding: 10px; margin-bottom: 20px; border-radius: 5px;'>Proposta modificata con successo.</div>";
         } else {
             $messaggio = "<div style='background-color: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 20px; border-radius: 5px;'>Errore durante la modifica della proposta.</div>";
         }
-        mysqli_stmt_close($istruzione);
-        
+        mysqli_stmt_close($istr);
+
+    } elseif ($_POST['action'] == 'organizza_gita') {
+        $idProposta = $_POST['idProposta'] ?? 0;
+        $dataInizio = $_POST['dataInizio'] ?? '';
+        $dataFine = $_POST['dataFine'] ?? '';
+        $alunni = $_POST['alunni'] ?? 0;
+        $docenti = $_POST['docenti'] ?? 0;
+        $idUtente = $_SESSION['id_utente'] ?? 0;
+
+        $queryProp = "SELECT Costo FROM propostagita WHERE IDProposta = $idProposta";
+        $resProp = mysqli_query($conn, $queryProp);
+        $rigaProp = mysqli_fetch_assoc($resProp);
+        $costoTotale = $rigaProp['Costo'] * $alunni;
+        $statoOrganizzata = 5;
+
+        $istr = mysqli_prepare($conn, "INSERT INTO gitaorganizzata (IDProposta, IDUtente, DataInizio, DataFine, NumAlunni, NumDocentiAccompagnatori, CostoTot, IDStato) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        mysqli_stmt_bind_param($istr, "iissiidi", $idProposta, $idUtente, $dataInizio, $dataFine, $alunni, $docenti, $costoTotale, $statoOrganizzata);
+
+        if (mysqli_stmt_execute($istr)) {
+            $messaggio = "<div style='background-color: #d4edda; color: #155724; padding: 10px; margin-bottom: 20px; border-radius: 5px;'>Gita organizzata con successo!</div>";
+        } else {
+            $messaggio = "<div style='background-color: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 20px; border-radius: 5px;'>Errore durante l'organizzazione della gita.</div>";
+        }
+        mysqli_stmt_close($istr);
+
     } elseif ($_POST['action'] == 'elimina_proposta') {
         $idProposta = $_POST['idProposta'] ?? 0;
 
-        // Elimino a cascata le gite organizzate dipendenti per evitare l'errore Foreign Key
-        $delGite = mysqli_prepare($conn, "DELETE FROM gitaorganizzata WHERE IDProposta=?");
-        mysqli_stmt_bind_param($delGite, "i", $idProposta);
-        mysqli_stmt_execute($delGite);
-        mysqli_stmt_close($delGite);
+        $eliminaGite = mysqli_prepare($conn, "DELETE FROM gitaorganizzata WHERE IDProposta=?");
+        mysqli_stmt_bind_param($eliminaGite, "i", $idProposta);
+        mysqli_stmt_execute($eliminaGite);
+        mysqli_stmt_close($eliminaGite);
 
-        // Ora elimino la proposta principale
-        $istruzione = mysqli_prepare($conn, "DELETE FROM propostagita WHERE IDProposta=?");
-        mysqli_stmt_bind_param($istruzione, "i", $idProposta);
-        
-        if (mysqli_stmt_execute($istruzione)) {
-            $messaggio = "<div style='background-color: #d4edda; color: #155724; padding: 10px; margin-bottom: 20px; border-radius: 5px;'>Proposta (e tutte le gite collegate) eliminata con successo.</div>";
+        $istr = mysqli_prepare($conn, "DELETE FROM propostagita WHERE IDProposta=?");
+        mysqli_stmt_bind_param($istr, "i", $idProposta);
+
+        if (mysqli_stmt_execute($istr)) {
+            $messaggio = "<div style='background-color: #d4edda; color: #155724; padding: 10px; margin-bottom: 20px; border-radius: 5px;'>Proposta eliminata con successo.</div>";
         } else {
-            $errore = mysqli_stmt_error($istruzione);
-            $messaggio = "<div style='background-color: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 20px; border-radius: 5px;'>Errore durante l'eliminazione della proposta: " . htmlspecialchars($errore) . "</div>";
+            $messaggio = "<div style='background-color: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 20px; border-radius: 5px;'>Errore durante l'eliminazione della proposta.</div>";
         }
-        mysqli_stmt_close($istruzione);
+        mysqli_stmt_close($istr);
     }
 }
 ?>
@@ -112,7 +146,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
                         </thead>
                         <tbody>
                             <?php 
-                                $query = "SELECT * FROM propostagita ORDER BY IDProposta DESC";
+                                $query = "SELECT p.* FROM propostagita p JOIN gitaorganizzata g ON p.IDProposta = g.IDProposta WHERE g.IDStato = 2 ORDER BY p.IDProposta DESC";
                                 $result = mysqli_query($conn, $query);
 
                                 if (mysqli_num_rows($result) > 0) {
@@ -126,7 +160,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
                                         echo "<td>€ " . number_format($row['Costo'], 2, ',', '.') . "</td>";
                                         echo "<td><button class='xs outline btn-modifica' data-id='".$row['IDProposta']."'>Modifica</button></td>";
                                         echo "<td><button class='xs cancel btn-elimina' data-id='".$row['IDProposta']."'>Elimina</button></td>";
-                                        echo "<td><button class='xs' onclick='alert(\"Creazione prototipo non attiva\")'>Crea Gita</button></td>";
+                                        echo "<td><button class='xs btn-organizza' data-id='".$row['IDProposta']."' data-dest='".htmlspecialchars($row['Destinazione'])."'>Organizza</button></td>";
                                         echo "</tr>";
                                     }
                                 } else {
@@ -222,6 +256,41 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
         </footer>
     </div>
 
+        <div class="modal-overlay hidden" id="modalOrganizza">
+            <div class="modal wide-modal">
+                <div class="modal-header">
+                    <h3 id="titoloOrganizza">Organizza Gita</h3>
+                    <button class="close-btn" id="chiudiOrganizza">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="formOrganizza" class="form-grid" method="POST" action="catalogo.php">
+                        <input type="hidden" name="action" value="organizza_gita">
+                        <input type="hidden" name="idProposta" id="organizzaIdProposta" value="">
+                        <div class="form-group">
+                            <label for="dataInizio">Data Inizio</label>
+                            <input type="date" id="dataInizio" name="dataInizio" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="dataFine">Data Fine</label>
+                            <input type="date" id="dataFine" name="dataFine" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="alunni">Numero Alunni</label>
+                            <input type="number" id="alunni" name="alunni" placeholder="es. 30" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="docenti">Numero Docenti</label>
+                            <input type="number" id="docenti" name="docenti" placeholder="es. 3" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="button cancel" id="annullaOrganizza">Annulla</button>
+                    <button class="button" type="submit" form="formOrganizza">Conferma</button>
+                </div>
+            </div>
+        </div>
+
     <script>
         var modale = document.getElementById('modalOverlay');
         var btnApri = document.getElementById('btnNuova');
@@ -303,7 +372,47 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
         window.addEventListener('click', function(e) {
             if (e.target === modale) chiudiModale();
             if (e.target === modaleDelete) chiudiModaleDelete();
+            if (e.target === modaleOrganizza) chiudiOrganizza();
         });
+
+        var modaleOrganizza = document.getElementById('modalOrganizza');
+        var organizzaIdProposta = document.getElementById('organizzaIdProposta');
+        var titoloOrganizza = document.getElementById('titoloOrganizza');
+
+        var listaOrganizza = document.querySelectorAll('.btn-organizza');
+        for (var z = 0; z < listaOrganizza.length; z++) {
+            listaOrganizza[z].addEventListener('click', function() {
+                organizzaIdProposta.value = this.getAttribute('data-id');
+                titoloOrganizza.innerText = 'Organizza: ' + this.getAttribute('data-dest');
+                document.getElementById('formOrganizza').reset();
+                organizzaIdProposta.value = this.getAttribute('data-id');
+                modaleOrganizza.classList.remove('hidden');
+            });
+        }
+
+        function chiudiOrganizza() {
+            modaleOrganizza.classList.add('hidden');
+        }
+
+        document.getElementById('chiudiOrganizza').addEventListener('click', chiudiOrganizza);
+        document.getElementById('annullaOrganizza').addEventListener('click', chiudiOrganizza);
     </script>
+    
+    <?php if (isset($mostraSuccesso) && $mostraSuccesso) { ?>
+    <div class="modal-overlay modal-successo" id="modalSuccessOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Nuova Proposta</h3>
+                <button class="close-btn" onclick="document.getElementById('modalSuccessOverlay').style.display='none'">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Proposta creata con successo! Si aspetta l'approvazione dalla commissione.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="button" onclick="document.getElementById('modalSuccessOverlay').style.display='none'">OK, Chiudi</button>
+            </div>
+        </div>
+    </div>
+    <?php } ?>
 </body>
 </html>

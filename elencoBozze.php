@@ -8,7 +8,7 @@
     
     if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['id_gita'])) {
         $idGita = (int)$_POST['id_gita'];
-        $nuovoStato = ($_POST['azione'] == 'approva') ? 3 : 4; // 3=approva, 4=boccia
+        $nuovoStato = ($_POST['azione'] == 'approva') ? 2 : 3;
         
         $queryAzione = "UPDATE gitaorganizzata SET IDStato = $nuovoStato WHERE IDGita = $idGita";
         if (mysqli_query($conn, $queryAzione)) {
@@ -45,10 +45,10 @@
                 </div>
                 <div style="font-size: 0.9rem; color: var(--my-gray);">
                     <?php 
-                        $resCount = mysqli_query($conn, "SELECT COUNT(*) as totale FROM gitaorganizzata WHERE IDStato = 2");
-                        $rowCount = mysqli_fetch_assoc($resCount);
+                        $ricercaContatore = mysqli_query($conn, "SELECT COUNT(*) as totale FROM gitaorganizzata WHERE IDStato = 1");
+                        $rigaContatore = mysqli_fetch_assoc($ricercaContatore);
                     ?>
-                    <strong id="contatore"><?php echo $rowCount['totale']; ?></strong> gite in attesa
+                    <strong id="contatore"><?php echo $rigaContatore['totale']; ?></strong> gite in attesa
                 </div>
             </div>
 
@@ -79,30 +79,23 @@
                         </thead>
                         <tbody>
                             <?php 
-                                $queryBozze = "
-                                    SELECT g.*, p.Destinazione, p.MezzoDiTrasporto, u.Nome, u.Cognome 
-                                    FROM gitaorganizzata g 
-                                    JOIN propostagita p ON g.IDProposta = p.IDProposta 
-                                    JOIN utente u ON g.IDUtente = u.IDUtente 
-                                    WHERE g.IDStato = 2
-                                    ORDER BY g.IDGita DESC
-                                ";
-                                $resultBozze = mysqli_query($conn, $queryBozze);
+                                $query = "SELECT g.*, p.Destinazione, p.MezzoDiTrasporto, u.Nome, u.Cognome FROM gitaorganizzata g JOIN propostagita p ON g.IDProposta = p.IDProposta JOIN utente u ON g.IDUtente = u.IDUtente WHERE g.IDStato = 1 ORDER BY g.IDGita DESC";
+                                $risultatoBozze = mysqli_query($conn, $query);
 
-                                if (mysqli_num_rows($resultBozze) > 0) {
-                                    while ($row = mysqli_fetch_assoc($resultBozze)) {
+                                if (mysqli_num_rows($risultatoBozze) > 0) {
+                                    while ($row = mysqli_fetch_assoc($risultatoBozze)) {
                                         $idGita = $row['IDGita'];
-                                        $dest = htmlspecialchars($row['Destinazione']);
+                                        $destinazione = htmlspecialchars($row['Destinazione']);
                                         $nomeCompleto = htmlspecialchars($row['Nome'] . ' ' . $row['Cognome']);
                                         $dataInizio = date('d/m/Y', strtotime($row['DataInizio']));
                                         $dataFine = date('d/m/Y', strtotime($row['DataFine']));
                                         $mezzo = htmlspecialchars($row['MezzoDiTrasporto']);
                                         $costo = number_format($row['CostoTot'], 2, ',', '.');
                                         $dataInvio = date('d/m/Y', strtotime($row['DataInizio'] . ' -7 days'));
-                                        $destEscaped = addslashes($row['Destinazione']);
+                                        $destinazioneSicura = addslashes($row['Destinazione']);
 
                                         echo "<tr data-id='$idGita'>";
-                                        echo "<td><strong>$dest</strong></td>";
+                                        echo "<td><strong>$destinazione</strong></td>";
                                         echo "<td>$nomeCompleto</td>";
                                         echo "<td>N/D</td>";
                                         echo "<td>$dataInizio</td>";
@@ -110,11 +103,11 @@
                                         echo "<td>{$row['NumAlunni']}</td>";
                                         echo "<td>{$row['NumDocentiAccompagnatori']}</td>";
                                         echo "<td>$mezzo</td>";
-                                        echo "<td>€ $costo</td>";
+                                        echo "<td>&euro; $costo</td>";
                                         echo "<td>$dataInvio</td>";
                                         echo "<td class='azioni-cell'>";
-                                        echo "<button class='xs btn-approva' title='Approva' onclick=\"prepareAction($idGita, '$destEscaped', 'approva')\">Approva</button> ";
-                                        echo "<button class='xs btn-boccia' title='Boccia' onclick=\"prepareAction($idGita, '$destEscaped', 'boccia')\">Boccia</button>";
+                                        echo "<button class='xs btn-approva' onclick=\"preparaAzione($idGita, '$destinazioneSicura', 'approva')\">Approva</button> ";
+                                        echo "<button class='xs btn-boccia' onclick=\"preparaAzione($idGita, '$destinazioneSicura', 'boccia')\">Boccia</button>";
                                         echo "</td>";
                                         echo "</tr>";
                                     }
@@ -200,8 +193,8 @@
     </div>
 
     <script>
-        function prepareAction(id, dest, type) {
-            if (type === 'approva') {
+        function preparaAzione(id, dest, tipo) {
+            if (tipo === 'approva') {
                 document.getElementById('approvaGitaId').value = id;
                 document.getElementById('approvaDestLabel').innerText = dest;
                 openModal('modalApprova');

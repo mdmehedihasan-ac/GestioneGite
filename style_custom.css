@@ -67,6 +67,10 @@ header h2 {
     width: 95%;
 }
 
+.modal-successo {
+    display: flex;
+    z-index: 10000;
+}
 
 .form-grid {
     display: grid;

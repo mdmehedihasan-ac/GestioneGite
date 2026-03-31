@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestione Gite - In Programma</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="vetrina.css">
     <link rel="stylesheet" href="style_custom.css">
@@ -40,45 +39,29 @@
                         </thead>
                         <tbody>
                             <?php
-                                $query = "
-                                    SELECT g.*, p.Destinazione, s.Stato 
-                                    FROM gitaorganizzata g 
-                                    JOIN propostagita p ON g.IDProposta = p.IDProposta 
-                                    JOIN statogita s ON g.IDStato = s.IDStato 
-                                    ORDER BY g.DataInizio ASC
-                                ";
-                                $result = mysqli_query($conn, $query);
+                                $query = "SELECT g.*, p.Destinazione, s.Stato FROM gitaorganizzata g JOIN propostagita p ON g.IDProposta = p.IDProposta JOIN statogita s ON g.IDStato = s.IDStato ORDER BY g.DataInizio ASC";
+                                $risultato = mysqli_query($conn, $query);
 
-                                if (mysqli_num_rows($result) > 0) {
-                                    while ($row = mysqli_fetch_assoc($result)) {
-                                      
+                                if (mysqli_num_rows($risultato) > 0) {
+                                    while ($row = mysqli_fetch_assoc($risultato)) {
                                         $dataInizio = date('d/m/Y', strtotime($row['DataInizio']));
                                         $dataFine = date('d/m/Y', strtotime($row['DataFine']));
-                                        
-                                   
-                                        $badgeClass = 'badge-secondary';
-                                        if ($row['Stato'] == 'Approvata'){
-                                            $badgeClass = 'badge-success';
-                                        } 
-                                        if ($row['Stato'] == 'Inserita'){
-                                            $badgeClass = 'badge-warning';
-                                        }
-                                        if ($row['Stato'] == 'Conclusa'){
-                                            $badgeClass = 'badge-primary';
-                                        }
-                                        if ($row['Stato'] == 'NonApprovata'){
-                                            $badgeClass = 'badge-danger';
-                                        }
-                                        
+
+                                        $classeBadge = 'badge-secondary';
+                                        if ($row['Stato'] == 'Approvata') $classeBadge = 'badge-success';
+                                        if ($row['Stato'] == 'Inserita') $classeBadge = 'badge-warning';
+                                        if ($row['Stato'] == 'Conclusa') $classeBadge = 'badge-primary';
+                                        if ($row['Stato'] == 'NonApprovata') $classeBadge = 'badge-danger';
+
                                         echo "<tr>";
                                         echo "<td>" . htmlspecialchars($row['Destinazione']) . "</td>";
                                         echo "<td>" . $dataInizio . "</td>";
                                         echo "<td>" . $dataFine . "</td>";
-                                        echo "<td>" . htmlspecialchars($row['NumAlunni']) . "</td>";
-                                        echo "<td>" . htmlspecialchars($row['NumDocentiAccompagnatori']) . "</td>";
-                                        echo "<td>€ " . number_format($row['CostoTot'], 2, ',', '.') . "</td>";
-                                        echo "<td><span class='badge {$badgeClass}'>" . htmlspecialchars($row['Stato']) . "</span></td>";
-                                        echo "<td><button class='xs outline' onclick='alert(\"Dettagli in via di sviluppo\")'>Dettagli</button></td>";
+                                        echo "<td>" . $row['NumAlunni'] . "</td>";
+                                        echo "<td>" . $row['NumDocentiAccompagnatori'] . "</td>";
+                                        echo "<td>&euro; " . number_format($row['CostoTot'], 2, ',', '.') . "</td>";
+                                        echo "<td><span class='badge $classeBadge'>" . htmlspecialchars($row['Stato']) . "</span></td>";
+                                        echo "<td><button class='xs outline'>Dettagli</button></td>";
                                         echo "</tr>";
                                     }
                                 } else {

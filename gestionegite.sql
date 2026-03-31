@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Creato il: Feb 27, 2026 alle 09:14
+-- Creato il: Mar 27, 2026 alle 09:41
 -- Versione del server: 10.4.32-MariaDB
 -- Versione PHP: 8.0.30
 
@@ -40,6 +40,14 @@ CREATE TABLE `gitaorganizzata` (
   `IDStato` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dump dei dati per la tabella `gitaorganizzata`
+--
+
+INSERT INTO `gitaorganizzata` (`IDGita`, `IDProposta`, `IDUtente`, `DataInizio`, `DataFine`, `NumAlunni`, `NumDocentiAccompagnatori`, `NumAlunniDisabili`, `CostoTot`, `IDStato`) VALUES
+(3, 3, 1, '2026-05-10', '2026-05-13', 85, 6, 2, 15300.00, 3),
+(4, 4, 1, '2025-11-20', '2025-11-20', 38, 2, 1, 190.00, 5);
+
 -- --------------------------------------------------------
 
 --
@@ -56,6 +64,17 @@ CREATE TABLE `propostagita` (
   `Costo` decimal(10,2) NOT NULL,
   `IDUtente` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dump dei dati per la tabella `propostagita`
+--
+
+INSERT INTO `propostagita` (`IDProposta`, `Destinazione`, `MezzoDiTrasporto`, `Periodo`, `MinPartecipanti`, `MaxPartecipanti`, `Costo`, `IDUtente`) VALUES
+(3, 'CERN di Ginevra (Liceo Scienze Applicate)', 'Pullman', 'Marzo 2026', 40, 50, 120.00, 1),
+(4, 'SMAU Milano (Classi 5A e 5B Informatica)', 'Treno', 'Ottobre 2025', 30, 60, 45.00, 1),
+(5, 'Roma - Fori Imperiali (Triennio)', 'Treno', 'Maggio 2026', 45, 100, 180.00, 1),
+(6, 'IIT Genova - Morego (Classi 3A Elettrotecnica)', 'Autobus', 'Novembre 2025', 15, 40, 1000.00, 1),
+(7, 'Roma - Musei Vaticani', 'Nave', 'Novembre 2025', 23, 45, 123.00, 1);
 
 -- --------------------------------------------------------
 
@@ -115,6 +134,13 @@ CREATE TABLE `utente` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
+-- Dump dei dati per la tabella `utente`
+--
+
+INSERT INTO `utente` (`IDUtente`, `Nome`, `Cognome`, `Mail`, `Password`, `IDTipo`) VALUES
+(1, 'elisa', 'stanizzi', 'elisa.stanizzi.2007@calvino.edu.it', '$2y$10$PZt7aoV4cgla70ditsreVeNCs0gjmjVqSgd49VS5/6PUdyqs75nc.', 2);
+
+--
 -- Indici per le tabelle scaricate
 --
 
@@ -162,13 +188,13 @@ ALTER TABLE `utente`
 -- AUTO_INCREMENT per la tabella `gitaorganizzata`
 --
 ALTER TABLE `gitaorganizzata`
-  MODIFY `IDGita` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `IDGita` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT per la tabella `propostagita`
 --
 ALTER TABLE `propostagita`
-  MODIFY `IDProposta` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `IDProposta` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT per la tabella `statogita`
@@ -186,7 +212,7 @@ ALTER TABLE `tipoutente`
 -- AUTO_INCREMENT per la tabella `utente`
 --
 ALTER TABLE `utente`
-  MODIFY `IDUtente` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `IDUtente` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- Limiti per le tabelle scaricate

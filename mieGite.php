@@ -29,7 +29,7 @@
                 <h2 style="margin-bottom: 1rem; color: var(--blue-700);">Gite create da me</h2>
                 <div class="miegite-grid">
                     <?php 
-                        $queryMie = "
+                        $query = "
                             SELECT g.*, p.Destinazione, s.Stato 
                             FROM gitaorganizzata g 
                             JOIN propostagita p ON g.IDProposta = p.IDProposta 
@@ -37,20 +37,18 @@
                             WHERE g.IDUtente = $idUtenteLoggato
                             ORDER BY g.DataInizio ASC
                         ";
-                        $resultMie = mysqli_query($conn, $queryMie);
+                        $risultatoMie = mysqli_query($conn, $query);
 
-                        if (mysqli_num_rows($resultMie) > 0) {
-                            while ($row = mysqli_fetch_assoc($resultMie)) {
+                        if (mysqli_num_rows($risultatoMie) > 0) {
+                            while ($row = mysqli_fetch_assoc($risultatoMie)) {
                                 $dataInizio = date('d/m/Y', strtotime($row['DataInizio']));
                                 $dataFine = date('d/m/Y', strtotime($row['DataFine']));
                                 
-                                $badgeClass = 'badge-secondary';
-                                if ($row['Stato'] == 'Approvata') $badgeClass = 'badge-success';
-                                if ($row['Stato'] == 'Inserita') $badgeClass = 'badge-warning';
-                                if ($row['Stato'] == 'Conclusa') $badgeClass = 'badge-primary';
-                                if ($row['Stato'] == 'NonApprovata') $badgeClass = 'badge-danger';
-                                
-                                $mezzo = htmlspecialchars($row['Destinazione']); // Semplicemente destinazione
+                                $classeBadge = 'badge-secondary';
+                                if ($row['Stato'] == 'Approvata') $classeBadge = 'badge-success';
+                                if ($row['Stato'] == 'Inserita') $classeBadge = 'badge-warning';
+                                if ($row['Stato'] == 'Conclusa') $classeBadge = 'badge-primary';
+                                if ($row['Stato'] == 'NonApprovata') $classeBadge = 'badge-danger';
                                 ?>
                                 <div class="miegite-card" <?php 
                                      echo 'data-dest="' . htmlspecialchars($row['Destinazione']) . '" ';
@@ -66,7 +64,7 @@
                                 ?>>
                                     <div class="miegite-card-header">
                                         <h3 class="miegite-card-title"><?php echo htmlspecialchars($row['Destinazione']); ?></h3>
-                                        <span class="badge <?php echo $badgeClass; ?>"><?php echo htmlspecialchars($row['Stato']); ?></span>
+                                        <span class="badge <?php echo $classeBadge; ?>"><?php echo htmlspecialchars($row['Stato']); ?></span>
                                     </div>
                                     <div class="miegite-card-body">
                                         <div class="miegite-card-info">
@@ -93,7 +91,45 @@
             <div style="margin-top: 3rem;">
                 <h2 style="margin-bottom: 1rem; color: var(--blue-700);">Gite a cui partecipo</h2>
                 <div class="miegite-grid">
-                    <p style="color: grey;">Nessuna gita a cui partecipi al momento.</p>
+                    <?php
+                        $query = "SELECT g.*, p.Destinazione, s.Stato FROM gitaorganizzata g JOIN propostagita p ON g.IDProposta = p.IDProposta JOIN statogita s ON g.IDStato = s.IDStato WHERE g.IDUtente = $idUtenteLoggato AND g.IDStato = 5 ORDER BY g.DataInizio ASC";
+                        $risultatoPartecipo = mysqli_query($conn, $query);
+
+                        if (mysqli_num_rows($risultatoPartecipo) > 0) {
+                            while ($row = mysqli_fetch_assoc($risultatoPartecipo)) {
+                                $dataInizio = date('d/m/Y', strtotime($row['DataInizio']));
+                                $dataFine = date('d/m/Y', strtotime($row['DataFine']));
+                                ?>
+                                <div class="miegite-card"
+                                    data-dest="<?php echo htmlspecialchars($row['Destinazione']); ?>"
+                                    data-stato="<?php echo htmlspecialchars($row['Stato']); ?>"
+                                    data-inizio="<?php echo $dataInizio; ?>"
+                                    data-fine="<?php echo $dataFine; ?>"
+                                    data-alunni="<?php echo $row['NumAlunni']; ?>"
+                                    data-docenti="<?php echo $row['NumDocentiAccompagnatori']; ?>"
+                                    data-costo="<?php echo number_format($row['CostoTot'], 2, ',', '.'); ?>"
+                                    data-mezzo="" data-classe="" data-note="">
+                                    <div class="miegite-card-header">
+                                        <h3 class="miegite-card-title"><?php echo htmlspecialchars($row['Destinazione']); ?></h3>
+                                        <span class="badge badge-primary"><?php echo htmlspecialchars($row['Stato']); ?></span>
+                                    </div>
+                                    <div class="miegite-card-body">
+                                        <div class="miegite-card-info">
+                                            <span><strong>Date:</strong> <?php echo $dataInizio . ' &#8211; ' . $dataFine; ?></span>
+                                            <span><strong>Partecipanti:</strong> <?php echo $row['NumAlunni'] . ' alunni, ' . $row['NumDocentiAccompagnatori'] . ' docenti'; ?></span>
+                                            <span><strong>Costo:</strong> &#8364; <?php echo number_format($row['CostoTot'], 2, ',', '.'); ?></span>
+                                        </div>
+                                    </div>
+                                    <div class="miegite-card-footer">
+                                        <button class="xs outline btn-dettagli-gita">Dettagli</button>
+                                    </div>
+                                </div>
+                                <?php
+                            }
+                        } else {
+                            echo "<p>Nessuna gita organizzata al momento.</p>";
+                        }
+                    ?>
                 </div>
             </div>
 
