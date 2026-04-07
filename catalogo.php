@@ -58,18 +58,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
         $idProposta = $_POST['idProposta'] ?? 0;
         $dataInizio = $_POST['dataInizio'] ?? '';
         $dataFine = $_POST['dataFine'] ?? '';
-        $alunni = $_POST['alunni'] ?? 0;
-        $docenti = $_POST['docenti'] ?? 0;
+        $alunni = intval($_POST['alunni'] ?? 0);
+        $alunniDisabili = intval($_POST['alunniDisabili'] ?? 0);
+        $docenti = intval($_POST['docenti'] ?? 0);
+        $classi = $_POST['classi'] ?? '';
+        $orarioPartenza = $_POST['orarioPartenza'] ?? null;
+        $orarioArrivo = $_POST['orarioArrivo'] ?? null;
+        $costoMezzi = floatval($_POST['costoMezzi'] ?? 0);
+        $costoAttivita = floatval($_POST['costoAttivita'] ?? 0);
         $idUtente = $_SESSION['id_utente'] ?? 0;
 
         $queryProp = "SELECT Costo FROM propostagita WHERE IDProposta = $idProposta";
         $resProp = mysqli_query($conn, $queryProp);
         $rigaProp = mysqli_fetch_assoc($resProp);
-        $costoTotale = $rigaProp['Costo'] * $alunni;
+        $costoTotale = ($rigaProp['Costo'] * $alunni) + $costoMezzi + $costoAttivita;
         $statoOrganizzata = 5;
 
-        $istr = mysqli_prepare($conn, "INSERT INTO gitaorganizzata (IDProposta, IDUtente, DataInizio, DataFine, NumAlunni, NumDocentiAccompagnatori, CostoTot, IDStato) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-        mysqli_stmt_bind_param($istr, "iissiidi", $idProposta, $idUtente, $dataInizio, $dataFine, $alunni, $docenti, $costoTotale, $statoOrganizzata);
+        $istr = mysqli_prepare($conn, "INSERT INTO gitaorganizzata (IDProposta, IDUtente, DataInizio, DataFine, NumAlunni, NumDocentiAccompagnatori, NumAlunniDisabili, CostoTot, IDStato, OrarioPartenza, OrarioArrivo, CostoMezzi, CostoAttivita, ClassiPartecipanti) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        mysqli_stmt_bind_param($istr, "iissiiididdsss", $idProposta, $idUtente, $dataInizio, $dataFine, $alunni, $docenti, $alunniDisabili, $costoTotale, $statoOrganizzata, $orarioPartenza, $orarioArrivo, $costoMezzi, $costoAttivita, $classi);
 
         if (mysqli_stmt_execute($istr)) {
             $messaggio = "<div style='background-color: #d4edda; color: #155724; padding: 10px; margin-bottom: 20px; border-radius: 5px;'>Gita organizzata con successo!</div>";
@@ -275,12 +281,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
                             <input type="date" id="dataFine" name="dataFine" required>
                         </div>
                         <div class="form-group">
+                            <label for="orarioPartenza">Orario Partenza</label>
+                            <input type="time" id="orarioPartenza" name="orarioPartenza">
+                        </div>
+                        <div class="form-group">
+                            <label for="orarioArrivo">Orario Arrivo</label>
+                            <input type="time" id="orarioArrivo" name="orarioArrivo">
+                        </div>
+                        <div class="form-group">
                             <label for="alunni">Numero Alunni</label>
-                            <input type="number" id="alunni" name="alunni" placeholder="es. 30" required>
+                            <input type="number" id="alunni" name="alunni" placeholder="es. 30" required min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="alunniDisabili">di cui Disabili</label>
+                            <input type="number" id="alunniDisabili" name="alunniDisabili" placeholder="es. 2" min="0" value="0">
                         </div>
                         <div class="form-group">
                             <label for="docenti">Numero Docenti</label>
-                            <input type="number" id="docenti" name="docenti" placeholder="es. 3" required>
+                            <input type="number" id="docenti" name="docenti" placeholder="es. 3" required min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="classi">Classi Partecipanti</label>
+                            <input type="text" id="classi" name="classi" placeholder="es. 5A, 5B, 4A">
+                        </div>
+                        <div class="form-group">
+                            <label for="costoMezzi">Costo Mezzi (&euro;)</label>
+                            <input type="number" step="0.01" id="costoMezzi" name="costoMezzi" placeholder="0" min="0" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="costoAttivita">Costo Attivit&agrave; (&euro;)</label>
+                            <input type="number" step="0.01" id="costoAttivita" name="costoAttivita" placeholder="0" min="0" value="0">
                         </div>
                     </form>
                 </div>
