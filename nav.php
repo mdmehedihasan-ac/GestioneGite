@@ -20,10 +20,10 @@
         exit;
     }
 ?>
-<!-- Nav Header: centralizzata per permettere il controllo dei ruoli e il corretto caricamento JS -->
+
 <header>
     <div class="header-container header-left" style="flex: 1; flex-basis: 0;">
-        <h2>GestioneGite</h2>
+        <h2>Gestione Gite</h2>
     </div>
     
     <nav class="header-nav">

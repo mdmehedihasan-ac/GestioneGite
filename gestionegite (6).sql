@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Creato il: Apr 07, 2026 alle 12:34
+-- Creato il: Apr 08, 2026 alle 14:46
 -- Versione del server: 10.4.32-MariaDB
 -- Versione PHP: 8.0.30
 
@@ -29,33 +29,30 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `gitaorganizzata` (
   `IDGita` int(11) NOT NULL,
-  `IDProposta` int(11) NOT NULL,
   `IDUtente` int(11) NOT NULL,
-  `DataInizio` date NOT NULL,
-  `DataFine` date NOT NULL,
-  `NumAlunni` int(11) NOT NULL,
-  `NumDocentiAccompagnatori` int(11) NOT NULL,
-  `NumAlunniDisabili` int(11) NOT NULL DEFAULT 0,
-  `CostoTot` decimal(10,2) NOT NULL,
-  `IDStato` int(11) NOT NULL,
+  `DataInizio` date DEFAULT NULL,
+  `DataFine` date DEFAULT NULL,
+  `NumAlunni` int(11) DEFAULT NULL,
+  `NumDocentiAccompagnatori` int(11) DEFAULT NULL,
+  `NumAlunniDisabili` int(11) DEFAULT 0,
+  `CostoTot` decimal(10,2) DEFAULT NULL,
+  `IDStato` int(11) DEFAULT NULL,
   `OrarioPartenza` time DEFAULT NULL COMMENT 'Orario di partenza della gita',
   `OrarioArrivo` time DEFAULT NULL COMMENT 'Orario di arrivo della gita',
-  `CostoMezzi` decimal(10,2) NOT NULL DEFAULT 0.00 COMMENT 'Costo dei mezzi di trasporto',
-  `CostoAttivita` decimal(10,2) NOT NULL DEFAULT 0.00 COMMENT 'Costo delle attività previste',
+  `CostoMezzi` decimal(10,2) DEFAULT 0.00 COMMENT 'Costo dei mezzi di trasporto',
+  `CostoAttivita` decimal(10,2) DEFAULT 0.00 COMMENT 'Costo delle attività previste',
   `ClassiPartecipanti` varchar(255) DEFAULT NULL COMMENT 'Classi che partecipano (es. 5A, 5B)',
-  `NumManleveConsegnate` int(11) NOT NULL DEFAULT 0 COMMENT 'Numero di manleve consegnate, se necessarie'
+  `NumManleveConsegnate` int(11) DEFAULT 0 COMMENT 'Numero di manleve consegnate, se necessarie'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dump dei dati per la tabella `gitaorganizzata`
 --
 
-INSERT INTO `gitaorganizzata` (`IDGita`, `IDProposta`, `IDUtente`, `DataInizio`, `DataFine`, `NumAlunni`, `NumDocentiAccompagnatori`, `NumAlunniDisabili`, `CostoTot`, `IDStato`, `OrarioPartenza`, `OrarioArrivo`, `CostoMezzi`, `CostoAttivita`, `ClassiPartecipanti`, `NumManleveConsegnate`) VALUES
-(3, 3, 1, '2026-05-10', '2026-05-13', 85, 6, 2, 15300.00, 3, NULL, NULL, 0.00, 0.00, NULL, 0),
-(4, 4, 1, '2025-11-20', '2025-11-20', 38, 2, 1, 190.00, 5, NULL, NULL, 0.00, 0.00, NULL, 0),
-(5, 8, 1, '2026-04-07', '2026-04-07', 0, 0, 0, 234234.00, 2, NULL, NULL, 0.00, 0.00, NULL, 0),
-(6, 8, 1, '2026-04-29', '2026-05-07', 45, 3, 0, 10540530.00, 5, NULL, NULL, 0.00, 0.00, NULL, 0),
-(7, 9, 1, '2026-04-07', '2026-04-07', 0, 0, 0, 12.00, 3, NULL, NULL, 0.00, 0.00, NULL, 0);
+INSERT INTO `gitaorganizzata` (`IDGita`, `IDUtente`, `DataInizio`, `DataFine`, `NumAlunni`, `NumDocentiAccompagnatori`, `NumAlunniDisabili`, `CostoTot`, `IDStato`, `OrarioPartenza`, `OrarioArrivo`, `CostoMezzi`, `CostoAttivita`, `ClassiPartecipanti`, `NumManleveConsegnate`) VALUES
+(8, 1, '2026-04-08', '2026-04-08', 0, 0, 0, 6546.00, 2, NULL, NULL, 0.00, 0.00, NULL, 0),
+(9, 1, '2026-04-09', '2026-04-18', 36, 453, 543, 236046.00, 5, '00:00:14', '00:00:14', 45.00, 345.00, '5AII, 5BII', 0),
+(10, 1, '2026-04-08', '2026-04-08', 0, 0, 0, 0.00, 1, NULL, NULL, 0.00, 0.00, NULL, 0);
 
 -- --------------------------------------------------------
 
@@ -72,35 +69,12 @@ CREATE TABLE `partecipanti` (
   `Descrizione` text DEFAULT NULL COMMENT 'Eventuali note o descrizioni'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
-
 --
--- Struttura della tabella `propostagita`
+-- Dump dei dati per la tabella `partecipanti`
 --
 
-CREATE TABLE `propostagita` (
-  `IDProposta` int(11) NOT NULL,
-  `Destinazione` varchar(100) NOT NULL,
-  `MezzoDiTrasporto` varchar(50) NOT NULL,
-  `Periodo` varchar(50) NOT NULL,
-  `MinPartecipanti` int(11) NOT NULL,
-  `MaxPartecipanti` int(11) NOT NULL,
-  `Costo` decimal(10,2) NOT NULL,
-  `IDUtente` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dump dei dati per la tabella `propostagita`
---
-
-INSERT INTO `propostagita` (`IDProposta`, `Destinazione`, `MezzoDiTrasporto`, `Periodo`, `MinPartecipanti`, `MaxPartecipanti`, `Costo`, `IDUtente`) VALUES
-(3, 'CERN di Ginevra (Liceo Scienze Applicate)', 'Pullman', 'Marzo 2026', 40, 50, 120.00, 1),
-(4, 'SMAU Milano (Classi 5A e 5B Informatica)', 'Treno', 'Ottobre 2025', 30, 60, 45.00, 1),
-(5, 'Roma - Fori Imperiali (Triennio)', 'Treno', 'Maggio 2026', 45, 100, 180.00, 1),
-(6, 'IIT Genova - Morego (Classi 3A Elettrotecnica)', 'Autobus', 'Novembre 2025', 15, 40, 1000.00, 1),
-(7, 'Roma - Musei Vaticani', 'Nave', 'Novembre 2025', 23, 45, 123.00, 1),
-(8, 'Napoli e Pompei', 'Treno', 'Maggio', 3, 34, 234234.00, 1),
-(9, 'Genova', 'Autobus', 'gennaio', 34, 768, 12.00, 1);
+INSERT INTO `partecipanti` (`IDPartecipante`, `IDGita`, `Nome`, `Cognome`, `Classe`, `Descrizione`) VALUES
+(3, 9, 'bnlh', 'jgk', 'gh', 'jghjg');
 
 -- --------------------------------------------------------
 
@@ -110,7 +84,7 @@ INSERT INTO `propostagita` (`IDProposta`, `Destinazione`, `MezzoDiTrasporto`, `P
 
 CREATE TABLE `statogita` (
   `IDStato` int(11) NOT NULL,
-  `Stato` enum('Bozza','Inserita','Approvata','NonApprovata','Organizzata','Conclusa') NOT NULL
+  `Stato` enum('Bozza','Approvata','Bocciata','Organizzazione','Conclusa') NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -119,11 +93,10 @@ CREATE TABLE `statogita` (
 
 INSERT INTO `statogita` (`IDStato`, `Stato`) VALUES
 (1, 'Bozza'),
-(2, 'Inserita'),
-(3, 'Approvata'),
-(4, 'NonApprovata'),
-(5, 'Organizzata'),
-(6, 'Conclusa');
+(2, 'Approvata'),
+(3, 'Bocciata'),
+(4, 'Organizzazione'),
+(5, 'Conclusa');
 
 -- --------------------------------------------------------
 
@@ -175,7 +148,6 @@ INSERT INTO `utente` (`IDUtente`, `Nome`, `Cognome`, `Mail`, `Password`, `IDTipo
 --
 ALTER TABLE `gitaorganizzata`
   ADD PRIMARY KEY (`IDGita`),
-  ADD KEY `IDProposta` (`IDProposta`),
   ADD KEY `IDUtente` (`IDUtente`),
   ADD KEY `IDStato` (`IDStato`);
 
@@ -185,13 +157,6 @@ ALTER TABLE `gitaorganizzata`
 ALTER TABLE `partecipanti`
   ADD PRIMARY KEY (`IDPartecipante`),
   ADD KEY `IDGita` (`IDGita`);
-
---
--- Indici per le tabelle `propostagita`
---
-ALTER TABLE `propostagita`
-  ADD PRIMARY KEY (`IDProposta`),
-  ADD KEY `IDUtente` (`IDUtente`);
 
 --
 -- Indici per le tabelle `statogita`
@@ -221,19 +186,13 @@ ALTER TABLE `utente`
 -- AUTO_INCREMENT per la tabella `gitaorganizzata`
 --
 ALTER TABLE `gitaorganizzata`
-  MODIFY `IDGita` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `IDGita` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT per la tabella `partecipanti`
 --
 ALTER TABLE `partecipanti`
-  MODIFY `IDPartecipante` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT per la tabella `propostagita`
---
-ALTER TABLE `propostagita`
-  MODIFY `IDProposta` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `IDPartecipante` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT per la tabella `statogita`
@@ -261,7 +220,6 @@ ALTER TABLE `utente`
 -- Limiti per la tabella `gitaorganizzata`
 --
 ALTER TABLE `gitaorganizzata`
-  ADD CONSTRAINT `gitaorganizzata_ibfk_1` FOREIGN KEY (`IDProposta`) REFERENCES `propostagita` (`IDProposta`),
   ADD CONSTRAINT `gitaorganizzata_ibfk_2` FOREIGN KEY (`IDUtente`) REFERENCES `utente` (`IDUtente`),
   ADD CONSTRAINT `gitaorganizzata_ibfk_3` FOREIGN KEY (`IDStato`) REFERENCES `statogita` (`IDStato`);
 
@@ -270,12 +228,6 @@ ALTER TABLE `gitaorganizzata`
 --
 ALTER TABLE `partecipanti`
   ADD CONSTRAINT `partecipanti_ibfk_1` FOREIGN KEY (`IDGita`) REFERENCES `gitaorganizzata` (`IDGita`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Limiti per la tabella `propostagita`
---
-ALTER TABLE `propostagita`
-  ADD CONSTRAINT `propostagita_ibfk_1` FOREIGN KEY (`IDUtente`) REFERENCES `utente` (`IDUtente`);
 
 --
 -- Limiti per la tabella `utente`
