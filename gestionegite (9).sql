@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Creato il: Apr 08, 2026 alle 14:46
+-- Creato il: Apr 10, 2026 alle 08:54
 -- Versione del server: 10.4.32-MariaDB
 -- Versione PHP: 8.0.30
 
@@ -24,35 +24,41 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Struttura della tabella `gitaorganizzata`
+-- Struttura della tabella `gita1g`
 --
 
-CREATE TABLE `gitaorganizzata` (
-  `IDGita` int(11) NOT NULL,
-  `IDUtente` int(11) NOT NULL,
-  `DataInizio` date DEFAULT NULL,
-  `DataFine` date DEFAULT NULL,
-  `NumAlunni` int(11) DEFAULT NULL,
-  `NumDocentiAccompagnatori` int(11) DEFAULT NULL,
-  `NumAlunniDisabili` int(11) DEFAULT 0,
-  `CostoTot` decimal(10,2) DEFAULT NULL,
-  `IDStato` int(11) DEFAULT NULL,
-  `OrarioPartenza` time DEFAULT NULL COMMENT 'Orario di partenza della gita',
-  `OrarioArrivo` time DEFAULT NULL COMMENT 'Orario di arrivo della gita',
-  `CostoMezzi` decimal(10,2) DEFAULT 0.00 COMMENT 'Costo dei mezzi di trasporto',
-  `CostoAttivita` decimal(10,2) DEFAULT 0.00 COMMENT 'Costo delle attività previste',
-  `ClassiPartecipanti` varchar(255) DEFAULT NULL COMMENT 'Classi che partecipano (es. 5A, 5B)',
-  `NumManleveConsegnate` int(11) DEFAULT 0 COMMENT 'Numero di manleve consegnate, se necessarie'
+CREATE TABLE `gita1g` (
+  `idGita` int(11) NOT NULL,
+  `idUtente` int(11) NOT NULL,
+  `destinazione` varchar(255) NOT NULL,
+  `mezzo` varchar(100) DEFAULT NULL,
+  `periodo` varchar(100) DEFAULT NULL,
+  `giorno` date DEFAULT NULL,
+  `costoMezzo` decimal(10,2) DEFAULT NULL,
+  `costoAttivita` decimal(10,2) DEFAULT NULL,
+  `costoAPersona` decimal(10,2) DEFAULT NULL,
+  `numAlunni` int(11) DEFAULT NULL,
+  `idStato` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- --------------------------------------------------------
+
 --
--- Dump dei dati per la tabella `gitaorganizzata`
+-- Struttura della tabella `gite5`
 --
 
-INSERT INTO `gitaorganizzata` (`IDGita`, `IDUtente`, `DataInizio`, `DataFine`, `NumAlunni`, `NumDocentiAccompagnatori`, `NumAlunniDisabili`, `CostoTot`, `IDStato`, `OrarioPartenza`, `OrarioArrivo`, `CostoMezzi`, `CostoAttivita`, `ClassiPartecipanti`, `NumManleveConsegnate`) VALUES
-(8, 1, '2026-04-08', '2026-04-08', 0, 0, 0, 6546.00, 2, NULL, NULL, 0.00, 0.00, NULL, 0),
-(9, 1, '2026-04-09', '2026-04-18', 36, 453, 543, 236046.00, 5, '00:00:14', '00:00:14', 45.00, 345.00, '5AII, 5BII', 0),
-(10, 1, '2026-04-08', '2026-04-08', 0, 0, 0, 0.00, 1, NULL, NULL, 0.00, 0.00, NULL, 0);
+CREATE TABLE `gite5` (
+  `idGita` int(11) NOT NULL,
+  `idUtente` int(11) NOT NULL,
+  `destinazione` varchar(255) NOT NULL,
+  `mezzo` varchar(100) DEFAULT NULL,
+  `periodo` varchar(100) DEFAULT NULL,
+  `giornoInizio` date DEFAULT NULL,
+  `giornoFine` date DEFAULT NULL,
+  `costoAPersona` decimal(10,2) DEFAULT NULL,
+  `numAlunni` int(11) DEFAULT NULL,
+  `idStato` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -61,20 +67,16 @@ INSERT INTO `gitaorganizzata` (`IDGita`, `IDUtente`, `DataInizio`, `DataFine`, `
 --
 
 CREATE TABLE `partecipanti` (
-  `IDPartecipante` int(11) NOT NULL,
-  `IDGita` int(11) NOT NULL COMMENT 'Riferimento alla gita organizzata',
-  `Nome` varchar(50) NOT NULL,
-  `Cognome` varchar(50) NOT NULL,
-  `Classe` varchar(10) NOT NULL COMMENT 'Classe del partecipante (es. 5A)',
-  `Descrizione` text DEFAULT NULL COMMENT 'Eventuali note o descrizioni'
+  `id` int(11) NOT NULL,
+  `idgita` int(11) NOT NULL,
+  `nome` varchar(50) NOT NULL,
+  `cognome` varchar(50) NOT NULL,
+  `classe` varchar(10) NOT NULL,
+  `descrizione` text DEFAULT NULL,
+  `documento` varchar(50) DEFAULT NULL,
+  `nDocumento` varchar(50) DEFAULT NULL,
+  `scadenza` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dump dei dati per la tabella `partecipanti`
---
-
-INSERT INTO `partecipanti` (`IDPartecipante`, `IDGita`, `Nome`, `Cognome`, `Classe`, `Descrizione`) VALUES
-(3, 9, 'bnlh', 'jgk', 'gh', 'jghjg');
 
 -- --------------------------------------------------------
 
@@ -144,19 +146,27 @@ INSERT INTO `utente` (`IDUtente`, `Nome`, `Cognome`, `Mail`, `Password`, `IDTipo
 --
 
 --
--- Indici per le tabelle `gitaorganizzata`
+-- Indici per le tabelle `gita1g`
 --
-ALTER TABLE `gitaorganizzata`
-  ADD PRIMARY KEY (`IDGita`),
-  ADD KEY `IDUtente` (`IDUtente`),
-  ADD KEY `IDStato` (`IDStato`);
+ALTER TABLE `gita1g`
+  ADD PRIMARY KEY (`idGita`),
+  ADD KEY `fk_gita1g_utente` (`idUtente`),
+  ADD KEY `fk_gita1g_stato` (`idStato`);
+
+--
+-- Indici per le tabelle `gite5`
+--
+ALTER TABLE `gite5`
+  ADD PRIMARY KEY (`idGita`),
+  ADD KEY `fk_gite5_utente` (`idUtente`),
+  ADD KEY `fk_gite5_stato` (`idStato`);
 
 --
 -- Indici per le tabelle `partecipanti`
 --
 ALTER TABLE `partecipanti`
-  ADD PRIMARY KEY (`IDPartecipante`),
-  ADD KEY `IDGita` (`IDGita`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_partecipanti_gite5` (`idgita`);
 
 --
 -- Indici per le tabelle `statogita`
@@ -183,16 +193,22 @@ ALTER TABLE `utente`
 --
 
 --
--- AUTO_INCREMENT per la tabella `gitaorganizzata`
+-- AUTO_INCREMENT per la tabella `gita1g`
 --
-ALTER TABLE `gitaorganizzata`
-  MODIFY `IDGita` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+ALTER TABLE `gita1g`
+  MODIFY `idGita` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT per la tabella `gite5`
+--
+ALTER TABLE `gite5`
+  MODIFY `idGita` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT per la tabella `partecipanti`
 --
 ALTER TABLE `partecipanti`
-  MODIFY `IDPartecipante` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT per la tabella `statogita`
@@ -217,17 +233,24 @@ ALTER TABLE `utente`
 --
 
 --
--- Limiti per la tabella `gitaorganizzata`
+-- Limiti per la tabella `gita1g`
 --
-ALTER TABLE `gitaorganizzata`
-  ADD CONSTRAINT `gitaorganizzata_ibfk_2` FOREIGN KEY (`IDUtente`) REFERENCES `utente` (`IDUtente`),
-  ADD CONSTRAINT `gitaorganizzata_ibfk_3` FOREIGN KEY (`IDStato`) REFERENCES `statogita` (`IDStato`);
+ALTER TABLE `gita1g`
+  ADD CONSTRAINT `fk_gita1g_stato` FOREIGN KEY (`idStato`) REFERENCES `statogita` (`IDStato`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_gita1g_utente` FOREIGN KEY (`idUtente`) REFERENCES `utente` (`IDUtente`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Limiti per la tabella `gite5`
+--
+ALTER TABLE `gite5`
+  ADD CONSTRAINT `fk_gite5_stato` FOREIGN KEY (`idStato`) REFERENCES `statogita` (`IDStato`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_gite5_utente` FOREIGN KEY (`idUtente`) REFERENCES `utente` (`IDUtente`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Limiti per la tabella `partecipanti`
 --
 ALTER TABLE `partecipanti`
-  ADD CONSTRAINT `partecipanti_ibfk_1` FOREIGN KEY (`IDGita`) REFERENCES `gitaorganizzata` (`IDGita`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `fk_partecipanti_gite5` FOREIGN KEY (`idgita`) REFERENCES `gite5` (`idGita`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Limiti per la tabella `utente`
