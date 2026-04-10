@@ -89,17 +89,17 @@ $risultatoProposte = mysqli_query($conn, "SELECT g.*, u.Nome AS NomeUtente, u.Co
 <body>
 <div class="container">
 <main class="content bozze-padding">
-<div class="hero-section" style="display:flex;justify-content:space-between;align-items:flex-end;">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;">
     <div>
-        <h2 style="margin-bottom:0.5rem;color:var(--blue-700);">Catalogo Proposte</h2>
-        <p>Proposte approvate disponibili per l'organizzazione.</p>
+        <h2 style="margin-bottom:0.25rem;color:var(--blue-700);">Catalogo Proposte</h2>
+        <p style="color:#64748b;margin:0;">Proposte approvate disponibili per l'organizzazione.</p>
     </div>
     <button class="button" id="btnNuovaProposta">+ Nuova Proposta</button>
 </div>
 
 <?php echo $messaggio; ?>
 
-<div class="table-section"><div class="table-container">
+<div style="background:#fff;border-radius:12px;box-shadow:0 2px 12px rgba(59,130,246,0.10);overflow:hidden;"><div class="table-container">
 <table>
 <thead><tr>
     <th>#</th><th>Destinazione / Descrizione</th><th>Proposta da</th><th>Costo Stimato</th><th>Azioni</th>

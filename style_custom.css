@@ -281,6 +281,53 @@ button.btn-boccia:hover, .button.btn-boccia:hover {
     margin: 0 auto;
 }
 
+/* Tabella generica */
+.table-container {
+    overflow-x: auto;
+    border-radius: 12px;
+}
+
+.table-container table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table-container thead tr {
+    background: var(--blue-600);
+    color: #fff;
+}
+
+.table-container thead th {
+    padding: 0.9rem 1.1rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.table-container tbody tr {
+    border-bottom: 1px solid var(--blue-100);
+    transition: background 0.15s;
+}
+
+.table-container tbody tr:hover {
+    background: var(--blue-50);
+}
+
+.table-container tbody td {
+    padding: 0.85rem 1.1rem;
+    font-size: 0.92rem;
+    color: #1e293b;
+    vertical-align: middle;
+}
+
+.table-container tbody td:last-child {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-wrap: nowrap;
+}
+
 
 .table-catalogo {
     overflow: clip;
