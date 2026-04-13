@@ -6,68 +6,66 @@ $messaggio = "";
 // ─── NUOVA PROPOSTA GITA 1 GIORNO ────────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'nuova_1g') {
     $idUtente     = $_SESSION['id_utente'];
-    $destinazione = $_POST['destinazione'];
-    $mezzo        = $_POST['mezzo'];
-    $periodo      = $_POST['periodo'];
-    $costo        = floatval($_POST['costo']);
+    $destinazione = $conn->real_escape_string($_POST['destinazione'] ?? '');
+    $descrizione  = $conn->real_escape_string($_POST['descrizione']  ?? '');
+    $mezzo        = $conn->real_escape_string($_POST['mezzo']        ?? '');
+    $periodo      = $conn->real_escape_string($_POST['periodo']      ?? '');
+    $classi       = $conn->real_escape_string($_POST['classi']       ?? '');
+    $costo        = floatval($_POST['costo'] ?? 0);
 
-    $stmt = $conn->prepare("INSERT INTO gita1g (idUtente, destinazione, mezzo, periodo, costoAPersona, idStato) VALUES (?, ?, ?, ?, ?, 1)");
-    $stmt->bind_param("isssd", $idUtente, $destinazione, $mezzo, $periodo, $costo);
-    if ($stmt->execute()) {
+    if ($conn->query("INSERT INTO gita1g (idUtente, destinazione, descrizione, mezzo, periodo, classi, costoAPersona, idStato) VALUES ($idUtente, '$destinazione', '$descrizione', '$mezzo', '$periodo', '$classi', $costo, 1)")) {
         $messaggio = "<div class='alert-success'>Proposta gita 1 giorno salvata come bozza.</div>";
     } else {
-        $messaggio = "<div class='alert-error'>Errore durante il salvataggio.</div>";
+        $messaggio = "<div class='alert-error'>Errore durante il salvataggio: " . htmlspecialchars($conn->error) . "</div>";
     }
-    $stmt->close();
 }
 
 // ─── NUOVA PROPOSTA GITA PIU GIORNI ──────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'nuova_5g') {
     $idUtente     = $_SESSION['id_utente'];
-    $destinazione = $_POST['destinazione'];
-    $mezzo        = $_POST['mezzo'];
-    $periodo      = $_POST['periodo'];
-    $costo        = floatval($_POST['costo']);
+    $destinazione = $conn->real_escape_string($_POST['destinazione'] ?? '');
+    $descrizione  = $conn->real_escape_string($_POST['descrizione']  ?? '');
+    $mezzo        = $conn->real_escape_string($_POST['mezzo']        ?? '');
+    $periodo      = $conn->real_escape_string($_POST['periodo']      ?? '');
+    $classi       = $conn->real_escape_string($_POST['classi']       ?? '');
+    $costo        = floatval($_POST['costo'] ?? 0);
 
-    $stmt = $conn->prepare("INSERT INTO gite5 (idUtente, destinazione, mezzo, periodo, costoAPersona, idStato) VALUES (?, ?, ?, ?, ?, 1)");
-    $stmt->bind_param("isssd", $idUtente, $destinazione, $mezzo, $periodo, $costo);
-    if ($stmt->execute()) {
+    if ($conn->query("INSERT INTO gite5 (idUtente, destinazione, descrizione, mezzo, periodo, classi, costoAPersona, idStato) VALUES ($idUtente, '$destinazione', '$descrizione', '$mezzo', '$periodo', '$classi', $costo, 1)")) {
         $messaggio = "<div class='alert-success'>Proposta gita di più giorni salvata come bozza.</div>";
     } else {
-        $messaggio = "<div class='alert-error'>Errore durante il salvataggio.</div>";
+        $messaggio = "<div class='alert-error'>Errore durante il salvataggio: " . htmlspecialchars($conn->error) . "</div>";
     }
-    $stmt->close();
 }
 
 // ─── ORGANIZZA GITA 1 GIORNO (copia con stato 4) ─────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'organizza_1g') {
     $idGita    = intval($_POST['id_gita']);
     $idUtente  = $_SESSION['id_utente'];
-    $periodo   = $_POST['org_periodo']   ?: null;
-    $giorno    = $_POST['org_giorno']    ?: null;
-    $costoMezzo= $_POST['org_costoMezzo'] !== '' ? floatval($_POST['org_costoMezzo']) : null;
-    $costoGiorno= $_POST['org_costoGiorno'] !== '' ? floatval($_POST['org_costoGiorno']) : null;
-    $numAlunni = $_POST['org_numAlunni'] !== '' ? intval($_POST['org_numAlunni']) : null;
+    $periodo     = $_POST['org_periodo']    ?: null;
+    $mezzo       = $_POST['org_mezzo']      ?? '';
+    $descrizione = $_POST['org_descrizione'] ?? '';
+    $classi      = $_POST['org_classe']     ?? '';
+    $giorno      = $_POST['org_giorno']     ?: null;
+    $costoMezzo  = $_POST['org_costoMezzo']  !== '' ? floatval($_POST['org_costoMezzo'])  : null;
+    $costoGiorno = $_POST['org_costoGiorno'] !== '' ? floatval($_POST['org_costoGiorno']) : null;
+    $numAlunni   = $_POST['org_numAlunni']   !== '' ? intval($_POST['org_numAlunni'])     : null;
 
     // Leggi la riga originale
     $orig = $conn->query("SELECT * FROM gita1g WHERE idGita = $idGita")->fetch_assoc();
     if ($orig) {
-        $dest   = $orig['destinazione'];
-        $mezzoO = $orig['mezzo'];
-        $perFin = $periodo ?? $orig['periodo'];
-        $costoA = $orig['costoAPersona'];
-        // uso query diretta con valori sanificati
-        $perFin_s    = $conn->real_escape_string($perFin ?? '');
-        $giorno_s    = $giorno    ? "'" . $conn->real_escape_string($giorno) . "'" : "NULL";
-        $costoMezzo_s= $costoMezzo  !== null ? floatval($costoMezzo)  : "NULL";
+        $dest_s      = $conn->real_escape_string($orig['destinazione']);
+        $desc_s      = $conn->real_escape_string($descrizione);
+        $mezzoFin_s  = $conn->real_escape_string($mezzo ?: ($orig['mezzo'] ?? ''));
+        $perFin_s    = $conn->real_escape_string($periodo ?? $orig['periodo'] ?? '');
+        $classi_s    = $conn->real_escape_string($classi);
+        $costoA_s    = floatval($orig['costoAPersona']);
+        $giorno_s    = $giorno      ? "'" . $conn->real_escape_string($giorno) . "'" : "NULL";
+        $costoMezzo_s = $costoMezzo  !== null ? floatval($costoMezzo)  : "NULL";
         $costoGiorno_s= $costoGiorno !== null ? floatval($costoGiorno) : "NULL";
-        $numAlunni_s = $numAlunni !== null ? intval($numAlunni) : "NULL";
-        $dest_s      = $conn->real_escape_string($dest);
-        $mezzoO_s    = $conn->real_escape_string($mezzoO ?? '');
-        $costoA_s    = floatval($costoA);
+        $numAlunni_s = $numAlunni   !== null ? intval($numAlunni)     : "NULL";
 
-        $sql = "INSERT INTO gita1g (idUtente, destinazione, mezzo, periodo, giorno, costoMezzo, costoAttivita, costoAPersona, numAlunni, idStato)
-                VALUES ($idUtente, '$dest_s', '$mezzoO_s', '$perFin_s', $giorno_s, $costoMezzo_s, $costoGiorno_s, $costoA_s, $numAlunni_s, 4)";
+        $sql = "INSERT INTO gita1g (idUtente, destinazione, descrizione, mezzo, periodo, classi, giorno, costoMezzo, costoAttivita, costoAPersona, numAlunni, idStato)
+                VALUES ($idUtente, '$dest_s', '$desc_s', '$mezzoFin_s', '$perFin_s', '$classi_s', $giorno_s, $costoMezzo_s, $costoGiorno_s, $costoA_s, $numAlunni_s, 4)";
         if ($conn->query($sql)) {
             $messaggio = "organizza_ok";
         } else {
@@ -82,22 +80,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $idUtente     = $_SESSION['id_utente'];
     $periodo      = $_POST['org_periodo']      ?: null;
     $giornoInizio = $_POST['org_giornoInizio'] ?: null;
-    $giornoFine   = $_POST['org_giornoFine']   ?: null;
+    $mezzo        = $_POST['org_mezzo']         ?? '';
+    $descrizione  = $_POST['org_descrizione']   ?? '';
+    $classi       = $_POST['org_classe']        ?? '';
+    $giornoInizio = $_POST['org_giornoInizio']  ?: null;
+    $giornoFine   = $_POST['org_giornoFine']    ?: null;
     $costoAPersona= $_POST['org_costoAPersona'] !== '' ? floatval($_POST['org_costoAPersona']) : null;
-    $numAlunni    = $_POST['org_numAlunni']    !== '' ? intval($_POST['org_numAlunni'])    : null;
+    $numAlunni    = $_POST['org_numAlunni']     !== '' ? intval($_POST['org_numAlunni'])       : null;
 
     $orig = $conn->query("SELECT * FROM gite5 WHERE idGita = $idGita")->fetch_assoc();
     if ($orig) {
         $dest_s      = $conn->real_escape_string($orig['destinazione']);
-        $mezzoO_s    = $conn->real_escape_string($orig['mezzo'] ?? '');
+        $desc_s      = $conn->real_escape_string($descrizione);
+        $mezzoFin_s  = $conn->real_escape_string($mezzo ?: ($orig['mezzo'] ?? ''));
         $perFin_s    = $conn->real_escape_string($periodo ?? $orig['periodo'] ?? '');
+        $classi_s    = $conn->real_escape_string($classi);
         $gi_s        = $giornoInizio ? "'" . $conn->real_escape_string($giornoInizio) . "'" : "NULL";
         $gf_s        = $giornoFine   ? "'" . $conn->real_escape_string($giornoFine)   . "'" : "NULL";
         $costoFin    = $costoAPersona !== null ? floatval($costoAPersona) : floatval($orig['costoAPersona'] ?? 0);
         $numAlunni_s = $numAlunni !== null ? intval($numAlunni) : "NULL";
 
-        $sql = "INSERT INTO gite5 (idUtente, destinazione, mezzo, periodo, giornoInizio, giornoFine, costoAPersona, numAlunni, idStato)
-                VALUES ($idUtente, '$dest_s', '$mezzoO_s', '$perFin_s', $gi_s, $gf_s, $costoFin, $numAlunni_s, 4)";
+        $sql = "INSERT INTO gite5 (idUtente, destinazione, descrizione, mezzo, periodo, classi, giornoInizio, giornoFine, costoAPersona, numAlunni, idStato)
+                VALUES ($idUtente, '$dest_s', '$desc_s', '$mezzoFin_s', '$perFin_s', '$classi_s', $gi_s, $gf_s, $costoFin, $numAlunni_s, 4)";
         if ($conn->query($sql)) {
             $messaggio = "organizza_ok";
         } else {
@@ -110,11 +114,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'modifica_1g') {
     if ($_SESSION['ruolo'] == 2) {
         $idGita       = intval($_POST['id_gita']);
-        $destinazione = $conn->real_escape_string($_POST['mod_destinazione']);
-        $mezzo        = $conn->real_escape_string($_POST['mod_mezzo']);
-        $periodo      = $conn->real_escape_string($_POST['mod_periodo']);
-        $costo        = floatval($_POST['mod_costo']);
-        if ($conn->query("UPDATE gita1g SET destinazione='$destinazione', mezzo='$mezzo', periodo='$periodo', costoAPersona=$costo WHERE idGita=$idGita")) {
+        $destinazione = $conn->real_escape_string($_POST['mod_destinazione'] ?? '');
+        $descrizione  = $conn->real_escape_string($_POST['mod_descrizione']  ?? '');
+        $mezzo        = $conn->real_escape_string($_POST['mod_mezzo']        ?? '');
+        $periodo      = $conn->real_escape_string($_POST['mod_periodo']      ?? '');
+        $classi       = $conn->real_escape_string($_POST['mod_classi']       ?? '');
+        $costo        = floatval($_POST['mod_costo'] ?? 0);
+        if ($conn->query("UPDATE gita1g SET destinazione='$destinazione', descrizione='$descrizione', mezzo='$mezzo', periodo='$periodo', classi='$classi', costoAPersona=$costo WHERE idGita=$idGita")) {
             $messaggio = "<div class='alert-success'>Gita 1 giorno modificata.</div>";
         } else {
             $messaggio = "<div class='alert-error'>Errore modifica: " . htmlspecialchars($conn->error) . "</div>";
@@ -138,11 +144,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'modifica_5g') {
     if ($_SESSION['ruolo'] == 2) {
         $idGita       = intval($_POST['id_gita']);
-        $destinazione = $conn->real_escape_string($_POST['mod_destinazione']);
-        $mezzo        = $conn->real_escape_string($_POST['mod_mezzo']);
-        $periodo      = $conn->real_escape_string($_POST['mod_periodo']);
-        $costo        = floatval($_POST['mod_costo']);
-        if ($conn->query("UPDATE gite5 SET destinazione='$destinazione', mezzo='$mezzo', periodo='$periodo', costoAPersona=$costo WHERE idGita=$idGita")) {
+        $destinazione = $conn->real_escape_string($_POST['mod_destinazione'] ?? '');
+        $descrizione  = $conn->real_escape_string($_POST['mod_descrizione']  ?? '');
+        $mezzo        = $conn->real_escape_string($_POST['mod_mezzo']        ?? '');
+        $periodo      = $conn->real_escape_string($_POST['mod_periodo']      ?? '');
+        $classi       = $conn->real_escape_string($_POST['mod_classi']       ?? '');
+        $costo        = floatval($_POST['mod_costo'] ?? 0);
+        if ($conn->query("UPDATE gite5 SET destinazione='$destinazione', descrizione='$descrizione', mezzo='$mezzo', periodo='$periodo', classi='$classi', costoAPersona=$costo WHERE idGita=$idGita")) {
             $messaggio = "<div class='alert-success'>Gita di più giorni modificata.</div>";
         } else {
             $messaggio = "<div class='alert-error'>Errore modifica: " . htmlspecialchars($conn->error) . "</div>";
@@ -164,7 +172,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 // ─── QUERY GITE 1 GIORNO (stato 2 = Approvate) ───────────────────────────────
 $gite1g = $conn->query("
-    SELECT g.idGita, g.destinazione, g.mezzo, g.periodo, g.costoAPersona,
+    SELECT g.idGita, g.destinazione, g.descrizione, g.mezzo, g.periodo, g.costoAPersona, g.classi,
            u.Nome, u.Cognome
     FROM gita1g g
     JOIN utente u ON g.idUtente = u.IDUtente
@@ -174,7 +182,7 @@ $gite1g = $conn->query("
 
 // ─── QUERY GITE PIU GIORNI (stato 2 = Approvate) ─────────────────────────────
 $gite5g = $conn->query("
-    SELECT g.idGita, g.destinazione, g.mezzo, g.periodo, g.costoAPersona,
+    SELECT g.idGita, g.destinazione, g.descrizione, g.mezzo, g.periodo, g.costoAPersona, g.classi,
            u.Nome, u.Cognome
     FROM gite5 g
     JOIN utente u ON g.idUtente = u.IDUtente
@@ -202,8 +210,10 @@ $tot5g = $gite5g ? $gite5g->num_rows : 0;
         document.getElementById('org1g_id').value             = d.id;
         document.getElementById('org1g_title').textContent    = 'Organizza: ' + d.dest;
         document.getElementById('org1g_mezzo_dest').value     = d.dest;
+        document.getElementById('org1g_descrizione').value    = d.descrizione || '';
         document.getElementById('org1g_mezzo').value          = d.mezzo    || '';
         document.getElementById('org1g_periodo').value        = d.periodo  || '';
+        document.getElementById('org1g_classe').value         = d.classi   || '';
         document.getElementById('org1g_costoPersona').value   = d.costo    || '';
         document.getElementById('org1g_giorno').value         = '';
         document.getElementById('org1g_costoMezzo').value     = '';
@@ -216,8 +226,10 @@ $tot5g = $gite5g ? $gite5g->num_rows : 0;
         document.getElementById('org5g_id').value             = d.id;
         document.getElementById('org5g_title').textContent    = 'Organizza: ' + d.dest;
         document.getElementById('org5g_mezzo_dest').value     = d.dest;
+        document.getElementById('org5g_descrizione').value    = d.descrizione || '';
         document.getElementById('org5g_mezzo').value          = d.mezzo    || '';
         document.getElementById('org5g_periodo').value        = d.periodo  || '';
+        document.getElementById('org5g_classe').value         = d.classi   || '';
         document.getElementById('org5g_costoAPersona').value  = d.costo    || '';
         document.getElementById('org5g_giornoInizio').value   = '';
         document.getElementById('org5g_giornoFine').value     = '';
@@ -226,19 +238,23 @@ $tot5g = $gite5g ? $gite5g->num_rows : 0;
     }
     function apriModifica1g(btn) {
         var d = btn.dataset;
-        document.getElementById('mod1g_id').value          = d.id;
+        document.getElementById('mod1g_id').value           = d.id;
         document.getElementById('mod1g_destinazione').value = d.dest;
+        document.getElementById('mod1g_descrizione').value  = d.descrizione || '';
         document.getElementById('mod1g_mezzo').value        = d.mezzo   || '';
         document.getElementById('mod1g_periodo').value      = d.periodo || '';
+        document.getElementById('mod1g_classi').value       = d.classi  || '';
         document.getElementById('mod1g_costo').value        = d.costo   || '';
         document.getElementById('modalMod1g').classList.remove('hidden');
     }
     function apriModifica5g(btn) {
         var d = btn.dataset;
-        document.getElementById('mod5g_id').value          = d.id;
+        document.getElementById('mod5g_id').value           = d.id;
         document.getElementById('mod5g_destinazione').value = d.dest;
+        document.getElementById('mod5g_descrizione').value  = d.descrizione || '';
         document.getElementById('mod5g_mezzo').value        = d.mezzo   || '';
         document.getElementById('mod5g_periodo').value      = d.periodo || '';
+        document.getElementById('mod5g_classi').value       = d.classi  || '';
         document.getElementById('mod5g_costo').value        = d.costo   || '';
         document.getElementById('modalMod5g').classList.remove('hidden');
     }
@@ -299,16 +315,19 @@ if ($gite1g && $gite1g->num_rows > 0) {
         $costo  = number_format($r['costoAPersona'], 2, ',', '.');
         $autore = htmlspecialchars($r['Nome'] . ' ' . $r['Cognome']);
         $id     = intval($r['idGita']);
-        $destJs  = addslashes($r['destinazione']);
-        $mezzoJs = addslashes($r['mezzo'] ?? '');
-        $perJs   = addslashes($r['periodo'] ?? '');
-        $costoJs = floatval($r['costoAPersona']);
+        $destJs       = htmlspecialchars($r['destinazione'], ENT_QUOTES);
+        $descJs       = htmlspecialchars($r['descrizione'] ?? '', ENT_QUOTES);
+        $mezzoJs      = htmlspecialchars($r['mezzo'] ?? '', ENT_QUOTES);
+        $perJs        = htmlspecialchars($r['periodo'] ?? '', ENT_QUOTES);
+        $classiJs     = htmlspecialchars($r['classi'] ?? '', ENT_QUOTES);
+        $costoJs      = floatval($r['costoAPersona']);
         $azioniCol = '';
         if ($_SESSION['ruolo'] == 2) {
             $azioniCol = "<td style='display:flex;gap:0.4rem;'>
                 <button type='button' class='button xs'
-                    data-id='$id' data-dest='$destJs' data-mezzo='$mezzoJs'
-                    data-periodo='$perJs' data-costo='$costoJs'
+                    data-id='$id' data-dest='$destJs' data-descrizione='$descJs'
+                    data-mezzo='$mezzoJs' data-periodo='$perJs'
+                    data-classi='$classiJs' data-costo='$costoJs'
                     onclick=\"apriModifica1g(this)\">Modifica</button>
                 <button type='button' class='button cancel xs'
                     onclick=\"apriElimina($id,'$destJs','elimina_1g')\">Elimina</button>
@@ -324,8 +343,10 @@ if ($gite1g && $gite1g->num_rows > 0) {
             <td><button type='button' class='button xs'
                 data-id='$id'
                 data-dest='$destJs'
+                data-descrizione='$descJs'
                 data-mezzo='$mezzoJs'
                 data-periodo='$perJs'
+                data-classi='$classiJs'
                 data-costo='$costoJs'
                 onclick=\"apriOrg1g(this)\">Organizza</button></td>
             $azioniCol
@@ -371,16 +392,19 @@ if ($gite5g && $gite5g->num_rows > 0) {
         $costo  = number_format($r['costoAPersona'], 2, ',', '.');
         $autore = htmlspecialchars($r['Nome'] . ' ' . $r['Cognome']);
         $id     = intval($r['idGita']);
-        $destJs  = addslashes($r['destinazione']);
-        $mezzoJs = addslashes($r['mezzo'] ?? '');
-        $perJs   = addslashes($r['periodo'] ?? '');
-        $costoJs = floatval($r['costoAPersona']);
+        $destJs       = htmlspecialchars($r['destinazione'], ENT_QUOTES);
+        $descJs       = htmlspecialchars($r['descrizione'] ?? '', ENT_QUOTES);
+        $mezzoJs      = htmlspecialchars($r['mezzo'] ?? '', ENT_QUOTES);
+        $perJs        = htmlspecialchars($r['periodo'] ?? '', ENT_QUOTES);
+        $classiJs     = htmlspecialchars($r['classi'] ?? '', ENT_QUOTES);
+        $costoJs      = floatval($r['costoAPersona']);
         $azioniCol = '';
         if ($_SESSION['ruolo'] == 2) {
             $azioniCol = "<td style='display:flex;gap:0.4rem;'>
                 <button type='button' class='button xs'
-                    data-id='$id' data-dest='$destJs' data-mezzo='$mezzoJs'
-                    data-periodo='$perJs' data-costo='$costoJs'
+                    data-id='$id' data-dest='$destJs' data-descrizione='$descJs'
+                    data-mezzo='$mezzoJs' data-periodo='$perJs'
+                    data-classi='$classiJs' data-costo='$costoJs'
                     onclick=\"apriModifica5g(this)\">Modifica</button>
                 <button type='button' class='button cancel xs'
                     onclick=\"apriElimina($id,'$destJs','elimina_5g')\">Elimina</button>
@@ -396,8 +420,10 @@ if ($gite5g && $gite5g->num_rows > 0) {
             <td><button type='button' class='button xs'
                 data-id='$id'
                 data-dest='$destJs'
+                data-descrizione='$descJs'
                 data-mezzo='$mezzoJs'
                 data-periodo='$perJs'
+                data-classi='$classiJs'
                 data-costo='$costoJs'
                 onclick=\"apriOrg5g(this)\">Organizza</button></td>
             $azioniCol
@@ -428,17 +454,30 @@ if ($gite5g && $gite5g->num_rows > 0) {
 <form method="POST" action="catalogo.php" id="form1g">
     <input type="hidden" name="action" value="nuova_1g">
     <div class="form-grid">
-        <div class="form-group">
+        <div class="form-group full-row">
             <label>Destinazione *</label>
             <input type="text" name="destinazione" class="form-control" required placeholder="es. Roma">
         </div>
+        <div class="form-group full-row">
+            <label>Descrizione</label>
+            <input type="text" name="descrizione" class="form-control" placeholder="Breve descrizione della gita">
+        </div>
         <div class="form-group">
             <label>Mezzo di trasporto</label>
-            <input type="text" name="mezzo" class="form-control" placeholder="es. Pullman">
+            <select name="mezzo" class="form-control">
+                <option value="">— Seleziona —</option>
+                <option value="Bus">Bus</option>
+                <option value="Treno">Treno</option>
+                <option value="Ci incontriamo direttamente lì">Ci incontriamo direttamente lì</option>
+            </select>
         </div>
         <div class="form-group">
             <label>Periodo</label>
             <input type="text" name="periodo" class="form-control" placeholder="es. Marzo 2026">
+        </div>
+        <div class="form-group">
+            <label>Classe/i</label>
+            <input type="text" name="classi" class="form-control" placeholder="es. 3A, 3B">
         </div>
         <div class="form-group">
             <label>Costo a persona (&euro;) *</label>
@@ -468,17 +507,30 @@ if ($gite5g && $gite5g->num_rows > 0) {
 <form method="POST" action="catalogo.php" id="form5g">
     <input type="hidden" name="action" value="nuova_5g">
     <div class="form-grid">
-        <div class="form-group">
+        <div class="form-group full-row">
             <label>Destinazione *</label>
             <input type="text" name="destinazione" class="form-control" required placeholder="es. Parigi">
         </div>
+        <div class="form-group full-row">
+            <label>Descrizione</label>
+            <input type="text" name="descrizione" class="form-control" placeholder="Breve descrizione della gita">
+        </div>
         <div class="form-group">
             <label>Mezzo di trasporto</label>
-            <input type="text" name="mezzo" class="form-control" placeholder="es. Aereo">
+            <select name="mezzo" class="form-control">
+                <option value="">— Seleziona —</option>
+                <option value="Bus GT">Bus GT</option>
+                <option value="Treno">Treno</option>
+                <option value="Aereo">Aereo</option>
+            </select>
         </div>
         <div class="form-group">
             <label>Periodo</label>
             <input type="text" name="periodo" class="form-control" placeholder="es. Maggio 2026">
+        </div>
+        <div class="form-group">
+            <label>Classe/i</label>
+            <input type="text" name="classi" class="form-control" placeholder="es. 4A, 4B">
         </div>
         <div class="form-group">
             <label>Costo a persona (&euro;) *</label>
@@ -513,13 +565,26 @@ if ($gite5g && $gite5g->num_rows > 0) {
             <label>Destinazione</label>
             <input type="text" name="org_mezzo_dest" id="org1g_mezzo_dest" class="form-control" readonly style="background:#f3f4f6;">
         </div>
+        <div class="form-group full-row">
+            <label>Descrizione</label>
+            <input type="text" name="org_descrizione" id="org1g_descrizione" class="form-control" placeholder="Breve descrizione">
+        </div>
         <div class="form-group">
             <label>Mezzo di trasporto</label>
-            <input type="text" name="org_mezzo" id="org1g_mezzo" class="form-control" placeholder="es. Pullman">
+            <select name="org_mezzo" id="org1g_mezzo" class="form-control">
+                <option value="">— Seleziona —</option>
+                <option value="Bus">Bus</option>
+                <option value="Treno">Treno</option>
+                <option value="Ci incontriamo direttamente lì">Ci incontriamo direttamente lì</option>
+            </select>
         </div>
         <div class="form-group">
             <label>Periodo</label>
             <input type="text" name="org_periodo" id="org1g_periodo" class="form-control" placeholder="es. Aprile 2026">
+        </div>
+        <div class="form-group">
+            <label>Classe/i</label>
+            <input type="text" name="org_classe" id="org1g_classe" class="form-control" placeholder="es. 3A">
         </div>
         <div class="form-group">
             <label>Costo a Persona (&euro;)</label>
@@ -570,13 +635,26 @@ if ($gite5g && $gite5g->num_rows > 0) {
             <label>Destinazione</label>
             <input type="text" id="org5g_mezzo_dest" class="form-control" readonly style="background:#f3f4f6;">
         </div>
+        <div class="form-group full-row">
+            <label>Descrizione</label>
+            <input type="text" name="org_descrizione" id="org5g_descrizione" class="form-control" placeholder="Breve descrizione">
+        </div>
         <div class="form-group">
             <label>Mezzo di trasporto</label>
-            <input type="text" name="org_mezzo" id="org5g_mezzo" class="form-control" placeholder="es. Aereo">
+            <select name="org_mezzo" id="org5g_mezzo" class="form-control">
+                <option value="">— Seleziona —</option>
+                <option value="Bus GT">Bus GT</option>
+                <option value="Treno">Treno</option>
+                <option value="Aereo">Aereo</option>
+            </select>
         </div>
         <div class="form-group">
             <label>Periodo</label>
             <input type="text" name="org_periodo" id="org5g_periodo" class="form-control" placeholder="es. Maggio 2026">
+        </div>
+        <div class="form-group">
+            <label>Classe/i</label>
+            <input type="text" name="org_classe" id="org5g_classe" class="form-control" placeholder="es. 4A">
         </div>
         <div class="form-group">
             <label>Costo a Persona (&euro;)</label>
@@ -618,17 +696,30 @@ if ($gite5g && $gite5g->num_rows > 0) {
     <input type="hidden" name="action"  value="modifica_1g">
     <input type="hidden" name="id_gita" id="mod1g_id">
     <div class="form-grid">
-        <div class="form-group">
+        <div class="form-group full-row">
             <label>Destinazione *</label>
             <input type="text" name="mod_destinazione" id="mod1g_destinazione" class="form-control" required>
         </div>
+        <div class="form-group full-row">
+            <label>Descrizione</label>
+            <input type="text" name="mod_descrizione" id="mod1g_descrizione" class="form-control">
+        </div>
         <div class="form-group">
             <label>Mezzo di trasporto</label>
-            <input type="text" name="mod_mezzo" id="mod1g_mezzo" class="form-control">
+            <select name="mod_mezzo" id="mod1g_mezzo" class="form-control">
+                <option value="">— Seleziona —</option>
+                <option value="Bus">Bus</option>
+                <option value="Treno">Treno</option>
+                <option value="Ci incontriamo direttamente lì">Ci incontriamo direttamente lì</option>
+            </select>
         </div>
         <div class="form-group">
             <label>Periodo</label>
             <input type="text" name="mod_periodo" id="mod1g_periodo" class="form-control">
+        </div>
+        <div class="form-group">
+            <label>Classe/i</label>
+            <input type="text" name="mod_classi" id="mod1g_classi" class="form-control" placeholder="es. 3A">
         </div>
         <div class="form-group">
             <label>Costo a Persona (&euro;)</label>
@@ -659,17 +750,30 @@ if ($gite5g && $gite5g->num_rows > 0) {
     <input type="hidden" name="action"  value="modifica_5g">
     <input type="hidden" name="id_gita" id="mod5g_id">
     <div class="form-grid">
-        <div class="form-group">
+        <div class="form-group full-row">
             <label>Destinazione *</label>
             <input type="text" name="mod_destinazione" id="mod5g_destinazione" class="form-control" required>
         </div>
+        <div class="form-group full-row">
+            <label>Descrizione</label>
+            <input type="text" name="mod_descrizione" id="mod5g_descrizione" class="form-control">
+        </div>
         <div class="form-group">
             <label>Mezzo di trasporto</label>
-            <input type="text" name="mod_mezzo" id="mod5g_mezzo" class="form-control">
+            <select name="mod_mezzo" id="mod5g_mezzo" class="form-control">
+                <option value="">— Seleziona —</option>
+                <option value="Bus GT">Bus GT</option>
+                <option value="Treno">Treno</option>
+                <option value="Aereo">Aereo</option>
+            </select>
         </div>
         <div class="form-group">
             <label>Periodo</label>
             <input type="text" name="mod_periodo" id="mod5g_periodo" class="form-control">
+        </div>
+        <div class="form-group">
+            <label>Classe/i</label>
+            <input type="text" name="mod_classi" id="mod5g_classi" class="form-control" placeholder="es. 4A">
         </div>
         <div class="form-group">
             <label>Costo a Persona (&euro;)</label>
