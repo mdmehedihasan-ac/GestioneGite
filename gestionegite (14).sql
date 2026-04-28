@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Creato il: Apr 13, 2026 alle 10:25
+-- Creato il: Apr 28, 2026 alle 12:33
 -- Versione del server: 10.4.32-MariaDB
 -- Versione PHP: 8.0.30
 
@@ -20,6 +20,32 @@ SET time_zone = "+00:00";
 --
 -- Database: `gestionegite`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Struttura della tabella `accompagnatori`
+--
+
+CREATE TABLE `accompagnatori` (
+  `id` int(11) NOT NULL,
+  `idgita` int(11) NOT NULL,
+  `idutente` int(11) NOT NULL,
+  `tipo_gita` enum('1g','5g') NOT NULL,
+  `documento` varchar(50) DEFAULT NULL,
+  `nDocumento` varchar(50) DEFAULT NULL,
+  `scadenza` date DEFAULT NULL,
+  `note` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dump dei dati per la tabella `accompagnatori`
+--
+
+INSERT INTO `accompagnatori` (`id`, `idgita`, `idutente`, `tipo_gita`, `documento`, `nDocumento`, `scadenza`, `note`) VALUES
+(2, 6, 2, '5g', 'Carta d\'identita', 'rfyrtuuhr', '2026-04-25', 'tfjtdj'),
+(3, 6, 1, '5g', NULL, NULL, NULL, NULL),
+(4, 8, 2, '1g', NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -49,9 +75,10 @@ CREATE TABLE `gita1g` (
 
 INSERT INTO `gita1g` (`idGita`, `idUtente`, `destinazione`, `descrizione`, `mezzo`, `periodo`, `giorno`, `costoMezzo`, `costoAttivita`, `costoAPersona`, `numAlunni`, `classi`, `idStato`) VALUES
 (2, 1, 'Roma - Musei Vaticani', NULL, 'treno', 'Novembre 2025', NULL, NULL, NULL, 13.00, NULL, NULL, 2),
-(3, 1, 'Roma - Musei Vaticani', NULL, 'treno', 'Novembre 2025', NULL, NULL, NULL, 13.00, NULL, NULL, 4),
 (5, 2, 'porto antico', NULL, 'autobus', 'gnnaio', NULL, NULL, NULL, 25.00, NULL, NULL, 2),
-(6, 1, 'porto antico', 'vedere cose li', 'Bus', 'gennaio', '2026-04-11', 2.50, 20.00, 23.00, 12, '3AII', 4);
+(8, 1, 'porto antico', '', 'autobus', 'gnnaio', NULL, NULL, NULL, 25.00, NULL, '', 4),
+(9, 1, 'Roma - Musei Vaticani', '', 'Bus', 'Novembre 2025', NULL, NULL, NULL, 13.00, NULL, '', 4),
+(10, 1, 'Roma - Musei Vaticani', 'vedere colosseo', 'Treno', 'd', NULL, NULL, NULL, 12.00, NULL, 'classi 4', 1);
 
 -- --------------------------------------------------------
 
@@ -94,7 +121,6 @@ INSERT INTO `gite5` (`idGita`, `idUtente`, `destinazione`, `descrizione`, `mezzo
 CREATE TABLE `partecipanti` (
   `id` int(11) NOT NULL,
   `idgita` int(11) NOT NULL,
-  `idUtente` int(11) DEFAULT NULL,
   `nome` varchar(50) NOT NULL,
   `cognome` varchar(50) NOT NULL,
   `classe` varchar(10) NOT NULL,
@@ -108,9 +134,9 @@ CREATE TABLE `partecipanti` (
 -- Dump dei dati per la tabella `partecipanti`
 --
 
-INSERT INTO `partecipanti` (`id`, `idgita`, `idUtente`, `nome`, `cognome`, `classe`, `descrizione`, `documento`, `nDocumento`, `scadenza`) VALUES
-(4, 6, NULL, 'sofia', 'Molly', '5BII', '', 'Carta d\'identità', 'sdfsd', NULL),
-(5, 6, NULL, 'sofia', 'Molly', '5DIT', '', 'Passaporto', 'sdfsd', '2026-04-07');
+INSERT INTO `partecipanti` (`id`, `idgita`, `nome`, `cognome`, `classe`, `descrizione`, `documento`, `nDocumento`, `scadenza`) VALUES
+(4, 6, 'sofia', 'Molly', '5BII', '', 'Carta d\'identità', 'sdfsd', NULL),
+(5, 6, 'sofia', 'Molly', '5DIT', '', 'Passaporto', 'sdfsd', '2026-04-07');
 
 -- --------------------------------------------------------
 
@@ -181,6 +207,13 @@ INSERT INTO `utente` (`IDUtente`, `Nome`, `Cognome`, `Mail`, `Password`, `IDTipo
 --
 
 --
+-- Indici per le tabelle `accompagnatori`
+--
+ALTER TABLE `accompagnatori`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uniq_acc` (`idgita`,`idutente`,`tipo_gita`);
+
+--
 -- Indici per le tabelle `gita1g`
 --
 ALTER TABLE `gita1g`
@@ -201,8 +234,7 @@ ALTER TABLE `gite5`
 --
 ALTER TABLE `partecipanti`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `fk_partecipanti_gite5` (`idgita`),
-  ADD KEY `idUtente` (`idUtente`);
+  ADD KEY `fk_partecipanti_gite5` (`idgita`);
 
 --
 -- Indici per le tabelle `statogita`
@@ -229,10 +261,16 @@ ALTER TABLE `utente`
 --
 
 --
+-- AUTO_INCREMENT per la tabella `accompagnatori`
+--
+ALTER TABLE `accompagnatori`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
 -- AUTO_INCREMENT per la tabella `gita1g`
 --
 ALTER TABLE `gita1g`
-  MODIFY `idGita` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `idGita` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT per la tabella `gite5`
@@ -286,8 +324,7 @@ ALTER TABLE `gite5`
 -- Limiti per la tabella `partecipanti`
 --
 ALTER TABLE `partecipanti`
-  ADD CONSTRAINT `fk_partecipanti_gite5` FOREIGN KEY (`idgita`) REFERENCES `gite5` (`idGita`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `partecipanti_ibfk_1` FOREIGN KEY (`idUtente`) REFERENCES `utente` (`IDUtente`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `fk_partecipanti_gite5` FOREIGN KEY (`idgita`) REFERENCES `gite5` (`idGita`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Limiti per la tabella `utente`

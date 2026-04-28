@@ -29,7 +29,7 @@
     <nav class="header-nav">
         <a href="index.php">Home</a>
         <?php if ($ruolo): ?>
-            <a href="catalogo.php">Catalogo</a>
+            <a href="catalogo.php">Proposte</a>
             <a href="mieGite.php">Le mie Gite</a>
             <a href="inProgramma.php">In Programma</a>
             <?php if ($ruolo == 2): ?>

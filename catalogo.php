@@ -270,10 +270,6 @@ $tot5g = $gite5g ? $gite5g->num_rows : 0;
 <div class="container">
 <main class="content bozze-padding">
 
-<div class="hero-section">
-    <h2 style="margin-bottom:0.5rem;color:var(--blue-700);">Proposte Gite</h2>
-    <p>Gite approvate disponibili per l'organizzazione.</p>
-</div>
 
 <?php if ($messaggio && $messaggio !== 'organizza_ok') echo $messaggio; ?>
 <?php if ($messaggio === 'organizza_ok'): ?>
@@ -283,7 +279,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 <?php endif; ?>
-
+<h2 style="color:var(--blue-700);margin:0;">Proposte Gite</h2>
 <!-- ═══════════════════════════════════════════════════════════════
      SEZIONE GITE 1 GIORNO
 ═══════════════════════════════════════════════════════════════ -->
@@ -476,7 +472,7 @@ if ($gite5g && $gite5g->num_rows > 0) {
             <input type="text" name="periodo" class="form-control" placeholder="es. Marzo 2026">
         </div>
         <div class="form-group">
-            <label>Classe/i</label>
+            <label>Classi consigliate</label>
             <input type="text" name="classi" class="form-control" placeholder="es. 3A, 3B">
         </div>
         <div class="form-group">
