@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 include('nav.php');
 
 $idGita = isset($_GET['id']) ? intval($_GET['id']) : 0;
@@ -31,7 +31,7 @@ if (!$isAutore && !$isAccompagnatore && $ruolo != 2) {
 
 $messaggio = '';
 
-// ─── Handler aggiungi partecipante ───────────────────────────────────────────
+// handler aggiungi partecipante
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'aggiungi') {
     $nome      = mysqli_real_escape_string($conn, trim($_POST['nome']       ?? ''));
     $cognome   = mysqli_real_escape_string($conn, trim($_POST['cognome']    ?? ''));
@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'aggiu
     }
 }
 
-// ─── Handler elimina partecipante ────────────────────────────────────────────
+// handler elimina partecipante
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'elimina') {
     $idPart = intval($_POST['id_part'] ?? 0);
     if ($idPart > 0) {
@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'elimi
     exit;
 }
 
-// ─── Handler modifica dati accompagnatore ────────────────────────────────────
+// handler modifica dati accompagnatore
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'mod_acc') {
     $accId     = intval($_POST['acc_id'] ?? 0);
     $documento = mysqli_real_escape_string($conn, trim($_POST['acc_documento']  ?? ''));
@@ -75,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'mod_a
     exit;
 }
 
-// ─── Carica accompagnatori della gita ────────────────────────────────────────
+// carica accompagnatori della gita
 $resAcc = mysqli_query($conn,
     "SELECT a.*, CONCAT(u.Nome, ' ', u.Cognome) AS nomeUtente, u.Nome AS nome_u, u.Cognome AS cognome_u
      FROM accompagnatori a JOIN utente u ON a.idutente = u.IDUtente
@@ -83,7 +83,7 @@ $resAcc = mysqli_query($conn,
      ORDER BY u.Cognome ASC, u.Nome ASC"
 );
 
-// ─── Carica partecipanti ──────────────────────────────────────────────────────
+// carica partecipanti
 $resPart = mysqli_query($conn, "SELECT * FROM partecipanti WHERE idgita = $idGita ORDER BY cognome ASC, nome ASC");
 $totPart = $resPart ? mysqli_num_rows($resPart) : 0;
 
@@ -138,7 +138,7 @@ $numAlunniDisp = $gita['numAlunni'] ?? '';
         <div class="alert alert-warning" style="margin-bottom:1rem;">Compila tutti i campi obbligatori.</div>
     <?php endif; ?>
 
-    <!-- ══ TABELLA ACCOMPAGNATORI ════════════════════════════════════════════ -->
+    <!-- tabella accompagnatori -->
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
         <h3 style="color:var(--blue-700);margin:0;">
             Accompagnatori
@@ -197,7 +197,7 @@ $numAlunniDisp = $gita['numAlunni'] ?? '';
                                 data-ndoc="<?php echo $aNDocJ; ?>"
                                 data-scad="<?php echo $aScadV; ?>"
                                 data-note="<?php echo $aNoteJ; ?>"
-                                onclick="apriModAcc(this)">✏️ Modifica</button>
+                                onclick="apriModAcc(this)">Modifica</button>
                             <?php endif; ?>
                         </td>
                     </tr>
@@ -209,7 +209,7 @@ $numAlunniDisp = $gita['numAlunni'] ?? '';
         </div>
     </div>
 
-    <!-- ══ TABELLA PARTECIPANTI ══════════════════════════════════════════════ -->
+    <!-- tabella partecipanti -->
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
         <h3 style="color:var(--blue-700);margin:0;">
             Lista Partecipanti
@@ -274,7 +274,7 @@ $numAlunniDisp = $gita['numAlunni'] ?? '';
 
 </main>
 
-<!-- ══════════════ MODAL — Modifica dati accompagnatore ══════════════════════ -->
+<!-- modal: modifica dati accompagnatore -->
 <div class="modal-overlay hidden" id="modalModAcc">
 <div class="modal wide-modal">
 <div class="modal-header">
@@ -316,7 +316,7 @@ $numAlunniDisp = $gita['numAlunni'] ?? '';
 </div>
 </div>
 
-<!-- ══════════════ MODAL — Aggiungi Partecipante ══════════════════════════════ -->
+<!-- modal: aggiungi partecipante -->
 <div class="modal-overlay hidden" id="modalAggiungi">
 <div class="modal wide-modal">
 <div class="modal-header">
@@ -414,3 +414,5 @@ document.getElementById('modalAggiungi').classList.remove('hidden');
 </script>
 </body>
 </html>
+
+

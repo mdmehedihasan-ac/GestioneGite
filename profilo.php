@@ -1,0 +1,222 @@
+<?php
+include('nav.php');
+
+// protezione: solo utenti loggati
+if (!isset($_SESSION['id_utente'])) {
+    header("Location: login.php");
+    exit;
+}
+
+$idUtente = intval($_SESSION['id_utente']);
+
+// carica dati utente dal database
+$stmt = mysqli_prepare($conn, "SELECT u.Nome, u.Cognome, u.Mail, t.Descrizione AS Ruolo FROM utente u JOIN tipoutente t ON u.IDTipo = t.IDTipo WHERE u.IDUtente = ?");
+mysqli_stmt_bind_param($stmt, "i", $idUtente);
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
+$utente = mysqli_fetch_assoc($result);
+mysqli_stmt_close($stmt);
+
+if (!$utente) {
+    header("Location: login.php");
+    exit;
+}
+
+// conta le proposte create dall'utente (stato 1,2,3)
+$r1 = mysqli_query($conn, "SELECT COUNT(*) AS tot FROM gita1g WHERE idUtente = $idUtente AND idStato IN (1,2,3)");
+$r2 = mysqli_query($conn, "SELECT COUNT(*) AS tot FROM gite5 WHERE idUtente = $idUtente AND idStato IN (1,2,3)");
+$totProposte = (mysqli_fetch_assoc($r1)['tot'] ?? 0) + (mysqli_fetch_assoc($r2)['tot'] ?? 0);
+
+// conta le gite in organizzazione (stato 4)
+$r3 = mysqli_query($conn, "SELECT COUNT(*) AS tot FROM gita1g WHERE idUtente = $idUtente AND idStato = 4");
+$r4 = mysqli_query($conn, "SELECT COUNT(*) AS tot FROM gite5 WHERE idUtente = $idUtente AND idStato = 4");
+$totOrganizzazione = (mysqli_fetch_assoc($r3)['tot'] ?? 0) + (mysqli_fetch_assoc($r4)['tot'] ?? 0);
+
+// conta le gite dove e accompagnatore (ma non autore)
+$r5 = mysqli_query($conn, "SELECT COUNT(*) AS tot FROM accompagnatori a JOIN gita1g g ON a.idgita = g.idGita AND a.tipo_gita = '1g' WHERE a.idutente = $idUtente AND g.idUtente <> $idUtente");
+$r6 = mysqli_query($conn, "SELECT COUNT(*) AS tot FROM accompagnatori a JOIN gite5 g ON a.idgita = g.idGita AND a.tipo_gita = '5g' WHERE a.idutente = $idUtente AND g.idUtente <> $idUtente");
+$totAccompagnatore = (mysqli_fetch_assoc($r5)['tot'] ?? 0) + (mysqli_fetch_assoc($r6)['tot'] ?? 0);
+?>
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profilo - Gestione Gite</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="vetrina.css">
+    <link rel="stylesheet" href="style_custom.css">
+    <script src="vetrina.js" defer></script>
+    <style>
+        .profilo-wrapper {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        .profilo-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .profilo-avatar {
+            width: 5rem;
+            height: 5rem;
+            border-radius: 50%;
+            background: var(--blue-200);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .profilo-avatar span {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--blue-700);
+        }
+        .profilo-nome {
+            color: var(--blue-700);
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        .profilo-ruolo {
+            display: inline-block;
+            background: var(--blue-100);
+            color: var(--blue-700);
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 0.2rem 0.7rem;
+            border-radius: 99px;
+            margin-top: 0.3rem;
+        }
+        .profilo-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .profilo-info-item {
+            background: var(--my-white);
+            border: 1px solid var(--blue-100);
+            border-radius: var(--radius-1);
+            padding: 1rem 1.2rem;
+        }
+        .profilo-info-item label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--blue-400);
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+        .profilo-info-item span {
+            font-size: 1rem;
+            color: var(--blue-900);
+            font-weight: 500;
+        }
+        .profilo-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+        .profilo-stat-card {
+            background: var(--my-white);
+            border: 1px solid var(--blue-100);
+            border-radius: var(--radius-1);
+            padding: 1.2rem;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.08);
+        }
+        .profilo-stat-card .stat-numero {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--blue-600);
+            display: block;
+        }
+        .profilo-stat-card .stat-label {
+            font-size: 0.85rem;
+            color: var(--my-gray);
+            margin-top: 0.3rem;
+            display: block;
+        }
+        @media (max-width: 600px) {
+            .profilo-info-grid {
+                grid-template-columns: 1fr;
+            }
+            .profilo-stats {
+                grid-template-columns: 1fr;
+            }
+            .profilo-header {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+<main class="content">
+
+    <div class="profilo-wrapper">
+        <!-- intestazione profilo -->
+        <div class="profilo-header">
+            <div class="profilo-avatar">
+                <span><?php echo mb_strtoupper(mb_substr($utente['Nome'], 0, 1) . mb_substr($utente['Cognome'], 0, 1)); ?></span>
+            </div>
+            <div>
+                <h2 class="profilo-nome"><?php echo htmlspecialchars($utente['Nome'] . ' ' . $utente['Cognome']); ?></h2>
+                <span class="profilo-ruolo"><?php echo htmlspecialchars($utente['Ruolo']); ?></span>
+            </div>
+        </div>
+
+        <!-- dati personali -->
+        <h3 style="color:var(--blue-700);margin-bottom:1rem;">Dati personali</h3>
+        <div class="profilo-info-grid">
+            <div class="profilo-info-item">
+                <label>Nome</label>
+                <span><?php echo htmlspecialchars($utente['Nome']); ?></span>
+            </div>
+            <div class="profilo-info-item">
+                <label>Cognome</label>
+                <span><?php echo htmlspecialchars($utente['Cognome']); ?></span>
+            </div>
+            <div class="profilo-info-item" style="grid-column: span 2;">
+                <label>Email</label>
+                <span><?php echo htmlspecialchars($utente['Mail']); ?></span>
+            </div>
+        </div>
+
+        <!-- statistiche -->
+        <h3 style="color:var(--blue-700);margin-bottom:1rem;">Riepilogo attivita</h3>
+        <div class="profilo-stats">
+            <div class="profilo-stat-card">
+                <span class="stat-numero"><?php echo $totProposte; ?></span>
+                <span class="stat-label">Proposte create</span>
+            </div>
+            <div class="profilo-stat-card">
+                <span class="stat-numero"><?php echo $totOrganizzazione; ?></span>
+                <span class="stat-label">In organizzazione</span>
+            </div>
+            <div class="profilo-stat-card">
+                <span class="stat-numero"><?php echo $totAccompagnatore; ?></span>
+                <span class="stat-label">Come accompagnatore</span>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<footer>
+    <div class="footer-container">
+        <div class="footer-left">
+            <p><strong>Gestione Gite Scolastiche</strong></p>
+        </div>
+    </div>
+</footer>
+</div>
+
+</body>
+</html>

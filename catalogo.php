@@ -1,43 +1,87 @@
-﻿<?php
+<?php
 include('nav.php');
 
 $messaggio = "";
 
-// ─── NUOVA PROPOSTA GITA 1 GIORNO ────────────────────────────────────────────
+// funzione per validare le date in modo sicuro
+function validaData($str) {
+    if (empty($str)) return false;
+    $ts = strtotime($str);
+    if ($ts === false) return false;
+    // controlla che la data abbia senso
+    $y = intval(date('Y', $ts));
+    return ($y >= 2000 && $y <= 2100);
+}
+
+// funzione per formattare data in modo sicuro
+function formattaData($str, $formato = 'd/m/Y') {
+    if (empty($str)) return '—';
+    $ts = strtotime($str);
+    if ($ts === false) return '—';
+    return date($formato, $ts);
+}
+
+// nuova proposta gita 1 giorno
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'nuova_1g') {
     $idUtente     = $_SESSION['id_utente'];
-    $destinazione = $conn->real_escape_string($_POST['destinazione'] ?? '');
-    $descrizione  = $conn->real_escape_string($_POST['descrizione']  ?? '');
-    $mezzo        = $conn->real_escape_string($_POST['mezzo']        ?? '');
-    $periodo      = $conn->real_escape_string($_POST['periodo']      ?? '');
-    $classi       = $conn->real_escape_string($_POST['classi']       ?? '');
+    $destinazione = trim($_POST['destinazione'] ?? '');
+    $descrizione  = trim($_POST['descrizione']  ?? '');
+    $mezzo        = trim($_POST['mezzo']        ?? '');
+    $periodo      = trim($_POST['periodo']      ?? '');
+    $classi       = trim($_POST['classi']       ?? '');
     $costo        = floatval($_POST['costo'] ?? 0);
 
-    if ($conn->query("INSERT INTO gita1g (idUtente, destinazione, descrizione, mezzo, periodo, classi, costoAPersona, idStato) VALUES ($idUtente, '$destinazione', '$descrizione', '$mezzo', '$periodo', '$classi', $costo, 1)")) {
-        $messaggio = "<div class='alert-success'>Proposta gita 1 giorno salvata come bozza.</div>";
+    // validazione input
+    if ($destinazione === '' || mb_strlen($destinazione) > 255) {
+        $messaggio = "<div class='alert-error'>Destinazione obbligatoria (max 255 caratteri).</div>";
+    } elseif ($costo < 0) {
+        $messaggio = "<div class='alert-error'>Il costo non puo essere negativo.</div>";
     } else {
-        $messaggio = "<div class='alert-error'>Errore durante il salvataggio: " . htmlspecialchars($conn->error) . "</div>";
+        $destinazione = $conn->real_escape_string($destinazione);
+        $descrizione  = $conn->real_escape_string($descrizione);
+        $mezzo        = $conn->real_escape_string($mezzo);
+        $periodo      = $conn->real_escape_string($periodo);
+        $classi       = $conn->real_escape_string($classi);
+
+        if ($conn->query("INSERT INTO gita1g (idUtente, destinazione, descrizione, mezzo, periodo, classi, costoAPersona, idStato) VALUES ($idUtente, '$destinazione', '$descrizione', '$mezzo', '$periodo', '$classi', $costo, 1)")) {
+            $messaggio = "<div class='alert-success'>Proposta gita 1 giorno salvata come bozza.</div>";
+        } else {
+            $messaggio = "<div class='alert-error'>Errore durante il salvataggio: " . htmlspecialchars($conn->error) . "</div>";
+        }
     }
 }
 
-// ─── NUOVA PROPOSTA GITA PIU GIORNI ──────────────────────────────────────────
+// nuova proposta gita piu giorni
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'nuova_5g') {
     $idUtente     = $_SESSION['id_utente'];
-    $destinazione = $conn->real_escape_string($_POST['destinazione'] ?? '');
-    $descrizione  = $conn->real_escape_string($_POST['descrizione']  ?? '');
-    $mezzo        = $conn->real_escape_string($_POST['mezzo']        ?? '');
-    $periodo      = $conn->real_escape_string($_POST['periodo']      ?? '');
-    $classi       = $conn->real_escape_string($_POST['classi']       ?? '');
+    $destinazione = trim($_POST['destinazione'] ?? '');
+    $descrizione  = trim($_POST['descrizione']  ?? '');
+    $mezzo        = trim($_POST['mezzo']        ?? '');
+    $periodo      = trim($_POST['periodo']      ?? '');
+    $classi       = trim($_POST['classi']       ?? '');
     $costo        = floatval($_POST['costo'] ?? 0);
 
-    if ($conn->query("INSERT INTO gite5 (idUtente, destinazione, descrizione, mezzo, periodo, classi, costoAPersona, idStato) VALUES ($idUtente, '$destinazione', '$descrizione', '$mezzo', '$periodo', '$classi', $costo, 1)")) {
-        $messaggio = "<div class='alert-success'>Proposta gita di più giorni salvata come bozza.</div>";
+    // validazione input
+    if ($destinazione === '' || mb_strlen($destinazione) > 255) {
+        $messaggio = "<div class='alert-error'>Destinazione obbligatoria (max 255 caratteri).</div>";
+    } elseif ($costo < 0) {
+        $messaggio = "<div class='alert-error'>Il costo non puo essere negativo.</div>";
     } else {
-        $messaggio = "<div class='alert-error'>Errore durante il salvataggio: " . htmlspecialchars($conn->error) . "</div>";
+        $destinazione = $conn->real_escape_string($destinazione);
+        $descrizione  = $conn->real_escape_string($descrizione);
+        $mezzo        = $conn->real_escape_string($mezzo);
+        $periodo      = $conn->real_escape_string($periodo);
+        $classi       = $conn->real_escape_string($classi);
+
+        if ($conn->query("INSERT INTO gite5 (idUtente, destinazione, descrizione, mezzo, periodo, classi, costoAPersona, idStato) VALUES ($idUtente, '$destinazione', '$descrizione', '$mezzo', '$periodo', '$classi', $costo, 1)")) {
+            $messaggio = "<div class='alert-success'>Proposta gita di piu giorni salvata come bozza.</div>";
+        } else {
+            $messaggio = "<div class='alert-error'>Errore durante il salvataggio: " . htmlspecialchars($conn->error) . "</div>";
+        }
     }
 }
 
-// ─── ORGANIZZA GITA 1 GIORNO (copia con stato 4) ─────────────────────────────
+// organizza gita 1 giorno (copia con stato 4)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'organizza_1g') {
     $idGita    = intval($_POST['id_gita']);
     $idUtente  = $_SESSION['id_utente'];
@@ -49,6 +93,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $costoMezzo  = $_POST['org_costoMezzo']  !== '' ? floatval($_POST['org_costoMezzo'])  : null;
     $costoGiorno = $_POST['org_costoGiorno'] !== '' ? floatval($_POST['org_costoGiorno']) : null;
     $numAlunni   = $_POST['org_numAlunni']   !== '' ? intval($_POST['org_numAlunni'])     : null;
+
+    if ($giorno && (strtotime($giorno) === false || intval(date('Y', strtotime($giorno))) < 2024 || intval(date('Y', strtotime($giorno))) > 2030)) {
+        $giorno = null;
+    }
 
     // Leggi la riga originale
     $orig = $conn->query("SELECT * FROM gita1g WHERE idGita = $idGita")->fetch_assoc();
@@ -74,7 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
-// ─── ORGANIZZA GITA PIU GIORNI (copia con stato 4) ───────────────────────────
+// organizza gita piu giorni (copia con stato 4)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'organizza_5g') {
     $idGita       = intval($_POST['id_gita']);
     $idUtente     = $_SESSION['id_utente'];
@@ -87,6 +135,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $giornoFine   = $_POST['org_giornoFine']    ?: null;
     $costoAPersona= $_POST['org_costoAPersona'] !== '' ? floatval($_POST['org_costoAPersona']) : null;
     $numAlunni    = $_POST['org_numAlunni']     !== '' ? intval($_POST['org_numAlunni'])       : null;
+
+    if ($giornoInizio && (strtotime($giornoInizio) === false || intval(date('Y', strtotime($giornoInizio))) < 2024 || intval(date('Y', strtotime($giornoInizio))) > 2030)) {
+        $giornoInizio = null;
+    }
+    if ($giornoFine && (strtotime($giornoFine) === false || intval(date('Y', strtotime($giornoFine))) < 2024 || intval(date('Y', strtotime($giornoFine))) > 2030)) {
+        $giornoFine = null;
+    }
 
     $orig = $conn->query("SELECT * FROM gite5 WHERE idGita = $idGita")->fetch_assoc();
     if ($orig) {
@@ -110,7 +165,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
-// ─── MODIFICA GITA 1 GIORNO ──────────────────────────────────────────────────
+// modifica gita 1 giorno
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'modifica_1g') {
     if ($_SESSION['ruolo'] == 2) {
         $idGita       = intval($_POST['id_gita']);
@@ -128,7 +183,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
-// ─── ELIMINA GITA 1 GIORNO ───────────────────────────────────────────────────
+// elimina gita 1 giorno
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'elimina_1g') {
     if ($_SESSION['ruolo'] == 2) {
         $idGita = intval($_POST['id_gita']);
@@ -140,7 +195,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
-// ─── MODIFICA GITA PIU GIORNI ─────────────────────────────────────────────────
+// modifica gita piu giorni
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'modifica_5g') {
     if ($_SESSION['ruolo'] == 2) {
         $idGita       = intval($_POST['id_gita']);
@@ -158,7 +213,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
-// ─── ELIMINA GITA PIU GIORNI ──────────────────────────────────────────────────
+// elimina gita piu giorni
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'elimina_5g') {
     if ($_SESSION['ruolo'] == 2) {
         $idGita = intval($_POST['id_gita']);
@@ -170,7 +225,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
-// ─── QUERY GITE 1 GIORNO (stato 2 = Approvate) ───────────────────────────────
+// query gite 1 giorno (stato 2 = approvate)
 $gite1g = $conn->query("
     SELECT g.idGita, g.destinazione, g.descrizione, g.mezzo, g.periodo, g.costoAPersona, g.classi,
            u.Nome, u.Cognome
@@ -180,7 +235,7 @@ $gite1g = $conn->query("
     ORDER BY g.idGita DESC
 ");
 
-// ─── QUERY GITE PIU GIORNI (stato 2 = Approvate) ─────────────────────────────
+// query gite piu giorni (stato 2 = approvate)
 $gite5g = $conn->query("
     SELECT g.idGita, g.destinazione, g.descrizione, g.mezzo, g.periodo, g.costoAPersona, g.classi,
            u.Nome, u.Cognome
@@ -280,9 +335,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 <?php endif; ?>
 <h2 style="color:var(--blue-700);margin:0;">Proposte Gite</h2>
-<!-- ═══════════════════════════════════════════════════════════════
-     SEZIONE GITE 1 GIORNO
-═══════════════════════════════════════════════════════════════ -->
+<!-- sezione gite 1 giorno -->
 <div style="display:flex;align-items:center;justify-content:space-between;margin-top:2rem;margin-bottom:1rem;">
     <h3 style="color:var(--blue-700);margin:0;">Gite di 1 Giorno <span style="font-size:.85rem;font-weight:400;color:#6b7280;">(<?= $tot1g ?> approvate)</span></h3>
     <button class="button" onclick="document.getElementById('modal1g').classList.remove('hidden')">+ Nuova Proposta</button>
@@ -357,9 +410,7 @@ if ($gite1g && $gite1g->num_rows > 0) {
 </table>
 </div></div>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     SEZIONE GITE PIU GIORNI
-═══════════════════════════════════════════════════════════════ -->
+<!-- sezione gite piu giorni -->
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
     <h3 style="color:var(--blue-700);margin:0;">Gite di più Giorni <span style="font-size:.85rem;font-weight:400;color:#6b7280;">(<?= $tot5g ?> approvate)</span></h3>
     <button class="button" onclick="document.getElementById('modal5g').classList.remove('hidden')">+ Nuova Proposta</button>
@@ -437,9 +488,7 @@ if ($gite5g && $gite5g->num_rows > 0) {
 </main>
 
 
-<!-- ═══════════════════════════════════════════════════════════════
-     MODAL — Nuova Proposta Gita 1 Giorno
-═══════════════════════════════════════════════════════════════ -->
+<!-- modal: nuova proposta gita 1 giorno -->
 <div class="modal-overlay hidden" id="modal1g">
 <div class="modal">
 <div class="modal-header">
@@ -490,9 +539,7 @@ if ($gite5g && $gite5g->num_rows > 0) {
 </div>
 
 
-<!-- ═══════════════════════════════════════════════════════════════
-     MODAL — Nuova Proposta Gita più Giorni
-═══════════════════════════════════════════════════════════════ -->
+<!-- modal: nuova proposta gita piu giorni -->
 <div class="modal-overlay hidden" id="modal5g">
 <div class="modal">
 <div class="modal-header">
@@ -543,9 +590,7 @@ if ($gite5g && $gite5g->num_rows > 0) {
 </div>
 
 
-<!-- ═══════════════════════════════════════════════════════════════
-     MODAL — Organizza Gita 1 Giorno
-═══════════════════════════════════════════════════════════════ -->
+<!-- modal: organizza gita 1 giorno -->
 <div class="modal-overlay hidden" id="modalOrg1g">
 <div class="modal">
 <div class="modal-header">
@@ -588,7 +633,7 @@ if ($gite5g && $gite5g->num_rows > 0) {
         </div>
         <div class="form-group">
             <label>Giorno</label>
-            <input type="date" name="org_giorno" id="org1g_giorno" class="form-control">
+            <input type="date" name="org_giorno" id="org1g_giorno" class="form-control" min="2024-01-01" max="2030-12-31">
         </div>
         <div class="form-group">
             <label>Costo Mezzo (&euro;)</label>
@@ -613,9 +658,7 @@ if ($gite5g && $gite5g->num_rows > 0) {
 </div>
 
 
-<!-- ═══════════════════════════════════════════════════════════════
-     MODAL — Organizza Gita più Giorni
-═══════════════════════════════════════════════════════════════ -->
+<!-- modal: organizza gita piu giorni -->
 <div class="modal-overlay hidden" id="modalOrg5g">
 <div class="modal">
 <div class="modal-header">
@@ -658,11 +701,11 @@ if ($gite5g && $gite5g->num_rows > 0) {
         </div>
         <div class="form-group">
             <label>Giorno Inizio</label>
-            <input type="date" name="org_giornoInizio" id="org5g_giornoInizio" class="form-control">
+            <input type="date" name="org_giornoInizio" id="org5g_giornoInizio" class="form-control" min="2024-01-01" max="2030-12-31">
         </div>
         <div class="form-group">
             <label>Giorno Fine</label>
-            <input type="date" name="org_giornoFine" id="org5g_giornoFine" class="form-control">
+            <input type="date" name="org_giornoFine" id="org5g_giornoFine" class="form-control" min="2024-01-01" max="2030-12-31">
         </div>
         <div class="form-group">
             <label>Num. Alunni</label>
@@ -678,9 +721,7 @@ if ($gite5g && $gite5g->num_rows > 0) {
 </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     MODAL — Modifica Gita 1 Giorno (solo commissione)
-═══════════════════════════════════════════════════════════════ -->
+<!-- modal: modifica gita 1 giorno (solo commissione) -->
 <div class="modal-overlay hidden" id="modalMod1g">
 <div class="modal">
 <div class="modal-header">
@@ -698,7 +739,7 @@ if ($gite5g && $gite5g->num_rows > 0) {
         </div>
         <div class="form-group full-row">
             <label>Descrizione</label>
-            <input type="text" name="mod_descrizione" id="mod1g_descrizione" class="form-control">
+            <input type="text" name="mod_descrizione" id="mod1g_descrizione" class="form-control" placeholder="Breve descrizione">
         </div>
         <div class="form-group">
             <label>Mezzo di trasporto</label>
@@ -732,9 +773,7 @@ if ($gite5g && $gite5g->num_rows > 0) {
 </div>
 
 
-<!-- ═══════════════════════════════════════════════════════════════
-     MODAL — Modifica Gita più Giorni (solo commissione)
-═══════════════════════════════════════════════════════════════ -->
+<!-- modal: modifica gita piu giorni -->
 <div class="modal-overlay hidden" id="modalMod5g">
 <div class="modal">
 <div class="modal-header">
@@ -752,7 +791,7 @@ if ($gite5g && $gite5g->num_rows > 0) {
         </div>
         <div class="form-group full-row">
             <label>Descrizione</label>
-            <input type="text" name="mod_descrizione" id="mod5g_descrizione" class="form-control">
+            <input type="text" name="mod_descrizione" id="mod5g_descrizione" class="form-control" placeholder="Breve descrizione">
         </div>
         <div class="form-group">
             <label>Mezzo di trasporto</label>
@@ -786,9 +825,7 @@ if ($gite5g && $gite5g->num_rows > 0) {
 </div>
 
 
-<!-- ═══════════════════════════════════════════════════════════════
-     MODAL — Conferma Elimina (solo commissione)
-═══════════════════════════════════════════════════════════════ -->
+<!-- modal: conferma elimina (solo commissione) -->
 <div class="modal-overlay hidden" id="modalElimina">
 <div class="modal">
 <div class="modal-header">
@@ -809,18 +846,15 @@ if ($gite5g && $gite5g->num_rows > 0) {
     <input type="hidden" name="id_gita" id="elimId">
 </form>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     MODAL — Organizzazione completata con successo
-═══════════════════════════════════════════════════════════════ -->
+<!-- modal: organizzazione completata -->
 <div class="modal-overlay hidden" id="modalOrganizzaOk">
 <div class="modal" style="text-align:center;max-width:420px;">
 <div class="modal-header" style="justify-content:center;border-bottom:none;padding-bottom:0;">
     <button class="close-btn" style="position:absolute;right:1rem;top:1rem;" onclick="document.getElementById('modalOrganizzaOk').classList.add('hidden')">&times;</button>
 </div>
 <div class="modal-body" style="padding-top:0.5rem;">
-    <div style="font-size:3rem;margin-bottom:0.75rem;">✅</div>
-    <h3 style="color:var(--blue-700);margin-bottom:0.5rem;">Gita Organizzata!</h3>
-    <p style="color:#475569;">La gita è stata messa in organizzazione con successo.</p>
+    <h3 style="color:var(--blue-700);margin-bottom:0.5rem;">Gita Organizzata</h3>
+    <p style="color:#475569;">La gita e stata messa in organizzazione con successo.</p>
 </div>
 <div class="modal-footer" style="justify-content:center;">
     <button class="button" onclick="document.getElementById('modalOrganizzaOk').classList.add('hidden')">OK</button>
@@ -831,3 +865,5 @@ if ($gite5g && $gite5g->num_rows > 0) {
 </div><!-- /container -->
 </body>
 </html>
+
+

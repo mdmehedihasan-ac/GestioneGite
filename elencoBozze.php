@@ -1,9 +1,9 @@
-﻿<?php
+<?php
 include('nav.php');
 
 $messaggio = "";
 
-// ─── AZIONI APPROVA / BOCCIA GITA 1 GIORNO ───────────────────────────────────
+// --- AZIONI APPROVA / BOCCIA GITA 1 GIORNO -----------------------------------
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'azione_1g') {
     $idGita     = intval($_POST['id_gita']);
     $nuovoStato = ($_POST['azione'] === 'approva') ? 2 : 3;
@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
-// ─── AZIONI APPROVA / BOCCIA GITA 5 GIORNI ───────────────────────────────────
+// --- AZIONI APPROVA / BOCCIA GITA 5 GIORNI -----------------------------------
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'azione_5g') {
     $idGita     = intval($_POST['id_gita']);
     $nuovoStato = ($_POST['azione'] === 'approva') ? 2 : 3;
@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
-// ─── QUERY BOZZE GITA 1 GIORNO (stato 1) ─────────────────────────────────────
+// --- QUERY BOZZE GITA 1 GIORNO (stato 1) -------------------------------------
 $bozze1g = $conn->query("
     SELECT g.idGita, g.destinazione, g.mezzo, g.periodo, g.costoAPersona,
            u.Nome, u.Cognome
@@ -35,7 +35,7 @@ $bozze1g = $conn->query("
     ORDER BY g.idGita DESC
 ");
 
-// ─── QUERY BOZZE GITA 5 GIORNI (stato 1) ─────────────────────────────────────
+// --- QUERY BOZZE GITA 5 GIORNI (stato 1) -------------------------------------
 $bozze5g = $conn->query("
     SELECT g.idGita, g.destinazione, g.mezzo, g.periodo, g.costoAPersona,
            u.Nome, u.Cognome
@@ -94,9 +94,9 @@ $tot5g = $bozze5g ? $bozze5g->num_rows : 0;
 
 <?php echo $messaggio; ?>
 
-<!-- ═══════════════════════════════════════════════════════════════
+<!-- ---------------------------------------------------------------
      SEZIONE BOZZE GITE 1 GIORNO
-═══════════════════════════════════════════════════════════════ -->
+--------------------------------------------------------------- -->
 <div style="display:flex;align-items:center;justify-content:space-between;margin-top:2rem;margin-bottom:1rem;">
     <h3 style="color:var(--blue-700);margin:0;">Gite di 1 Giorno <span style="font-size:.85rem;font-weight:400;color:#6b7280;">(<?= $tot1g ?> in attesa)</span></h3>
 </div>
@@ -118,8 +118,8 @@ $n = 1;
 if ($bozze1g && $bozze1g->num_rows > 0) {
     while ($r = $bozze1g->fetch_assoc()) {
         $dest   = htmlspecialchars($r['destinazione']);
-        $mezzo  = htmlspecialchars($r['mezzo'] ?? '—');
-        $per    = htmlspecialchars($r['periodo'] ?? '—');
+        $mezzo  = htmlspecialchars($r['mezzo'] ?? '�');
+        $per    = htmlspecialchars($r['periodo'] ?? '�');
         $costo  = number_format($r['costoAPersona'], 2, ',', '.');
         $autore = htmlspecialchars($r['Nome'] . ' ' . $r['Cognome']);
         $id     = intval($r['idGita']);
@@ -145,9 +145,9 @@ if ($bozze1g && $bozze1g->num_rows > 0) {
 </table>
 </div></div>
 
-<!-- ═══════════════════════════════════════════════════════════════
+<!-- ---------------------------------------------------------------
      SEZIONE BOZZE GITE 5 GIORNI
-═══════════════════════════════════════════════════════════════ -->
+--------------------------------------------------------------- -->
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
     <h3 style="color:var(--blue-700);margin:0;">Gite di 5 Giorni <span style="font-size:.85rem;font-weight:400;color:#6b7280;">(<?= $tot5g ?> in attesa)</span></h3>
 </div>
@@ -169,8 +169,8 @@ $n = 1;
 if ($bozze5g && $bozze5g->num_rows > 0) {
     while ($r = $bozze5g->fetch_assoc()) {
         $dest   = htmlspecialchars($r['destinazione']);
-        $mezzo  = htmlspecialchars($r['mezzo'] ?? '—');
-        $per    = htmlspecialchars($r['periodo'] ?? '—');
+        $mezzo  = htmlspecialchars($r['mezzo'] ?? '�');
+        $per    = htmlspecialchars($r['periodo'] ?? '�');
         $costo  = number_format($r['costoAPersona'], 2, ',', '.');
         $autore = htmlspecialchars($r['Nome'] . ' ' . $r['Cognome']);
         $id     = intval($r['idGita']);
@@ -198,9 +198,9 @@ if ($bozze5g && $bozze5g->num_rows > 0) {
 
 </main>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     MODAL — Conferma Approva / Boccia
-═══════════════════════════════════════════════════════════════ -->
+<!-- ---------------------------------------------------------------
+     MODAL � Conferma Approva / Boccia
+--------------------------------------------------------------- -->
 <div class="modal-overlay hidden" id="modalConferma">
 <div class="modal">
 <div class="modal-header">
@@ -227,3 +227,5 @@ if ($bozze5g && $bozze5g->num_rows > 0) {
 </div><!-- /container -->
 </body>
 </html>
+
+

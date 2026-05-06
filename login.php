@@ -8,10 +8,16 @@
         $email = trim($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
 
-        $istruzione = mysqli_prepare($conn, "SELECT IDUtente, Nome, Cognome, Password, IDTipo FROM utente WHERE Mail = ?");
-        mysqli_stmt_bind_param($istruzione, "s", $email);
-        mysqli_stmt_execute($istruzione);
-        $result = mysqli_stmt_get_result($istruzione);
+        // validazione email
+        if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errore = "Inserisci un indirizzo email valido.";
+        } elseif ($password === '') {
+            $errore = "Inserisci la password.";
+        } else {
+            $istruzione = mysqli_prepare($conn, "SELECT IDUtente, Nome, Cognome, Password, IDTipo FROM utente WHERE Mail = ?");
+            mysqli_stmt_bind_param($istruzione, "s", $email);
+            mysqli_stmt_execute($istruzione);
+            $result = mysqli_stmt_get_result($istruzione);
         
         if ($row = mysqli_fetch_assoc($result)) {
             if (password_verify($password, $row['Password'])) {
@@ -29,6 +35,7 @@
             $errore = "Nessun account trovato con questa email.";
         }
         mysqli_stmt_close($istruzione);
+        }
     }
 ?>
 <?php include('nav.php'); ?>

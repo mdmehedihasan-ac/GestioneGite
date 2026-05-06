@@ -1,4 +1,4 @@
-﻿
+
 .header-container {
     border: none !important;
 }
@@ -62,9 +62,17 @@ header h2 {
     }
 }
 
+/* modale largo per form complessi */
 .modal.wide-modal {
     max-width: 900px; 
     width: 95%;
+}
+
+@media (max-width: 600px) {
+    .modal.wide-modal {
+        width: 98%;
+        max-width: 98%;
+    }
 }
 
 .modal-successo {

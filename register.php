@@ -12,7 +12,16 @@
         $password = $_POST['password'] ?? '';
         $conferma_password = $_POST['confirm-password'] ?? '';
 
-        if ($password !== $conferma_password) {
+        // validazione campi obbligatori
+        if ($nome === '' || mb_strlen($nome) > 50) {
+            $errore = "Nome obbligatorio (max 50 caratteri).";
+        } elseif ($cognome === '' || mb_strlen($cognome) > 50) {
+            $errore = "Cognome obbligatorio (max 50 caratteri).";
+        } elseif (!preg_match('/^[a-zA-ZÀ-ÿ\s\'-]+$/', $nome) || !preg_match('/^[a-zA-ZÀ-ÿ\s\'-]+$/', $cognome)) {
+            $errore = "Nome e cognome possono contenere solo lettere.";
+        } elseif ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errore = "Inserisci un indirizzo email valido.";
+        } elseif ($password !== $conferma_password) {
             $errore = "Le password non coincidono.";
         } elseif (strlen($password) < 6) {
             $errore = "La password deve contenere almeno 6 caratteri.";

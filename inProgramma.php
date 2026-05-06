@@ -1,10 +1,10 @@
-﻿<?php
+<?php
 include('nav.php');
 
 $ruolo           = $_SESSION['ruolo']     ?? 0;
 $idUtenteLoggato = intval($_SESSION['id_utente'] ?? 0);
 
-// ─── Handler partecipa ────────────────────────────────────────────────────────
+// handler partecipa
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'partecipa') {
     $idGita   = intval($_POST['id_gita']   ?? 0);
     $tipoGita = ($_POST['tipo_gita'] ?? '') === 'gite5' ? '5g' : '1g';
@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'parte
     exit;
 }
 
-// ─── Handler elimina (solo commissione) ──────────────────────────────────────
+// handler elimina (solo commissione)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'elimina' && $ruolo == 2) {
     $idGita = intval($_POST['id_gita'] ?? 0);
     $tab    = $_POST['tabella'] === 'gite5' ? 'gite5' : 'gita1g';
@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'elimi
     exit;
 }
 
-// ─── Handler modifica 1g (solo commissione) ───────────────────────────────────
+// handler modifica 1g (solo commissione)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'modifica_1g' && $ruolo == 2) {
     $id   = intval($_POST['id_gita'] ?? 0);
     $dest = mysqli_real_escape_string($conn, trim($_POST['destinazione'] ?? ''));
@@ -36,7 +36,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'modif
     $per  = mysqli_real_escape_string($conn, trim($_POST['periodo']      ?? ''));
     $cls  = mysqli_real_escape_string($conn, trim($_POST['classi']       ?? ''));
     $gio  = trim($_POST['giorno'] ?? '');
-    $gio_s = $gio ? "'$gio'" : 'NULL';
+    
+    // validazione
+    if ($gio && (strtotime($gio) === false || intval(date('Y', strtotime($gio))) < 2024 || intval(date('Y', strtotime($gio))) > 2030)) {
+        $gio = '';
+    }
+    
+    $gio_s   = $gio ? "'" . $conn->real_escape_string($gio) . "'" : "NULL";
     $costoM = $_POST['costoMezzo']    !== '' ? floatval($_POST['costoMezzo'])    : 'NULL';
     $costoA = $_POST['costoAttivita'] !== '' ? floatval($_POST['costoAttivita']) : 'NULL';
     $costoP = $_POST['costoAPersona'] !== '' ? floatval($_POST['costoAPersona']) : 'NULL';
@@ -48,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'modif
     exit;
 }
 
-// ─── Handler modifica 5g (solo commissione) ───────────────────────────────────
+// handler modifica 5g (solo commissione)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'modifica_5g' && $ruolo == 2) {
     $id   = intval($_POST['id_gita'] ?? 0);
     $dest = mysqli_real_escape_string($conn, trim($_POST['destinazione'] ?? ''));
@@ -58,8 +64,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'modif
     $cls  = mysqli_real_escape_string($conn, trim($_POST['classi']       ?? ''));
     $gi   = trim($_POST['giornoInizio'] ?? '');
     $gf   = trim($_POST['giornoFine']   ?? '');
-    $gi_s = $gi ? "'$gi'" : 'NULL';
-    $gf_s = $gf ? "'$gf'" : 'NULL';
+
+    // validazione
+    if ($gi && (strtotime($gi) === false || intval(date('Y', strtotime($gi))) < 2024 || intval(date('Y', strtotime($gi))) > 2030)) {
+        $gi = '';
+    }
+    if ($gf && (strtotime($gf) === false || intval(date('Y', strtotime($gf))) < 2024 || intval(date('Y', strtotime($gf))) > 2030)) {
+        $gf = '';
+    }
+
+    $gi_s    = $gi ? "'" . $conn->real_escape_string($gi) . "'" : "NULL";
+    $gf_s    = $gf ? "'" . $conn->real_escape_string($gf) . "'" : "NULL";
     $costoP = $_POST['costoAPersona'] !== '' ? floatval($_POST['costoAPersona']) : 'NULL';
     $numAl  = $_POST['numAlunni']     !== '' ? intval($_POST['numAlunni'])       : 'NULL';
     if ($id > 0) {
@@ -69,14 +84,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'modif
     exit;
 }
 
-// ─── Query gite 1 giorno stato 4 ─────────────────────────────────────────────
+// query gite 1 giorno stato 4
 $res1g = mysqli_query($conn,
     "SELECT g.*, CONCAT(u.Nome, ' ', u.Cognome) AS autore
      FROM gita1g g JOIN utente u ON g.idUtente = u.IDUtente
      WHERE g.idStato = 4 ORDER BY g.giorno ASC"
 );
 
-// ─── Query gite piu giorni stato 4 ───────────────────────────────────────────
+// query gite piu giorni stato 4
 $res5g = mysqli_query($conn,
     "SELECT g.*, CONCAT(u.Nome, ' ', u.Cognome) AS autore
      FROM gite5 g JOIN utente u ON g.idUtente = u.IDUtente
@@ -106,11 +121,11 @@ $res5g = mysqli_query($conn,
 
 <?php if (($_GET['partecipato'] ?? '') === '1'): ?>
 <div class="alert alert-success" style="margin-bottom:1rem;">
-    ✅ Hai aderito alla gita come accompagnatore! La trovi ora in <a href="mieGite.php"><strong>Le Mie Gite</strong></a>.
+    Hai aderito alla gita come accompagnatore. La trovi ora in <a href="mieGite.php"><strong>Le Mie Gite</strong></a>.
 </div>
 <?php endif; ?>
 
-<!-- ══ GITE 1 GIORNO ════════════════════════════════════════════════════════ -->
+<!-- gite 1 giorno -->
 <h3 style="color:var(--blue-700);margin-bottom:0.75rem;">Gite di 1 Giorno</h3>
 <div class="table-section"><div class="table-container">
 <table>
@@ -127,7 +142,7 @@ if ($res1g && mysqli_num_rows($res1g) > 0):
         $dest    = htmlspecialchars($row['destinazione'] ?? '');
         $mezzo   = htmlspecialchars($row['mezzo']   ?? '');
         $classi  = htmlspecialchars($row['classi']  ?? '');
-        $giorno  = $row['giorno'] ? date('d/m/Y', strtotime($row['giorno'])) : '—';
+        $giorno  = $row['giorno'] ? (strtotime($row['giorno']) !== false ? date('d/m/Y', strtotime($row['giorno'])) : '—') : '—';
         $giornoV = $row['giorno'] ?? '';
         $costo   = $row['costoAPersona'] !== null ? '&euro; ' . number_format($row['costoAPersona'], 2, ',', '.') : '—';
         $numAl   = $row['numAlunni'] ?? '';
@@ -151,13 +166,13 @@ if ($res1g && mysqli_num_rows($res1g) > 0):
         <td><?php echo $autore; ?></td>
         <td style="display:flex;gap:0.4rem;flex-wrap:wrap;align-items:center;">
             <?php if ($giaPart): ?>
-                <span class="badge badge-success" style="font-size:0.78rem;">✅ Iscritto</span>
+                <span class="badge badge-success" style="font-size:0.78rem;">Iscritto</span>
             <?php else: ?>
                 <form method="POST" action="inProgramma.php" style="margin:0;">
                     <input type="hidden" name="action"    value="partecipa">
                     <input type="hidden" name="id_gita"   value="<?php echo $id; ?>">
                     <input type="hidden" name="tipo_gita" value="gita1g">
-                    <button type="submit" class="button xs">👥 Partecipa</button>
+                    <button type="submit" class="button xs">Partecipa</button>
                 </form>
             <?php endif; ?>
             <?php if ($ruolo == 2): ?>
@@ -173,12 +188,12 @@ if ($res1g && mysqli_num_rows($res1g) > 0):
                 data-costo-att="<?php echo $costoAV; ?>"
                 data-costo-ap="<?php echo $costoPA; ?>"
                 data-num-alunni="<?php echo $numAl; ?>"
-                onclick="apriMod1g(this)">✏️ Modifica</button>
+                onclick="apriMod1g(this)">Modifica</button>
             <button type="button" class="button cancel xs"
                 data-id="<?php echo $id; ?>"
                 data-dest="<?php echo $dJ; ?>"
                 data-tab="gita1g"
-                onclick="apriElimina(this)">🗑️ Elimina</button>
+                onclick="apriElimina(this)">Elimina</button>
             <?php endif; ?>
         </td>
     </tr>
@@ -189,7 +204,7 @@ if ($res1g && mysqli_num_rows($res1g) > 0):
 </table>
 </div></div>
 
-<!-- ══ GITE PIU GIORNI ══════════════════════════════════════════════════════ -->
+<!-- gite piu giorni -->
 <h3 style="color:var(--blue-700);margin:2rem 0 0.75rem;">Gite di Più Giorni</h3>
 <div class="table-section"><div class="table-container">
 <table>
@@ -206,8 +221,8 @@ if ($res5g && mysqli_num_rows($res5g) > 0):
         $dest   = htmlspecialchars($row['destinazione'] ?? '');
         $mezzo  = htmlspecialchars($row['mezzo']   ?? '');
         $classi = htmlspecialchars($row['classi']  ?? '');
-        $gi     = $row['giornoInizio'] ? date('d/m/Y', strtotime($row['giornoInizio'])) : '—';
-        $gf     = $row['giornoFine']   ? date('d/m/Y', strtotime($row['giornoFine']))   : '—';
+        $gi     = $row['giornoInizio'] ? (strtotime($row['giornoInizio']) !== false ? date('d/m/Y', strtotime($row['giornoInizio'])) : '—') : '—';
+        $gf     = $row['giornoFine']   ? (strtotime($row['giornoFine'])   !== false ? date('d/m/Y', strtotime($row['giornoFine']))   : '—') : '—';
         $giV    = $row['giornoInizio'] ?? '';
         $gfV    = $row['giornoFine']   ?? '';
         $costo  = $row['costoAPersona'] !== null ? '&euro; ' . number_format($row['costoAPersona'], 2, ',', '.') : '—';
@@ -231,13 +246,14 @@ if ($res5g && mysqli_num_rows($res5g) > 0):
         <td><?php echo $autore; ?></td>
         <td style="display:flex;gap:0.4rem;flex-wrap:wrap;align-items:center;">
             <?php if ($giaPart): ?>
-                <span class="badge badge-success" style="font-size:0.78rem;">✅ Iscritto</span>
+                <!-- blocco disdetta: una volta iscritto non si puo annullare -->
+                <span class="badge badge-success" style="font-size:0.78rem;">Iscritto</span>
             <?php else: ?>
                 <form method="POST" action="inProgramma.php" style="margin:0;">
                     <input type="hidden" name="action"    value="partecipa">
                     <input type="hidden" name="id_gita"   value="<?php echo $id; ?>">
                     <input type="hidden" name="tipo_gita" value="gite5">
-                    <button type="submit" class="button xs">👥 Partecipa</button>
+                    <button type="submit" class="button xs">Partecipa</button>
                 </form>
             <?php endif; ?>
             <?php if ($ruolo == 2): ?>
@@ -252,12 +268,12 @@ if ($res5g && mysqli_num_rows($res5g) > 0):
                 data-gf="<?php echo $gfV; ?>"
                 data-costo-ap="<?php echo $costoPA; ?>"
                 data-num-alunni="<?php echo $numAl; ?>"
-                onclick="apriMod5g(this)">✏️ Modifica</button>
+                onclick="apriMod5g(this)">Modifica</button>
             <button type="button" class="button cancel xs"
                 data-id="<?php echo $id; ?>"
                 data-dest="<?php echo $dJ; ?>"
                 data-tab="gite5"
-                onclick="apriElimina(this)">🗑️ Elimina</button>
+                onclick="apriElimina(this)">Elimina</button>
             <?php endif; ?>
         </td>
     </tr>
@@ -270,7 +286,7 @@ if ($res5g && mysqli_num_rows($res5g) > 0):
 
 </main>
 
-<!-- ══════════════ MODAL — Conferma Elimina ══════════════════════════════════ -->
+<!-- modal: conferma elimina -->
 <div class="modal-overlay hidden" id="modalElimina">
 <div class="modal" style="max-width:420px;">
 <div class="modal-header">
@@ -294,7 +310,7 @@ if ($res5g && mysqli_num_rows($res5g) > 0):
 </div>
 </div>
 
-<!-- ══════════════ MODAL — Modifica Gita 1 Giorno ════════════════════════════ -->
+<!-- modal: modifica gita 1 giorno -->
 <div class="modal-overlay hidden" id="modalMod1g">
 <div class="modal wide-modal">
 <div class="modal-header">
@@ -312,7 +328,7 @@ if ($res5g && mysqli_num_rows($res5g) > 0):
         </div>
         <div class="form-group full-row">
             <label>Descrizione</label>
-            <input type="text" name="descrizione" id="m1g_desc" class="form-control">
+            <input type="text" name="descrizione" id="m1g_desc" class="form-control" placeholder="Breve descrizione">
         </div>
         <div class="form-group">
             <label>Mezzo di trasporto</label>
@@ -333,7 +349,7 @@ if ($res5g && mysqli_num_rows($res5g) > 0):
         </div>
         <div class="form-group">
             <label>Giorno</label>
-            <input type="date" name="giorno" id="m1g_giorno" class="form-control">
+            <input type="date" name="giorno" id="m1g_giorno" class="form-control" min="2024-01-01" max="2030-12-31">
         </div>
         <div class="form-group">
             <label>Costo Mezzo (&euro;)</label>
@@ -361,7 +377,7 @@ if ($res5g && mysqli_num_rows($res5g) > 0):
 </div>
 </div>
 
-<!-- ══════════════ MODAL — Modifica Gita Più Giorni ══════════════════════════ -->
+<!-- modal: modifica gita piu giorni -->
 <div class="modal-overlay hidden" id="modalMod5g">
 <div class="modal wide-modal">
 <div class="modal-header">
@@ -379,7 +395,7 @@ if ($res5g && mysqli_num_rows($res5g) > 0):
         </div>
         <div class="form-group full-row">
             <label>Descrizione</label>
-            <input type="text" name="descrizione" id="m5g_desc" class="form-control">
+            <input type="text" name="descrizione" id="m5g_desc" class="form-control" placeholder="Breve descrizione">
         </div>
         <div class="form-group">
             <label>Mezzo di trasporto</label>
@@ -400,11 +416,11 @@ if ($res5g && mysqli_num_rows($res5g) > 0):
         </div>
         <div class="form-group">
             <label>Giorno Inizio</label>
-            <input type="date" name="giornoInizio" id="m5g_gi" class="form-control">
+            <input type="date" name="giornoInizio" id="m5g_gi" class="form-control" min="2024-01-01" max="2030-12-31">
         </div>
         <div class="form-group">
             <label>Giorno Fine</label>
-            <input type="date" name="giornoFine" id="m5g_gf" class="form-control">
+            <input type="date" name="giornoFine" id="m5g_gf" class="form-control" min="2024-01-01" max="2030-12-31">
         </div>
         <div class="form-group">
             <label>Costo a Persona (&euro;)</label>
@@ -480,3 +496,5 @@ function apriMod5g(btn) {
 </script>
 </body>
 </html>
+
+

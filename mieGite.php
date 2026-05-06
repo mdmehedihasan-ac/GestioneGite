@@ -1,10 +1,18 @@
-﻿<?php
+<?php
 include('nav.php');
 
 $idUtenteLoggato = $_SESSION['id_utente'];
 $messaggio = "";
 
-// ─── MODIFICA GITA 1G IN ORGANIZZAZIONE ──────────────────────────────────────
+// funzione per formattare data in modo sicuro
+function formattaData($str, $formato = 'd/m/Y') {
+    if (empty($str)) return '—';
+    $ts = strtotime($str);
+    if ($ts === false) return '—';
+    return date($formato, $ts);
+}
+
+// modifica gita 1g in organizzazione
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'modifica_org_1g') {
     $idGita       = intval($_POST['id_gita']);
     $dest         = $conn->real_escape_string($_POST['mo_destinazione'] ?? '');
@@ -13,6 +21,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $periodo      = $conn->real_escape_string($_POST['mo_periodo']      ?? '');
     $classi       = $conn->real_escape_string($_POST['mo_classi']       ?? '');
     $giorno       = $_POST['mo_giorno'] ?: null;
+    // validazione: la data deve essere tra 2024 e 2030
+    if ($giorno && (strtotime($giorno) === false || intval(date('Y', strtotime($giorno))) < 2024 || intval(date('Y', strtotime($giorno))) > 2030)) {
+        $giorno = null;
+    }
     $giorno_s     = $giorno ? "'" . $conn->real_escape_string($giorno) . "'" : "NULL";
     $costoMezzo   = $_POST['mo_costoMezzo']   !== '' ? floatval($_POST['mo_costoMezzo'])   : "NULL";
     $costoAtt     = $_POST['mo_costoAttivita'] !== '' ? floatval($_POST['mo_costoAttivita']) : "NULL";
@@ -22,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $messaggio = "modifica_org_ok";
 }
 
-// ─── MODIFICA GITA 5G IN ORGANIZZAZIONE ──────────────────────────────────────
+// modifica gita 5g in organizzazione
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'modifica_org_5g') {
     $idGita       = intval($_POST['id_gita']);
     $dest         = $conn->real_escape_string($_POST['mo_destinazione']  ?? '');
@@ -32,6 +44,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $classi       = $conn->real_escape_string($_POST['mo_classi']        ?? '');
     $gi           = $_POST['mo_giornoInizio'] ?: null;
     $gf           = $_POST['mo_giornoFine']   ?: null;
+    // validazione: le date devono essere tra 2024 e 2030
+    if ($gi && (strtotime($gi) === false || intval(date('Y', strtotime($gi))) < 2024 || intval(date('Y', strtotime($gi))) > 2030)) {
+        $gi = null;
+    }
+    if ($gf && (strtotime($gf) === false || intval(date('Y', strtotime($gf))) < 2024 || intval(date('Y', strtotime($gf))) > 2030)) {
+        $gf = null;
+    }
     $gi_s         = $gi ? "'" . $conn->real_escape_string($gi) . "'" : "NULL";
     $gf_s         = $gf ? "'" . $conn->real_escape_string($gf) . "'" : "NULL";
     $costoAP      = $_POST['mo_costoAPersona'] !== '' ? floatval($_POST['mo_costoAPersona']) : "NULL";
@@ -40,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $messaggio = "modifica_org_ok";
 }
 
-// ─── ORGANIZZA GITA 1 GIORNO (copia con stato 4) ────────────────────────────
+// organizza gita 1 giorno (copia con stato 4)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'organizza_1g') {
     $idGita      = intval($_POST['id_gita']);
     $idUtente    = $_SESSION['id_utente'];
@@ -78,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
-// ─── ORGANIZZA GITA PIU GIORNI (copia con stato 4) ───────────────────────────
+// organizza gita piu giorni (copia con stato 4)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'organizza_5g') {
     $idGita       = intval($_POST['id_gita']);
     $idUtente     = $_SESSION['id_utente'];
@@ -115,7 +134,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
-// ─── RIPROPONI (modifica campi + rimetti in bozza) ────────────────────────────
+// riproponi (modifica campi e rimetti in bozza)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
     if ($_POST['action'] === 'riproponi_1g') {
@@ -151,14 +170,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     }
 }
 
-// ─── QUERY: proposte create da me (stato 1,2,3) ──────────────────────────────
+// query: proposte create da me (stato 1,2,3)
 $proposte = [];
 $r1 = $conn->query("SELECT g.*, s.Stato, '1g' AS tipo FROM gita1g g JOIN statogita s ON g.idStato = s.IDStato WHERE g.idUtente = $idUtenteLoggato AND g.idStato IN (1,2,3) ORDER BY g.idGita DESC");
 if ($r1) { while ($row = $r1->fetch_assoc()) $proposte[] = $row; }
 $r2 = $conn->query("SELECT g.*, s.Stato, '5g' AS tipo FROM gite5 g JOIN statogita s ON g.idStato = s.IDStato WHERE g.idUtente = $idUtenteLoggato AND g.idStato IN (1,2,3) ORDER BY g.idGita DESC");
 if ($r2) { while ($row = $r2->fetch_assoc()) $proposte[] = $row; }
 
-// ─── QUERY: gite in organizzazione/concluse (stato 4,5) ──────────────────────
+// query: gite in organizzazione/concluse (stato 4,5)
 // Include sia le gite create dall'utente che quelle a cui partecipa come accompagnatore
 $organizzate = [];
 $r3 = $conn->query("
@@ -231,10 +250,10 @@ function badgeClass($stato) {
 <script>document.addEventListener('DOMContentLoaded',function(){ document.getElementById('modalEliminataOk').classList.remove('hidden'); });</script>
 <?php endif; ?>
 
-<!-- ══════════════ SEZIONE 1: PROPOSTE CREATE DA ME ══════════════ -->
+<!-- sezione 1: proposte create da me -->
 <div class="table-section" style="margin-top:2rem;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem;">
-        <h3 style="margin:0;color:var(--blue-700);">📋 Proposte create da me</h3>
+        <h3 style="margin:0;color:var(--blue-700);">Proposte create da me</h3>
         <span style="font-size:0.85rem;color:var(--blue-400);"><?php echo count($proposte); ?> proposta<?php echo count($proposte) != 1 ? 'e' : ''; ?></span>
     </div>
 
@@ -252,6 +271,7 @@ function badgeClass($stato) {
             $periodoJs = htmlspecialchars($row['periodo'] ?? '', ENT_QUOTES);
             $descJs    = htmlspecialchars($row['descrizione'] ?? '', ENT_QUOTES);
             $classiJs  = htmlspecialchars($row['classi'] ?? '', ENT_QUOTES);
+            $descDisp  = htmlspecialchars($row['descrizione'] ?? '');
             $costoRaw  = $row['costoAPersona'] ?? 0;
             $costo     = $costoRaw !== null ? '€ ' . number_format($costoRaw, 2, ',', '.') : '—';
             $stato     = $row['Stato'];
@@ -260,11 +280,11 @@ function badgeClass($stato) {
             $tipoTabella = $row['tipo'];
 
             if ($row['tipo'] === '1g') {
-                $data = $row['giorno'] ? date('d/m/Y', strtotime($row['giorno'])) : '—';
+                $data = formattaData($row['giorno']);
                 $dataLabel = 'Giorno';
             } else {
-                $ini = $row['giornoInizio'] ? date('d/m/Y', strtotime($row['giornoInizio'])) : '—';
-                $fin = $row['giornoFine']   ? date('d/m/Y', strtotime($row['giornoFine']))   : '—';
+                $ini = formattaData($row['giornoInizio']);
+                $fin = formattaData($row['giornoFine']);
                 $data = "$ini → $fin";
                 $dataLabel = 'Date';
             }
@@ -281,6 +301,7 @@ function badgeClass($stato) {
                     <span><strong>Periodo:</strong> <?php echo $periodo ?: '—'; ?></span>
                     <span><strong><?php echo $dataLabel; ?>:</strong> <?php echo $data; ?></span>
                     <span><strong>Costo a persona:</strong> <?php echo $costo; ?></span>
+                    <?php if ($descDisp): ?><span><strong>Descrizione:</strong> <?php echo $descDisp; ?></span><?php endif; ?>
                 </div>
             </div>
             <?php if ($stato === 'Approvata'): ?>
@@ -295,18 +316,18 @@ function badgeClass($stato) {
                     data-costo="<?php echo floatval($costoRaw); ?>"
                     data-tipo="<?php echo $tipoTabella; ?>"
                     onclick="apriOrg(this)">
-                    🗓️ Organizza
+                    Organizza
                 </button>
             </div>
             <?php elseif ($stato === 'Bocciata'): ?>
             <div class="miegite-card-footer">
                 <button type="button" class="button xs"
                     onclick="apriModifica(<?php echo $id; ?>,'<?php echo $destJs; ?>','<?php echo $mezzoJs; ?>','<?php echo $periodoJs; ?>',<?php echo floatval($costoRaw); ?>,'<?php echo $tipoTabella; ?>')">
-                    ✏️ Modifica
+                    Modifica
                 </button>
                 <button type="button" class="button cancel xs"
                     onclick="apriElimina(<?php echo $id; ?>,'<?php echo $destJs; ?>','<?php echo $tipoTabella; ?>')">
-                    🗑️ Elimina
+                    Elimina
                 </button>
             </div>
             <?php endif; ?>
@@ -316,10 +337,10 @@ function badgeClass($stato) {
     <?php endif; ?>
 </div>
 
-<!-- ══════════════ SEZIONE 2: GITE IN ORGANIZZAZIONE / CONCLUSE ══════════════ -->
+<!-- sezione 2: gite in organizzazione / concluse -->
 <div class="table-section" style="margin-top:3rem;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem;">
-        <h3 style="margin:0;color:var(--blue-700);">🗓️ Gite che sto organizzando</h3>
+        <h3 style="margin:0;color:var(--blue-700);">Gite che sto organizzando</h3>
         <span style="font-size:0.85rem;color:var(--blue-400);"><?php echo count($organizzate); ?> gita<?php echo count($organizzate) != 1 ? 'e' : ''; ?></span>
     </div>
 
@@ -336,6 +357,7 @@ function badgeClass($stato) {
             $periodo = htmlspecialchars($row['periodo'] ?? '—');
             $periodoJs = htmlspecialchars($row['periodo'] ?? '', ENT_QUOTES);
             $descJs  = htmlspecialchars($row['descrizione'] ?? '', ENT_QUOTES);
+            $descDisp = htmlspecialchars($row['descrizione'] ?? '');
             $classiJs= htmlspecialchars($row['classi'] ?? '', ENT_QUOTES);
             $costo   = $row['costoAPersona'] !== null ? '€ ' . number_format($row['costoAPersona'], 2, ',', '.') : '—';
             $stato   = $row['Stato'];
@@ -345,7 +367,7 @@ function badgeClass($stato) {
             $tipoTabella = $row['tipo'];
             if ($row['tipo'] === '1g') {
                 $dataRaw   = $row['giorno'] ?? '';
-                $data      = $dataRaw ? date('d/m/Y', strtotime($dataRaw)) : '—';
+                $data      = formattaData($dataRaw);
                 $dataLabel = 'Giorno';
                 $costoMezzoRaw = $row['costoMezzo'] ?? '';
                 $costoAttRaw   = $row['costoAttivita'] ?? '';
@@ -355,8 +377,8 @@ function badgeClass($stato) {
                 $extraInfo  = "<span><strong>Costo mezzo:</strong> $costoMezzo</span><span><strong>Costo attività:</strong> $costoAtt</span>";
             } else {
                 $dataRaw = '';
-                $ini = $row['giornoInizio'] ? date('d/m/Y', strtotime($row['giornoInizio'])) : '—';
-                $fin = $row['giornoFine']   ? date('d/m/Y', strtotime($row['giornoFine']))   : '—';
+                $ini = formattaData($row['giornoInizio']);
+                $fin = formattaData($row['giornoFine']);
                 $data      = "$ini → $fin";
                 $dataLabel = 'Date';
                 $extraInfo = "";
@@ -378,6 +400,7 @@ function badgeClass($stato) {
                     <span><strong><?php echo $dataLabel; ?>:</strong> <?php echo $data; ?></span>
                     <span><strong>Costo a persona:</strong> <?php echo $costo; ?></span>
                     <span><strong>Num. alunni:</strong> <?php echo $numAl; ?></span>
+                    <?php if ($descDisp): ?><span><strong>Descrizione:</strong> <?php echo $descDisp; ?></span><?php endif; ?>
                     <?php echo $extraInfo; ?>
                 </div>
             </div>
@@ -398,7 +421,7 @@ function badgeClass($stato) {
                     data-costo-ap="<?php echo $costoAPRaw; ?>"
                     data-num-alunni="<?php echo $row['numAlunni'] ?? ''; ?>"
                     onclick="apriModOrg(this)">
-                    ✏️ Modifica
+                    Modifica
                 </button>
                 <?php if ($row['tipo'] === '1g'):
                     $accRes = $conn->query("SELECT CONCAT(u.Nome,' ',u.Cognome) AS nome FROM accompagnatori a JOIN utente u ON a.idutente=u.IDUtente WHERE a.idgita={$row['idGita']} AND a.tipo_gita='1g' ORDER BY u.Cognome,u.Nome");
@@ -409,10 +432,10 @@ function badgeClass($stato) {
                 <button type="button" class="button xs outline"
                     data-dest="<?php echo $destJs; ?>"
                     data-acc="<?php echo $accJson; ?>"
-                    onclick="apriAccompagnatori(this)">👥 Accompagnatori</button>
+                    onclick="apriAccompagnatori(this)">Accompagnatori</button>
                 <?php endif; ?>
                 <?php if ($row['tipo'] === '5g'): ?>
-                <a href="partecipanti.php?id=<?php echo $row['idGita']; ?>" class="button xs" style="text-decoration:none;">👥 Partecipanti</a>
+                <a href="partecipanti.php?id=<?php echo $row['idGita']; ?>" class="button xs" style="text-decoration:none;">Partecipanti</a>
                 <?php endif; ?>
             </div>
         </div>
@@ -423,7 +446,7 @@ function badgeClass($stato) {
 
 </main>
 
-<!-- ══════════════ MODAL — Modifica Gita 1g in Organizzazione ══════════════ -->
+<!-- modal: modifica gita 1g in organizzazione -->
 <div class="modal-overlay hidden" id="modalModOrg1g">
 <div class="modal wide-modal">
 <div class="modal-header">
@@ -462,7 +485,7 @@ function badgeClass($stato) {
         </div>
         <div class="form-group">
             <label>Giorno</label>
-            <input type="date" name="mo_giorno" id="modOrg1g_giorno" class="form-control">
+            <input type="date" name="mo_giorno" id="modOrg1g_giorno" class="form-control" min="2024-01-01" max="2030-12-31">
         </div>
         <div class="form-group">
             <label>Costo Mezzo (&euro;)</label>
@@ -485,12 +508,12 @@ function badgeClass($stato) {
 </div>
 <div class="modal-footer">
     <button class="button cancel" onclick="document.getElementById('modalModOrg1g').classList.add('hidden')">Annulla</button>
-    <button class="button" onclick="document.getElementById('formModOrg1g').submit()">💾 Salva</button>
+    <button class="button" onclick="document.getElementById('formModOrg1g').submit()">Salva</button>
 </div>
 </div>
 </div>
 
-<!-- ══════════════ MODAL — Modifica Gita 5g in Organizzazione ══════════════ -->
+<!-- modal: modifica gita 5g in organizzazione -->
 <div class="modal-overlay hidden" id="modalModOrg5g">
 <div class="modal wide-modal">
 <div class="modal-header">
@@ -529,11 +552,11 @@ function badgeClass($stato) {
         </div>
         <div class="form-group">
             <label>Giorno Inizio</label>
-            <input type="date" name="mo_giornoInizio" id="modOrg5g_gi" class="form-control">
+            <input type="date" name="mo_giornoInizio" id="modOrg5g_gi" class="form-control" min="2024-01-01" max="2030-12-31">
         </div>
         <div class="form-group">
             <label>Giorno Fine</label>
-            <input type="date" name="mo_giornoFine" id="modOrg5g_gf" class="form-control">
+            <input type="date" name="mo_giornoFine" id="modOrg5g_gf" class="form-control" min="2024-01-01" max="2030-12-31">
         </div>
         <div class="form-group">
             <label>Costo a Persona (&euro;)</label>
@@ -548,20 +571,19 @@ function badgeClass($stato) {
 </div>
 <div class="modal-footer">
     <button class="button cancel" onclick="document.getElementById('modalModOrg5g').classList.add('hidden')">Annulla</button>
-    <button class="button" onclick="document.getElementById('formModOrg5g').submit()">💾 Salva</button>
+    <button class="button" onclick="document.getElementById('formModOrg5g').submit()">Salva</button>
 </div>
 </div>
 </div>
 
-<!-- ══════════════ MODAL — Modifica salvata ══════════════ -->
+<!-- modal: modifica salvata -->
 <div class="modal-overlay hidden" id="modalModOrgOk">
 <div class="modal" style="text-align:center;max-width:400px;">
 <div class="modal-header" style="justify-content:center;border-bottom:none;padding-bottom:0;">
     <button class="close-btn" style="position:absolute;right:1rem;top:1rem;" onclick="document.getElementById('modalModOrgOk').classList.add('hidden')">&times;</button>
 </div>
 <div class="modal-body" style="padding-top:0.5rem;">
-    <div style="font-size:3rem;margin-bottom:0.75rem;">💾</div>
-    <h3 style="color:var(--blue-700);margin-bottom:0.5rem;">Modifiche Salvate!</h3>
+    <h3 style="color:var(--blue-700);margin-bottom:0.5rem;">Modifiche Salvate</h3>
     <p style="color:#475569;">I dati della gita sono stati aggiornati con successo.</p>
 </div>
 <div class="modal-footer" style="justify-content:center;">
@@ -570,7 +592,7 @@ function badgeClass($stato) {
 </div>
 </div>
 
-<!-- ══════════════ MODAL — Modifica e Riproponi ══════════════ -->
+<!-- modal: modifica e riproponi -->
 <div class="modal-overlay hidden" id="modalModifica">
 <div class="modal">
 <div class="modal-header">
@@ -603,12 +625,12 @@ function badgeClass($stato) {
 </div>
 <div class="modal-footer">
     <button class="button cancel" onclick="chiudiModifica()">Annulla</button>
-    <button class="button" onclick="document.getElementById('formModifica').submit()">🔄 Proponi di Nuovo</button>
+    <button class="button" onclick="document.getElementById('formModifica').submit()">Proponi di Nuovo</button>
 </div>
 </div>
 </div>
 
-<!-- ══════════════ MODAL — Conferma Elimina ══════════════ -->
+<!-- modal: conferma elimina -->
 <div class="modal-overlay hidden" id="modalElimina">
 <div class="modal">
 <div class="modal-header">
@@ -620,7 +642,7 @@ function badgeClass($stato) {
 </div>
 <div class="modal-footer">
     <button class="button cancel" onclick="chiudiElimina()">Annulla</button>
-    <button class="button cancel" onclick="document.getElementById('formElimina').submit()">🗑️ Elimina</button>
+    <button class="button cancel" onclick="document.getElementById('formElimina').submit()">Elimina</button>
 </div>
 </div>
 </div>
@@ -629,7 +651,7 @@ function badgeClass($stato) {
     <input type="hidden" name="id_gita" id="elimId">
 </form>
 
-<!-- ══════════════ MODAL — Organizza Gita 1 Giorno ══════════════ -->
+<!-- modal: organizza gita 1 giorno -->
 <div class="modal-overlay hidden" id="modalOrg1g">
 <div class="modal">
 <div class="modal-header">
@@ -668,7 +690,7 @@ function badgeClass($stato) {
         </div>
         <div class="form-group">
             <label>Giorno *</label>
-            <input type="date" name="org_giorno" id="org1g_giorno" class="form-control" required>
+            <input type="date" name="org_giorno" id="org1g_giorno" class="form-control" required min="2024-01-01" max="2030-12-31">
         </div>
         <div class="form-group">
             <label>Costo Mezzo (&euro;)</label>
@@ -691,12 +713,12 @@ function badgeClass($stato) {
 </div>
 <div class="modal-footer">
     <button class="button cancel" onclick="document.getElementById('modalOrg1g').classList.add('hidden')">Annulla</button>
-    <button class="button" onclick="document.getElementById('formOrg1g').submit()">🗓️ Organizza</button>
+    <button class="button" onclick="document.getElementById('formOrg1g').submit()">Organizza</button>
 </div>
 </div>
 </div>
 
-<!-- ══════════════ MODAL — Organizza Gita Più Giorni ══════════════ -->
+<!-- modal: organizza gita piu giorni -->
 <div class="modal-overlay hidden" id="modalOrg5g">
 <div class="modal">
 <div class="modal-header">
@@ -735,11 +757,11 @@ function badgeClass($stato) {
         </div>
         <div class="form-group">
             <label>Giorno Inizio *</label>
-            <input type="date" name="org_giornoInizio" id="org5g_giornoInizio" class="form-control" required>
+            <input type="date" name="org_giornoInizio" id="org5g_giornoInizio" class="form-control" required min="2024-01-01" max="2030-12-31">
         </div>
         <div class="form-group">
             <label>Giorno Fine *</label>
-            <input type="date" name="org_giornoFine" id="org5g_giornoFine" class="form-control" required>
+            <input type="date" name="org_giornoFine" id="org5g_giornoFine" class="form-control" required min="2024-01-01" max="2030-12-31">
         </div>
         <div class="form-group">
             <label>Costo a Persona (&euro;)</label>
@@ -754,20 +776,19 @@ function badgeClass($stato) {
 </div>
 <div class="modal-footer">
     <button class="button cancel" onclick="document.getElementById('modalOrg5g').classList.add('hidden')">Annulla</button>
-    <button class="button" onclick="document.getElementById('formOrg5g').submit()">🗓️ Organizza</button>
+    <button class="button" onclick="document.getElementById('formOrg5g').submit()">Organizza</button>
 </div>
 </div>
 </div>
 
-<!-- ══════════════ MODAL — Organizzata con successo ══════════════ -->
+<!-- modal: organizzata con successo -->
 <div class="modal-overlay hidden" id="modalOrganizzaOk">
 <div class="modal" style="text-align:center;max-width:400px;">
 <div class="modal-header" style="justify-content:center;border-bottom:none;padding-bottom:0;">
     <button class="close-btn" style="position:absolute;right:1rem;top:1rem;" onclick="document.getElementById('modalOrganizzaOk').classList.add('hidden')">&times;</button>
 </div>
 <div class="modal-body" style="padding-top:0.5rem;">
-    <div style="font-size:3rem;margin-bottom:0.75rem;">✅</div>
-    <h3 style="color:var(--blue-700);margin-bottom:0.5rem;">Gita Organizzata!</h3>
+    <h3 style="color:var(--blue-700);margin-bottom:0.5rem;">Gita Organizzata</h3>
     <p style="color:#475569;">La gita è stata messa in organizzazione con successo.</p>
 </div>
 <div class="modal-footer" style="justify-content:center;">
@@ -776,15 +797,14 @@ function badgeClass($stato) {
 </div>
 </div>
 
-<!-- ══════════════ MODAL — Riproposta salvata ══════════════ -->
+<!-- modal: riproposta salvata -->
 <div class="modal-overlay hidden" id="modalRiproponiOk">
 <div class="modal" style="text-align:center;max-width:400px;">
 <div class="modal-header" style="justify-content:center;border-bottom:none;padding-bottom:0;">
     <button class="close-btn" style="position:absolute;right:1rem;top:1rem;" onclick="document.getElementById('modalRiproponiOk').classList.add('hidden')">&times;</button>
 </div>
 <div class="modal-body" style="padding-top:0.5rem;">
-    <div style="font-size:3rem;margin-bottom:0.75rem;">✅</div>
-    <h3 style="color:var(--blue-700);margin-bottom:0.5rem;">Proposta Inviata!</h3>
+    <h3 style="color:var(--blue-700);margin-bottom:0.5rem;">Proposta Inviata</h3>
     <p style="color:#475569;">La gita è stata rimessa in bozza e inviata per approvazione.</p>
 </div>
 <div class="modal-footer" style="justify-content:center;">
@@ -793,14 +813,13 @@ function badgeClass($stato) {
 </div>
 </div>
 
-<!-- ══════════════ MODAL — Eliminata ══════════════ -->
+<!-- modal: eliminata -->
 <div class="modal-overlay hidden" id="modalEliminataOk">
 <div class="modal" style="text-align:center;max-width:400px;">
 <div class="modal-header" style="justify-content:center;border-bottom:none;padding-bottom:0;">
     <button class="close-btn" style="position:absolute;right:1rem;top:1rem;" onclick="document.getElementById('modalEliminataOk').classList.add('hidden')">&times;</button>
 </div>
 <div class="modal-body" style="padding-top:0.5rem;">
-    <div style="font-size:3rem;margin-bottom:0.75rem;">🗑️</div>
     <h3 style="color:#dc2626;margin-bottom:0.5rem;">Gita Eliminata</h3>
     <p style="color:#475569;">La proposta è stata eliminata correttamente.</p>
 </div>
@@ -813,7 +832,7 @@ function badgeClass($stato) {
 <footer><div class="footer-container"><div class="footer-left"><p><strong>Gestione Gite Scolastiche</strong></p></div></div></footer>
 </div>
 
-<!-- ══════════════ MODAL — Accompagnatori Gita 1g ══════════════ -->
+<!-- modal: accompagnatori gita 1g -->
 <div class="modal-overlay hidden" id="modalAccompagnatori">
 <div class="modal" style="max-width:480px;">
 <div class="modal-header">
@@ -835,7 +854,7 @@ function apriAccompagnatori(btn) {
     var acc  = JSON.parse(btn.dataset.acc);
     document.getElementById('accModalTit').textContent = 'Accompagnatori — ' + dest;
     var html = acc.length > 0
-        ? '<ul style="list-style:none;padding:0;margin:0;">' + acc.map(function(n){ return '<li style="padding:0.4rem 0;border-bottom:1px solid #e2e8f0;">👤 ' + n + '</li>'; }).join('') + '</ul>'
+        ? '<ul style="list-style:none;padding:0;margin:0;">' + acc.map(function(n){ return '<li style="padding:0.4rem 0;border-bottom:1px solid #e2e8f0;">' + n + '</li>'; }).join('') + '</ul>'
         : '<p style="color:#94a3b8;text-align:center;padding:1rem 0;">Nessun accompagnatore registrato.</p>';
     document.getElementById('accModalList').innerHTML = html;
     document.getElementById('modalAccompagnatori').classList.remove('hidden');

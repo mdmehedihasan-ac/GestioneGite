@@ -1,4 +1,4 @@
-﻿.font-examples {
+.font-examples {
     border: 1px solid var(--my-gray);
 
     h1, h2, h3, h4, p {
@@ -468,6 +468,7 @@ button.outline:hover, .button.outline:hover {
 
 
 
+/* overlay che centra il modale */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -480,17 +481,20 @@ button.outline:hover, .button.outline:hover {
     align-items: center;
     z-index: 1000;
     backdrop-filter: blur(2px);
+    padding: 1rem;
+    box-sizing: border-box;
 }
 
 .modal-overlay.hidden {
     display: none !important;
 }
 
+/* modale centrato e largo */
 .modal {
     background: var(--my-white);
     border-radius: var(--radius-1);
-    width: 90%;
-    max-width: 500px;
+    width: 95%;
+    max-width: 700px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
@@ -542,6 +546,21 @@ button.outline:hover, .button.outline:hover {
         display: flex;
         justify-content: flex-end;
         gap: 1rem;
+    }
+}
+
+/* responsive per schermi piccoli */
+@media (max-width: 600px) {
+    .modal-overlay {
+        padding: 0.5rem;
+    }
+    .modal {
+        width: 98%;
+    }
+    .modal .modal-header,
+    .modal .modal-body,
+    .modal .modal-footer {
+        padding: 1rem;
     }
 }
 
