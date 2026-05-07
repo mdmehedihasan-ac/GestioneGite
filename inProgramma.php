@@ -299,7 +299,7 @@ if ($res5g && mysqli_num_rows($res5g) > 0):
     <p style="color:#64748b;font-size:0.9rem;">Questa azione non può essere annullata.</p>
 </div>
 <div class="modal-footer">
-    <button class="button cancel" onclick="chiudi('modalElimina')">Annulla</button>
+    <button class="button cancel-outline" onclick="chiudi('modalElimina')">Annulla</button>
     <form id="formElimina" method="POST" action="inProgramma.php" style="margin:0;">
         <input type="hidden" name="action"  value="elimina">
         <input type="hidden" name="id_gita" id="elimId">

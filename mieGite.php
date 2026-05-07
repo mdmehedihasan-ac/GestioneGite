@@ -668,7 +668,7 @@ function badgeClass($stato) {
     <p>Sei sicuro di voler eliminare la gita verso <strong id="elimDestTxt"></strong>? L'operazione non è reversibile.</p>
 </div>
 <div class="modal-footer">
-    <button type="button" class="button cancel" onclick="chiudiElimina()">Annulla</button>
+    <button type="button" class="button cancel-outline" onclick="chiudiElimina()">Annulla</button>
     <button type="submit" form="formElimina" class="button cancel">Elimina</button>
 </div>
 </div>

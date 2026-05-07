@@ -273,14 +273,26 @@ button:hover, .button:hover {
 }
 
 button.cancel, .button.cancel {
-    background: var(--my-gray);
+    background: var(--hex-red);
     color: white;
 }
 
 button.cancel:hover, .button.cancel:hover {
-    background: #64748b;
+    background: #b91c1c;
     color: white;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
+}
+
+button.cancel-outline, .button.cancel-outline {
+    background: white;
+    color: var(--hex-red);
+    border: 2px solid var(--hex-red);
+}
+
+button.cancel-outline:hover, .button.cancel-outline:hover {
+    background: var(--hex-red);
+    color: white;
+    box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
 }
 
 button.xs, .button.xs {

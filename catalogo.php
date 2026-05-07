@@ -846,7 +846,7 @@ if ($gite5g && $gite5g->num_rows > 0) {
     <p>Sei sicuro di voler eliminare la gita verso <strong id="elimDest"></strong>? L'operazione non è reversibile.</p>
 </div>
 <div class="modal-footer">
-    <button type="button" class="button" onclick="document.getElementById('modalElimina').classList.add('hidden')">Annulla</button>
+    <button type="button" class="button cancel-outline" onclick="document.getElementById('modalElimina').classList.add('hidden')">Annulla</button>
     <button type="submit" form="formElimina" class="button cancel">Elimina</button>
 </div>
 </div>
