@@ -535,7 +535,6 @@ button.outline:hover, .button.outline:hover {
     .modal-body {
         padding: 1.5rem;
         color: var(--blue-900);
-        overflow-y: auto;
 
         p {
             color: var(--blue-900);
