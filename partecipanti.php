@@ -310,8 +310,8 @@ $numAlunniDisp = $gita['numAlunni'] ?? '';
 </form>
 </div>
 <div class="modal-footer">
-    <button class="button cancel" onclick="document.getElementById('modalModAcc').classList.add('hidden')">Annulla</button>
-    <button class="button" onclick="document.getElementById('formModAcc').submit()">Salva</button>
+    <button type="button" class="button cancel" onclick="document.getElementById('modalModAcc').classList.add('hidden')">Annulla</button>
+    <button type="submit" form="formModAcc" class="button">Salva</button>
 </div>
 </div>
 </div>

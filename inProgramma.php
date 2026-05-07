@@ -371,8 +371,8 @@ if ($res5g && mysqli_num_rows($res5g) > 0):
 </form>
 </div>
 <div class="modal-footer">
-    <button class="button cancel" onclick="chiudi('modalMod1g')">Annulla</button>
-    <button class="button" onclick="document.getElementById('formMod1g').submit()">Salva modifiche</button>
+    <button type="button" class="button cancel" onclick="chiudi('modalMod1g')">Annulla</button>
+    <button type="submit" form="formMod1g" class="button">Salva modifiche</button>
 </div>
 </div>
 </div>
@@ -434,8 +434,8 @@ if ($res5g && mysqli_num_rows($res5g) > 0):
 </form>
 </div>
 <div class="modal-footer">
-    <button class="button cancel" onclick="chiudi('modalMod5g')">Annulla</button>
-    <button class="button" onclick="document.getElementById('formMod5g').submit()">Salva modifiche</button>
+    <button type="button" class="button cancel" onclick="chiudi('modalMod5g')">Annulla</button>
+    <button type="submit" form="formMod5g" class="button">Salva modifiche</button>
 </div>
 </div>
 </div>

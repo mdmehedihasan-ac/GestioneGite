@@ -289,6 +289,13 @@ button.btn-boccia:hover, .button.btn-boccia:hover {
     margin: 0 auto;
 }
 
+@media (max-width: 768px) {
+    .bozze-padding {
+        padding: 2rem 1rem;
+        max-width: 100%;
+    }
+}
+
 /* Tabella generica */
 .table-container {
     overflow-x: auto;
@@ -338,7 +345,7 @@ button.btn-boccia:hover, .button.btn-boccia:hover {
 
 
 .table-catalogo {
-    overflow: clip;
+    overflow-x: auto;
     border-radius: var(--radius-1);
     box-shadow: 0 0 10px rgba(0,0,0,0.05);
     background: white;
@@ -355,7 +362,7 @@ button.btn-boccia:hover, .button.btn-boccia:hover {
 }
 
 .table-container-full {
-    overflow: clip;
+    overflow-x: auto;
     border-radius: var(--radius-1);
     box-shadow: 0 0 10px rgba(0,0,0,0.05);
     background: white;
