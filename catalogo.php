@@ -509,11 +509,11 @@ if ($gite5g && $gite5g->num_rows > 0) {
 <form method="POST" action="catalogo.php" id="form1g">
     <input type="hidden" name="action" value="nuova_1g">
     <div class="form-grid">
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Destinazione *</label>
             <input type="text" name="destinazione" class="form-control" required placeholder="es. Roma">
         </div>
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Descrizione</label>
             <input type="text" name="descrizione" class="form-control" placeholder="Breve descrizione della gita">
         </div>
@@ -560,11 +560,11 @@ if ($gite5g && $gite5g->num_rows > 0) {
 <form method="POST" action="catalogo.php" id="form5g">
     <input type="hidden" name="action" value="nuova_5g">
     <div class="form-grid">
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Destinazione *</label>
             <input type="text" name="destinazione" class="form-control" required placeholder="es. Parigi">
         </div>
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Descrizione</label>
             <input type="text" name="descrizione" class="form-control" placeholder="Breve descrizione della gita">
         </div>
@@ -616,7 +616,7 @@ if ($gite5g && $gite5g->num_rows > 0) {
             <label>Destinazione</label>
             <input type="text" name="org_mezzo_dest" id="org1g_mezzo_dest" class="form-control" readonly style="background:#f3f4f6;">
         </div>
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Descrizione</label>
             <input type="text" name="org_descrizione" id="org1g_descrizione" class="form-control" placeholder="Breve descrizione">
         </div>
@@ -684,7 +684,7 @@ if ($gite5g && $gite5g->num_rows > 0) {
             <label>Destinazione</label>
             <input type="text" id="org5g_mezzo_dest" class="form-control" readonly style="background:#f3f4f6;">
         </div>
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Descrizione</label>
             <input type="text" name="org_descrizione" id="org5g_descrizione" class="form-control" placeholder="Breve descrizione">
         </div>
@@ -743,11 +743,11 @@ if ($gite5g && $gite5g->num_rows > 0) {
     <input type="hidden" name="action"  value="modifica_1g">
     <input type="hidden" name="id_gita" id="mod1g_id">
     <div class="form-grid">
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Destinazione *</label>
             <input type="text" name="mod_destinazione" id="mod1g_destinazione" class="form-control" required>
         </div>
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Descrizione</label>
             <input type="text" name="mod_descrizione" id="mod1g_descrizione" class="form-control" placeholder="Breve descrizione">
         </div>
@@ -795,11 +795,11 @@ if ($gite5g && $gite5g->num_rows > 0) {
     <input type="hidden" name="action"  value="modifica_5g">
     <input type="hidden" name="id_gita" id="mod5g_id">
     <div class="form-grid">
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Destinazione *</label>
             <input type="text" name="mod_destinazione" id="mod5g_destinazione" class="form-control" required>
         </div>
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Descrizione</label>
             <input type="text" name="mod_descrizione" id="mod5g_descrizione" class="form-control" placeholder="Breve descrizione">
         </div>

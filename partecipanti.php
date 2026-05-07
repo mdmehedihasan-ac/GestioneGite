@@ -302,7 +302,7 @@ $numAlunniDisp = $gita['numAlunni'] ?? '';
             <label>Scadenza documento</label>
             <input type="date" name="acc_scadenza" id="modAccScad" class="form-control">
         </div>
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Allergeni / Note</label>
             <input type="text" name="acc_note" id="modAccNote" class="form-control" placeholder="es. allergie, intolleranze...">
         </div>
@@ -367,7 +367,7 @@ $numAlunniDisp = $gita['numAlunni'] ?? '';
             <label>Scadenza documento *</label>
             <input type="date" name="scadenza" class="form-control" required>
         </div>
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Allergeni / Note (facoltativo)</label>
             <input type="text" name="note" class="form-control" placeholder="es. allergie, intolleranze...">
         </div>

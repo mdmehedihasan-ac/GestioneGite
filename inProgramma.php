@@ -322,11 +322,11 @@ if ($res5g && mysqli_num_rows($res5g) > 0):
     <input type="hidden" name="action"  value="modifica_1g">
     <input type="hidden" name="id_gita" id="m1g_id">
     <div class="form-grid">
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Destinazione *</label>
             <input type="text" name="destinazione" id="m1g_dest" class="form-control" required>
         </div>
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Descrizione</label>
             <input type="text" name="descrizione" id="m1g_desc" class="form-control" placeholder="Breve descrizione">
         </div>
@@ -389,11 +389,11 @@ if ($res5g && mysqli_num_rows($res5g) > 0):
     <input type="hidden" name="action"  value="modifica_5g">
     <input type="hidden" name="id_gita" id="m5g_id">
     <div class="form-grid">
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Destinazione *</label>
             <input type="text" name="destinazione" id="m5g_dest" class="form-control" required>
         </div>
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Descrizione</label>
             <input type="text" name="descrizione" id="m5g_desc" class="form-control" placeholder="Breve descrizione">
         </div>

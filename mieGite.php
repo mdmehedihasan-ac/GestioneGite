@@ -485,11 +485,11 @@ function badgeClass($stato) {
     <input type="hidden" name="action"  value="modifica_org_1g">
     <input type="hidden" name="id_gita" id="modOrg1g_id">
     <div class="form-grid">
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Destinazione *</label>
             <input type="text" name="mo_destinazione" id="modOrg1g_dest" class="form-control" required>
         </div>
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Descrizione</label>
             <input type="text" name="mo_descrizione" id="modOrg1g_desc" class="form-control" placeholder="Breve descrizione">
         </div>
@@ -552,11 +552,11 @@ function badgeClass($stato) {
     <input type="hidden" name="action"  value="modifica_org_5g">
     <input type="hidden" name="id_gita" id="modOrg5g_id">
     <div class="form-grid">
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Destinazione *</label>
             <input type="text" name="mo_destinazione" id="modOrg5g_dest" class="form-control" required>
         </div>
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Descrizione</label>
             <input type="text" name="mo_descrizione" id="modOrg5g_desc" class="form-control" placeholder="Breve descrizione">
         </div>
@@ -631,7 +631,7 @@ function badgeClass($stato) {
     <input type="hidden" name="action" id="modAction">
     <input type="hidden" name="id_gita" id="modId">
     <div class="form-grid">
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Destinazione *</label>
             <input type="text" name="destinazione" id="modDest" class="form-control" required>
         </div>
@@ -690,11 +690,11 @@ function badgeClass($stato) {
     <input type="hidden" name="action"  value="organizza_1g">
     <input type="hidden" name="id_gita" id="org1g_id">
     <div class="form-grid">
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Destinazione</label>
             <input type="text" id="org1g_mezzo_dest" class="form-control" readonly>
         </div>
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Descrizione</label>
             <input type="text" name="org_descrizione" id="org1g_descrizione" class="form-control" placeholder="Breve descrizione">
         </div>
@@ -757,11 +757,11 @@ function badgeClass($stato) {
     <input type="hidden" name="action"  value="organizza_5g">
     <input type="hidden" name="id_gita" id="org5g_id">
     <div class="form-grid">
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Destinazione</label>
             <input type="text" id="org5g_mezzo_dest" class="form-control" readonly>
         </div>
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Descrizione</label>
             <input type="text" name="org_descrizione" id="org5g_descrizione" class="form-control" placeholder="Breve descrizione">
         </div>
