@@ -511,6 +511,7 @@ button.outline:hover, .button.outline:hover {
     display: flex;
     flex-direction: column;
     max-height: 90vh;
+    overflow: hidden;
     animation: slideIn 0.3s ease-out;
     
     .modal-header {
@@ -519,6 +520,7 @@ button.outline:hover, .button.outline:hover {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        flex-shrink: 0;
         
         h3 {
             color: var(--blue-700);
@@ -547,6 +549,9 @@ button.outline:hover, .button.outline:hover {
     .modal-body {
         padding: 1.5rem;
         color: var(--blue-900);
+        overflow-y: auto;
+        flex: 1;
+        min-height: 0;
 
         p {
             color: var(--blue-900);
@@ -559,6 +564,7 @@ button.outline:hover, .button.outline:hover {
         display: flex;
         justify-content: flex-end;
         gap: 1rem;
+        flex-shrink: 0;
     }
 }
 

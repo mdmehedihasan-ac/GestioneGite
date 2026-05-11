@@ -94,12 +94,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $costoGiorno = $_POST['org_costoGiorno'] !== '' ? floatval(str_replace(',', '.', $_POST['org_costoGiorno'])) : null;
     $numAlunni   = $_POST['org_numAlunni']   !== '' ? intval($_POST['org_numAlunni'])     : null;
 
-    $is_valid = true;
+    $valido = true;
     if ($giorno && (strtotime($giorno) === false || intval(date('Y', strtotime($giorno))) < 2024 || intval(date('Y', strtotime($giorno))) > 2030)) {
-        $is_valid = false;
+        $valido = false;
     }
 
-    if (!$is_valid) {
+    if (!$valido) {
         $messaggio = "<div class='alert-error'>Errore di validazione: la data inserita non è valida.</div>";
     } else {
         // Leggi la riga originale
@@ -141,15 +141,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $costoAPersona= $_POST['org_costoAPersona'] !== '' ? floatval(str_replace(',', '.', $_POST['org_costoAPersona'])) : null;
     $numAlunni    = $_POST['org_numAlunni']     !== '' ? intval($_POST['org_numAlunni'])       : null;
 
-    $is_valid = true;
+    $valido = true;
     if ($giornoInizio && (strtotime($giornoInizio) === false || intval(date('Y', strtotime($giornoInizio))) < 2024 || intval(date('Y', strtotime($giornoInizio))) > 2030)) {
-        $is_valid = false;
+        $valido = false;
     }
     if ($giornoFine && (strtotime($giornoFine) === false || intval(date('Y', strtotime($giornoFine))) < 2024 || intval(date('Y', strtotime($giornoFine))) > 2030)) {
-        $is_valid = false;
+        $valido = false;
     }
 
-    if (!$is_valid) {
+    if (!$valido) {
         $messaggio = "<div class='alert-error'>Errore di validazione: le date inserite non sono valide.</div>";
     } else {
         $orig = $conn->query("SELECT * FROM gite5 WHERE idGita = $idGita")->fetch_assoc();
@@ -336,14 +336,20 @@ $tot5g = $gite5g ? $gite5g->num_rows : 0;
 <main class="content bozze-padding">
 
 
-<?php if ($messaggio && $messaggio !== 'organizza_ok') echo $messaggio; ?>
-<?php if ($messaggio === 'organizza_ok'): ?>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('modalOrganizzaOk').classList.remove('hidden');
-});
-</script>
-<?php endif; ?>
+<?php
+// mostra il messaggio di errore o successo
+if ($messaggio && $messaggio !== 'organizza_ok') {
+    echo $messaggio;
+}
+// se l'organizzazione e andata bene apri la modale di conferma
+if ($messaggio === 'organizza_ok') {
+    echo '<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.getElementById("modalOrganizzaOk").classList.remove("hidden");
+    });
+    </script>';
+}
+?>
 <h2 style="color:var(--blue-700);margin:0;">Proposte Gite</h2>
 <!-- sezione gite 1 giorno -->
 <div style="display:flex;align-items:center;justify-content:space-between;margin-top:2rem;margin-bottom:1rem;">
@@ -361,7 +367,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <th>Costo a Persona</th>
     <th>Proposta da</th>
     <th>Organizza</th>
-    <?php if ($_SESSION['ruolo'] == 2): ?><th>Azioni</th><?php endif; ?>
+    <?php if ($_SESSION['ruolo'] == 2) { echo '<th>Azioni</th>'; } ?>
 </tr></thead>
 <tbody>
 <?php
@@ -436,7 +442,7 @@ if ($gite1g && $gite1g->num_rows > 0) {
     <th>Costo a Persona</th>
     <th>Proposta da</th>
     <th>Organizza</th>
-    <?php if ($_SESSION['ruolo'] == 2): ?><th>Azioni</th><?php endif; ?>
+    <?php if ($_SESSION['ruolo'] == 2) { echo '<th>Azioni</th>'; } ?>
 </tr></thead>
 <tbody>
 <?php
