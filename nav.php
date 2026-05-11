@@ -2,7 +2,7 @@
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
-    include('config.php');
+    require_once('config.php');
 
     $nome_utente = $_SESSION['username'] ?? 'Utente Sconosciuto';
     $ruolo = $_SESSION['ruolo'] ?? null;

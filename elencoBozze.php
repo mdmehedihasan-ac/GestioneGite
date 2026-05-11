@@ -118,8 +118,8 @@ $n = 1;
 if ($bozze1g && $bozze1g->num_rows > 0) {
     while ($r = $bozze1g->fetch_assoc()) {
         $dest   = htmlspecialchars($r['destinazione']);
-        $mezzo  = htmlspecialchars($r['mezzo'] ?? '—');
-        $per    = htmlspecialchars($r['periodo'] ?? '—');
+        $mezzo  = htmlspecialchars($r['mezzo'] ?? 'â€”');
+        $per    = htmlspecialchars($r['periodo'] ?? 'â€”');
         $costo  = number_format($r['costoAPersona'], 2, ',', '.');
         $autore = htmlspecialchars($r['Nome'] . ' ' . $r['Cognome']);
         $id     = intval($r['idGita']);
@@ -169,8 +169,8 @@ $n = 1;
 if ($bozze5g && $bozze5g->num_rows > 0) {
     while ($r = $bozze5g->fetch_assoc()) {
         $dest   = htmlspecialchars($r['destinazione']);
-        $mezzo  = htmlspecialchars($r['mezzo'] ?? '—');
-        $per    = htmlspecialchars($r['periodo'] ?? '—');
+        $mezzo  = htmlspecialchars($r['mezzo'] ?? 'â€”');
+        $per    = htmlspecialchars($r['periodo'] ?? 'â€”');
         $costo  = number_format($r['costoAPersona'], 2, ',', '.');
         $autore = htmlspecialchars($r['Nome'] . ' ' . $r['Cognome']);
         $id     = intval($r['idGita']);
@@ -199,7 +199,7 @@ if ($bozze5g && $bozze5g->num_rows > 0) {
 </main>
 
 <!-- ---------------------------------------------------------------
-     MODAL — Conferma Approva / Boccia
+     MODAL â€” Conferma Approva / Boccia
 --------------------------------------------------------------- -->
 <div class="modal-overlay hidden" id="modalConferma">
 <div class="modal">
@@ -224,6 +224,7 @@ if ($bozze5g && $bozze5g->num_rows > 0) {
     <input type="hidden" name="azione"   id="confAzione">
 </form>
 
+<footer><div class="footer-container"><div class="footer-left"><p><strong>Gestione Gite Scolastiche</strong></p></div></div></footer>
 </div><!-- /container -->
 </body>
 </html>

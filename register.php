@@ -1,6 +1,6 @@
 <?php
     session_start();
-    include('config.php');
+    require_once('config.php');
 
     $errore = "";
     $successo = "";
@@ -52,7 +52,6 @@
         }
     }
 ?>
-<?php include('nav.php'); ?>
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -114,7 +113,8 @@
     </style>
 </head>
 <body>
-    
+    <?php include('nav.php'); ?>
+
     <div class="register-wrapper">
         <div class="register-container">
             <div class="card centered">

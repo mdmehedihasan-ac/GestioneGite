@@ -862,6 +862,7 @@ if ($gite5g && $gite5g->num_rows > 0) {
 </div>
 </div>
 
+<footer><div class="footer-container"><div class="footer-left"><p><strong>Gestione Gite Scolastiche</strong></p></div></div></footer>
 </div><!-- /container -->
 </body>
 </html>

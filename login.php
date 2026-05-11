@@ -1,6 +1,6 @@
 <?php
     session_start();
-    include('config.php');
+    require_once('config.php');
 
     $errore = "";
 
@@ -38,7 +38,6 @@
         }
     }
 ?>
-<?php include('nav.php'); ?>
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -92,8 +91,7 @@
     </style>
 </head>
 <body>
-
-    
+    <?php include('nav.php'); ?>
 
     <div class="login-wrapper">
         <div class="login-container">
