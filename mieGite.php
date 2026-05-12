@@ -189,36 +189,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
 // query: proposte create da me (stato 1,2,3)
 $proposte = [];
-$r1 = $conn->query("SELECT g.*, s.Stato, '1g' AS tipo FROM gita1g g JOIN statogita s ON g.idStato = s.IDStato WHERE g.idUtente = $idUtenteLoggato AND g.idStato IN (1,2,3) ORDER BY g.idGita DESC");
+$r1 = $conn->query("SELECT *, '1g' AS tipo FROM gita1g WHERE idUtente = $idUtenteLoggato AND idStato IN (1,2,3) ORDER BY idGita DESC");
 if ($r1) { while ($riga = $r1->fetch_assoc()) $proposte[] = $riga; }
-$r2 = $conn->query("SELECT g.*, s.Stato, '5g' AS tipo FROM gite5 g JOIN statogita s ON g.idStato = s.IDStato WHERE g.idUtente = $idUtenteLoggato AND g.idStato IN (1,2,3) ORDER BY g.idGita DESC");
+$r2 = $conn->query("SELECT *, '5g' AS tipo FROM gite5 WHERE idUtente = $idUtenteLoggato AND idStato IN (1,2,3) ORDER BY idGita DESC");
 if ($r2) { while ($riga = $r2->fetch_assoc()) $proposte[] = $riga; }
 
 // query: gite in organizzazione/concluse (stato 4,5)
 // Include sia le gite create dall'utente che quelle a cui partecipa come accompagnatore
 $organizzate = [];
 $r3 = $conn->query("
-    SELECT g.*, s.Stato, '1g' AS tipo, 1 AS sono_autore
-    FROM gita1g g JOIN statogita s ON g.idStato = s.IDStato
-    WHERE g.idUtente = $idUtenteLoggato AND g.idStato IN (4,5)
-    UNION
-    SELECT g.*, s.Stato, '1g' AS tipo, 0 AS sono_autore
-    FROM gita1g g JOIN statogita s ON g.idStato = s.IDStato
-    JOIN accompagnatori a ON a.idgita = g.idGita AND a.tipo_gita = '1g'
-    WHERE a.idutente = $idUtenteLoggato AND g.idUtente <> $idUtenteLoggato AND g.idStato IN (4,5)
-    ORDER BY idGita DESC
+    SELECT g.*, '1g' AS tipo, IF(g.idUtente = $idUtenteLoggato, 1, 0) AS sono_autore
+    FROM gita1g g
+    LEFT JOIN accompagnatori a ON a.idgita = g.idGita AND a.tipo_gita = '1g' AND a.idutente = $idUtenteLoggato
+    WHERE g.idStato IN (4,5) AND (g.idUtente = $idUtenteLoggato OR a.idutente IS NOT NULL)
+    ORDER BY g.idGita DESC
 ");
 if ($r3) { while ($riga = $r3->fetch_assoc()) $organizzate[] = $riga; }
 $r4 = $conn->query("
-    SELECT g.*, s.Stato, '5g' AS tipo, 1 AS sono_autore
-    FROM gite5 g JOIN statogita s ON g.idStato = s.IDStato
-    WHERE g.idUtente = $idUtenteLoggato AND g.idStato IN (4,5)
-    UNION
-    SELECT g.*, s.Stato, '5g' AS tipo, 0 AS sono_autore
-    FROM gite5 g JOIN statogita s ON g.idStato = s.IDStato
-    JOIN accompagnatori a ON a.idgita = g.idGita AND a.tipo_gita = '5g'
-    WHERE a.idutente = $idUtenteLoggato AND g.idUtente <> $idUtenteLoggato AND g.idStato IN (4,5)
-    ORDER BY idGita DESC
+    SELECT g.*, '5g' AS tipo, IF(g.idUtente = $idUtenteLoggato, 1, 0) AS sono_autore
+    FROM gite5 g
+    LEFT JOIN accompagnatori a ON a.idgita = g.idGita AND a.tipo_gita = '5g' AND a.idutente = $idUtenteLoggato
+    WHERE g.idStato IN (4,5) AND (g.idUtente = $idUtenteLoggato OR a.idutente IS NOT NULL)
+    ORDER BY g.idGita DESC
 ");
 if ($r4) { while ($riga = $r4->fetch_assoc()) $organizzate[] = $riga; }
 
@@ -294,7 +286,7 @@ function badgeClass($stato) {
             $descDisp  = htmlspecialchars($riga['descrizione'] ?? '');
             $costoRaw  = $riga['costoAPersona'] ?? 0;
             $costo     = $costoRaw !== null ? '€ ' . number_format($costoRaw, 2, ',', '.') : '—';
-            $stato     = $riga['Stato'];
+            $stato     = nomeStato($riga['idStato']);
             $badge     = badgeClass($stato);
             $id        = intval($riga['idGita']);
             $tipoTabella = $riga['tipo'];

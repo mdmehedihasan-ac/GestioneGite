@@ -56,27 +56,21 @@
             // carica statistiche per la home
             $idUtente = intval($_SESSION['id_utente']);
 
-            // proposte personali (stato 1,2,3)
-            $proposte1g = mysqli_query($conn, "SELECT COUNT(*) AS tot FROM gita1g WHERE idUtente = $idUtente AND idStato IN (1,2,3)");
-            $proposte5g = mysqli_query($conn, "SELECT COUNT(*) AS tot FROM gite5 WHERE idUtente = $idUtente AND idStato IN (1,2,3)");
-            $totProposte = (mysqli_fetch_assoc($proposte1g)['tot'] ?? 0) + (mysqli_fetch_assoc($proposte5g)['tot'] ?? 0);
-
-            // gite in organizzazione personali (stato 4)
-            $org1g = mysqli_query($conn, "SELECT COUNT(*) AS tot FROM gita1g WHERE idUtente = $idUtente AND idStato = 4");
-            $org5g = mysqli_query($conn, "SELECT COUNT(*) AS tot FROM gite5 WHERE idUtente = $idUtente AND idStato = 4");
-            $totOrg = (mysqli_fetch_assoc($org1g)['tot'] ?? 0) + (mysqli_fetch_assoc($org5g)['tot'] ?? 0);
+            // proposte e organizzazione personali (1g + 5g in una query per tabella)
+            $c1 = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(CASE WHEN idStato IN (1,2,3) THEN 1 END) AS prop, COUNT(CASE WHEN idStato = 4 THEN 1 END) AS org FROM gita1g WHERE idUtente = $idUtente"));
+            $c5 = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(CASE WHEN idStato IN (1,2,3) THEN 1 END) AS prop, COUNT(CASE WHEN idStato = 4 THEN 1 END) AS org FROM gite5 WHERE idUtente = $idUtente"));
+            $totProposte = ($c1['prop'] ?? 0) + ($c5['prop'] ?? 0);
+            $totOrg = ($c1['org'] ?? 0) + ($c5['org'] ?? 0);
 
             // totale gite in programma (stato 4, tutti)
-            $prog1g = mysqli_query($conn, "SELECT COUNT(*) AS tot FROM gita1g WHERE idStato = 4");
-            $prog5g = mysqli_query($conn, "SELECT COUNT(*) AS tot FROM gite5 WHERE idStato = 4");
-            $totInProgramma = (mysqli_fetch_assoc($prog1g)['tot'] ?? 0) + (mysqli_fetch_assoc($prog5g)['tot'] ?? 0);
+            $totInProgramma = (mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS tot FROM gita1g WHERE idStato = 4"))['tot'] ?? 0)
+                            + (mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS tot FROM gite5 WHERE idStato = 4"))['tot'] ?? 0);
 
             // bozze in attesa (solo per commissione, stato 1)
             $totBozze = 0;
             if ($ruolo == 2) {
-                $attesa1g = mysqli_query($conn, "SELECT COUNT(*) AS tot FROM gita1g WHERE idStato = 1");
-                $attesa5g = mysqli_query($conn, "SELECT COUNT(*) AS tot FROM gite5 WHERE idStato = 1");
-                $totBozze = (mysqli_fetch_assoc($attesa1g)['tot'] ?? 0) + (mysqli_fetch_assoc($attesa5g)['tot'] ?? 0);
+                $totBozze = (mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS tot FROM gita1g WHERE idStato = 1"))['tot'] ?? 0)
+                          + (mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS tot FROM gite5 WHERE idStato = 1"))['tot'] ?? 0);
             }
             ?>
 
