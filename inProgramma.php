@@ -299,7 +299,7 @@ if ($res5g && mysqli_num_rows($res5g) > 0):
     <p style="color:#64748b;font-size:0.9rem;">Questa azione non può essere annullata.</p>
 </div>
 <div class="modal-footer">
-    <button class="button cancel" onclick="chiudi('modalElimina')">Annulla</button>
+    <button class="button cancel-outline" onclick="chiudi('modalElimina')">Annulla</button>
     <form id="formElimina" method="POST" action="inProgramma.php" style="margin:0;">
         <input type="hidden" name="action"  value="elimina">
         <input type="hidden" name="id_gita" id="elimId">
@@ -322,11 +322,11 @@ if ($res5g && mysqli_num_rows($res5g) > 0):
     <input type="hidden" name="action"  value="modifica_1g">
     <input type="hidden" name="id_gita" id="m1g_id">
     <div class="form-grid">
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Destinazione *</label>
             <input type="text" name="destinazione" id="m1g_dest" class="form-control" required>
         </div>
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Descrizione</label>
             <input type="text" name="descrizione" id="m1g_desc" class="form-control" placeholder="Breve descrizione">
         </div>
@@ -371,8 +371,8 @@ if ($res5g && mysqli_num_rows($res5g) > 0):
 </form>
 </div>
 <div class="modal-footer">
-    <button class="button cancel" onclick="chiudi('modalMod1g')">Annulla</button>
-    <button class="button" onclick="document.getElementById('formMod1g').submit()">Salva modifiche</button>
+    <button type="button" class="button cancel" onclick="chiudi('modalMod1g')">Annulla</button>
+    <button type="submit" form="formMod1g" class="button">Salva modifiche</button>
 </div>
 </div>
 </div>
@@ -389,11 +389,11 @@ if ($res5g && mysqli_num_rows($res5g) > 0):
     <input type="hidden" name="action"  value="modifica_5g">
     <input type="hidden" name="id_gita" id="m5g_id">
     <div class="form-grid">
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Destinazione *</label>
             <input type="text" name="destinazione" id="m5g_dest" class="form-control" required>
         </div>
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Descrizione</label>
             <input type="text" name="descrizione" id="m5g_desc" class="form-control" placeholder="Breve descrizione">
         </div>
@@ -434,8 +434,8 @@ if ($res5g && mysqli_num_rows($res5g) > 0):
 </form>
 </div>
 <div class="modal-footer">
-    <button class="button cancel" onclick="chiudi('modalMod5g')">Annulla</button>
-    <button class="button" onclick="document.getElementById('formMod5g').submit()">Salva modifiche</button>
+    <button type="button" class="button cancel" onclick="chiudi('modalMod5g')">Annulla</button>
+    <button type="submit" form="formMod5g" class="button">Salva modifiche</button>
 </div>
 </div>
 </div>

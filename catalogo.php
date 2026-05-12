@@ -90,34 +90,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $descrizione = $_POST['org_descrizione'] ?? '';
     $classi      = $_POST['org_classe']     ?? '';
     $giorno      = $_POST['org_giorno']     ?: null;
-    $costoMezzo  = $_POST['org_costoMezzo']  !== '' ? floatval($_POST['org_costoMezzo'])  : null;
-    $costoGiorno = $_POST['org_costoGiorno'] !== '' ? floatval($_POST['org_costoGiorno']) : null;
+    $costoMezzo  = $_POST['org_costoMezzo']  !== '' ? floatval(str_replace(',', '.', $_POST['org_costoMezzo']))  : null;
+    $costoGiorno = $_POST['org_costoGiorno'] !== '' ? floatval(str_replace(',', '.', $_POST['org_costoGiorno'])) : null;
     $numAlunni   = $_POST['org_numAlunni']   !== '' ? intval($_POST['org_numAlunni'])     : null;
 
+    $valido = true;
     if ($giorno && (strtotime($giorno) === false || intval(date('Y', strtotime($giorno))) < 2024 || intval(date('Y', strtotime($giorno))) > 2030)) {
-        $giorno = null;
+        $valido = false;
     }
 
-    // Leggi la riga originale
-    $orig = $conn->query("SELECT * FROM gita1g WHERE idGita = $idGita")->fetch_assoc();
-    if ($orig) {
-        $dest_s      = $conn->real_escape_string($orig['destinazione']);
-        $desc_s      = $conn->real_escape_string($descrizione);
-        $mezzoFin_s  = $conn->real_escape_string($mezzo ?: ($orig['mezzo'] ?? ''));
-        $perFin_s    = $conn->real_escape_string($periodo ?? $orig['periodo'] ?? '');
-        $classi_s    = $conn->real_escape_string($classi);
-        $costoA_s    = floatval($orig['costoAPersona']);
-        $giorno_s    = $giorno      ? "'" . $conn->real_escape_string($giorno) . "'" : "NULL";
-        $costoMezzo_s = $costoMezzo  !== null ? floatval($costoMezzo)  : "NULL";
-        $costoGiorno_s= $costoGiorno !== null ? floatval($costoGiorno) : "NULL";
-        $numAlunni_s = $numAlunni   !== null ? intval($numAlunni)     : "NULL";
+    if (!$valido) {
+        $messaggio = "<div class='alert-error'>Errore di validazione: la data inserita non è valida.</div>";
+    } else {
+        // Leggi la riga originale
+        $orig = $conn->query("SELECT * FROM gita1g WHERE idGita = $idGita")->fetch_assoc();
+        if ($orig) {
+            $dest_s      = $conn->real_escape_string($orig['destinazione']);
+            $desc_s      = $conn->real_escape_string($descrizione);
+            $mezzoFin_s  = $conn->real_escape_string($mezzo ?: ($orig['mezzo'] ?? ''));
+            $perFin_s    = $conn->real_escape_string($periodo ?? $orig['periodo'] ?? '');
+            $classi_s    = $conn->real_escape_string($classi);
+            $costoA_s    = floatval($orig['costoAPersona']);
+            $giorno_s    = $giorno      ? "'" . $conn->real_escape_string($giorno) . "'" : "NULL";
+            $costoMezzo_s = $costoMezzo  !== null ? floatval($costoMezzo)  : "NULL";
+            $costoGiorno_s= $costoGiorno !== null ? floatval($costoGiorno) : "NULL";
+            $numAlunni_s = $numAlunni   !== null ? intval($numAlunni)     : "NULL";
 
-        $sql = "INSERT INTO gita1g (idUtente, destinazione, descrizione, mezzo, periodo, classi, giorno, costoMezzo, costoAttivita, costoAPersona, numAlunni, idStato)
-                VALUES ($idUtente, '$dest_s', '$desc_s', '$mezzoFin_s', '$perFin_s', '$classi_s', $giorno_s, $costoMezzo_s, $costoGiorno_s, $costoA_s, $numAlunni_s, 4)";
-        if ($conn->query($sql)) {
-            $messaggio = "organizza_ok";
-        } else {
-            $messaggio = "<div class='alert-error'>Errore: " . htmlspecialchars($conn->error) . "</div>";
+            $sql = "INSERT INTO gita1g (idUtente, destinazione, descrizione, mezzo, periodo, classi, giorno, costoMezzo, costoAttivita, costoAPersona, numAlunni, idStato)
+                    VALUES ($idUtente, '$dest_s', '$desc_s', '$mezzoFin_s', '$perFin_s', '$classi_s', $giorno_s, $costoMezzo_s, $costoGiorno_s, $costoA_s, $numAlunni_s, 4)";
+            if ($conn->query($sql)) {
+                $messaggio = "organizza_ok";
+            } else {
+                $messaggio = "<div class='alert-error'>Errore: " . htmlspecialchars($conn->error) . "</div>";
+            }
         }
     }
 }
@@ -133,34 +138,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $classi       = $_POST['org_classe']        ?? '';
     $giornoInizio = $_POST['org_giornoInizio']  ?: null;
     $giornoFine   = $_POST['org_giornoFine']    ?: null;
-    $costoAPersona= $_POST['org_costoAPersona'] !== '' ? floatval($_POST['org_costoAPersona']) : null;
+    $costoAPersona= $_POST['org_costoAPersona'] !== '' ? floatval(str_replace(',', '.', $_POST['org_costoAPersona'])) : null;
     $numAlunni    = $_POST['org_numAlunni']     !== '' ? intval($_POST['org_numAlunni'])       : null;
 
+    $valido = true;
     if ($giornoInizio && (strtotime($giornoInizio) === false || intval(date('Y', strtotime($giornoInizio))) < 2024 || intval(date('Y', strtotime($giornoInizio))) > 2030)) {
-        $giornoInizio = null;
+        $valido = false;
     }
     if ($giornoFine && (strtotime($giornoFine) === false || intval(date('Y', strtotime($giornoFine))) < 2024 || intval(date('Y', strtotime($giornoFine))) > 2030)) {
-        $giornoFine = null;
+        $valido = false;
     }
 
-    $orig = $conn->query("SELECT * FROM gite5 WHERE idGita = $idGita")->fetch_assoc();
-    if ($orig) {
-        $dest_s      = $conn->real_escape_string($orig['destinazione']);
-        $desc_s      = $conn->real_escape_string($descrizione);
-        $mezzoFin_s  = $conn->real_escape_string($mezzo ?: ($orig['mezzo'] ?? ''));
-        $perFin_s    = $conn->real_escape_string($periodo ?? $orig['periodo'] ?? '');
-        $classi_s    = $conn->real_escape_string($classi);
-        $gi_s        = $giornoInizio ? "'" . $conn->real_escape_string($giornoInizio) . "'" : "NULL";
-        $gf_s        = $giornoFine   ? "'" . $conn->real_escape_string($giornoFine)   . "'" : "NULL";
-        $costoFin    = $costoAPersona !== null ? floatval($costoAPersona) : floatval($orig['costoAPersona'] ?? 0);
-        $numAlunni_s = $numAlunni !== null ? intval($numAlunni) : "NULL";
+    if (!$valido) {
+        $messaggio = "<div class='alert-error'>Errore di validazione: le date inserite non sono valide.</div>";
+    } else {
+        $orig = $conn->query("SELECT * FROM gite5 WHERE idGita = $idGita")->fetch_assoc();
+        if ($orig) {
+            $dest_s      = $conn->real_escape_string($orig['destinazione']);
+            $desc_s      = $conn->real_escape_string($descrizione);
+            $mezzoFin_s  = $conn->real_escape_string($mezzo ?: ($orig['mezzo'] ?? ''));
+            $perFin_s    = $conn->real_escape_string($periodo ?? $orig['periodo'] ?? '');
+            $classi_s    = $conn->real_escape_string($classi);
+            $gi_s        = $giornoInizio ? "'" . $conn->real_escape_string($giornoInizio) . "'" : "NULL";
+            $gf_s        = $giornoFine   ? "'" . $conn->real_escape_string($giornoFine)   . "'" : "NULL";
+            $costoFin    = $costoAPersona !== null ? floatval($costoAPersona) : floatval($orig['costoAPersona'] ?? 0);
+            $numAlunni_s = $numAlunni !== null ? intval($numAlunni) : "NULL";
 
-        $sql = "INSERT INTO gite5 (idUtente, destinazione, descrizione, mezzo, periodo, classi, giornoInizio, giornoFine, costoAPersona, numAlunni, idStato)
-                VALUES ($idUtente, '$dest_s', '$desc_s', '$mezzoFin_s', '$perFin_s', '$classi_s', $gi_s, $gf_s, $costoFin, $numAlunni_s, 4)";
-        if ($conn->query($sql)) {
-            $messaggio = "organizza_ok";
-        } else {
-            $messaggio = "<div class='alert-error'>Errore: " . htmlspecialchars($conn->error) . "</div>";
+            $sql = "INSERT INTO gite5 (idUtente, destinazione, descrizione, mezzo, periodo, classi, giornoInizio, giornoFine, costoAPersona, numAlunni, idStato)
+                    VALUES ($idUtente, '$dest_s', '$desc_s', '$mezzoFin_s', '$perFin_s', '$classi_s', $gi_s, $gf_s, $costoFin, $numAlunni_s, 4)";
+            if ($conn->query($sql)) {
+                $messaggio = "organizza_ok";
+            } else {
+                $messaggio = "<div class='alert-error'>Errore: " . htmlspecialchars($conn->error) . "</div>";
+            }
         }
     }
 }
@@ -326,14 +336,20 @@ $tot5g = $gite5g ? $gite5g->num_rows : 0;
 <main class="content bozze-padding">
 
 
-<?php if ($messaggio && $messaggio !== 'organizza_ok') echo $messaggio; ?>
-<?php if ($messaggio === 'organizza_ok'): ?>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('modalOrganizzaOk').classList.remove('hidden');
-});
-</script>
-<?php endif; ?>
+<?php
+// mostra il messaggio di errore o successo
+if ($messaggio && $messaggio !== 'organizza_ok') {
+    echo $messaggio;
+}
+// se l'organizzazione e andata bene apri la modale di conferma
+if ($messaggio === 'organizza_ok') {
+    echo '<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.getElementById("modalOrganizzaOk").classList.remove("hidden");
+    });
+    </script>';
+}
+?>
 <h2 style="color:var(--blue-700);margin:0;">Proposte Gite</h2>
 <!-- sezione gite 1 giorno -->
 <div style="display:flex;align-items:center;justify-content:space-between;margin-top:2rem;margin-bottom:1rem;">
@@ -351,7 +367,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <th>Costo a Persona</th>
     <th>Proposta da</th>
     <th>Organizza</th>
-    <?php if ($_SESSION['ruolo'] == 2): ?><th>Azioni</th><?php endif; ?>
+    <?php if ($_SESSION['ruolo'] == 2) { echo '<th>Azioni</th>'; } ?>
 </tr></thead>
 <tbody>
 <?php
@@ -426,7 +442,7 @@ if ($gite1g && $gite1g->num_rows > 0) {
     <th>Costo a Persona</th>
     <th>Proposta da</th>
     <th>Organizza</th>
-    <?php if ($_SESSION['ruolo'] == 2): ?><th>Azioni</th><?php endif; ?>
+    <?php if ($_SESSION['ruolo'] == 2) { echo '<th>Azioni</th>'; } ?>
 </tr></thead>
 <tbody>
 <?php
@@ -499,11 +515,11 @@ if ($gite5g && $gite5g->num_rows > 0) {
 <form method="POST" action="catalogo.php" id="form1g">
     <input type="hidden" name="action" value="nuova_1g">
     <div class="form-grid">
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Destinazione *</label>
             <input type="text" name="destinazione" class="form-control" required placeholder="es. Roma">
         </div>
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Descrizione</label>
             <input type="text" name="descrizione" class="form-control" placeholder="Breve descrizione della gita">
         </div>
@@ -532,8 +548,8 @@ if ($gite5g && $gite5g->num_rows > 0) {
 </form>
 </div>
 <div class="modal-footer">
-    <button class="button cancel" onclick="document.getElementById('modal1g').classList.add('hidden')">Annulla</button>
-    <button class="button" onclick="document.getElementById('form1g').submit()">Salva Proposta</button>
+    <button type="button" class="button cancel" onclick="document.getElementById('modal1g').classList.add('hidden')">Annulla</button>
+    <button type="submit" form="form1g" class="button">Salva Proposta</button>
 </div>
 </div>
 </div>
@@ -550,11 +566,11 @@ if ($gite5g && $gite5g->num_rows > 0) {
 <form method="POST" action="catalogo.php" id="form5g">
     <input type="hidden" name="action" value="nuova_5g">
     <div class="form-grid">
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Destinazione *</label>
             <input type="text" name="destinazione" class="form-control" required placeholder="es. Parigi">
         </div>
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Descrizione</label>
             <input type="text" name="descrizione" class="form-control" placeholder="Breve descrizione della gita">
         </div>
@@ -583,8 +599,8 @@ if ($gite5g && $gite5g->num_rows > 0) {
 </form>
 </div>
 <div class="modal-footer">
-    <button class="button cancel" onclick="document.getElementById('modal5g').classList.add('hidden')">Annulla</button>
-    <button class="button" onclick="document.getElementById('form5g').submit()">Salva Proposta</button>
+    <button type="button" class="button cancel" onclick="document.getElementById('modal5g').classList.add('hidden')">Annulla</button>
+    <button type="submit" form="form5g" class="button">Salva Proposta</button>
 </div>
 </div>
 </div>
@@ -606,7 +622,7 @@ if ($gite5g && $gite5g->num_rows > 0) {
             <label>Destinazione</label>
             <input type="text" name="org_mezzo_dest" id="org1g_mezzo_dest" class="form-control" readonly style="background:#f3f4f6;">
         </div>
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Descrizione</label>
             <input type="text" name="org_descrizione" id="org1g_descrizione" class="form-control" placeholder="Breve descrizione">
         </div>
@@ -651,8 +667,8 @@ if ($gite5g && $gite5g->num_rows > 0) {
 </form>
 </div>
 <div class="modal-footer">
-    <button class="button cancel" onclick="document.getElementById('modalOrg1g').classList.add('hidden')">Annulla</button>
-    <button class="button" onclick="document.getElementById('formOrg1g').submit()">Metti in Organizzazione</button>
+    <button type="button" class="button cancel" onclick="document.getElementById('modalOrg1g').classList.add('hidden')">Annulla</button>
+    <button type="submit" form="formOrg1g" class="button">Metti in Organizzazione</button>
 </div>
 </div>
 </div>
@@ -674,7 +690,7 @@ if ($gite5g && $gite5g->num_rows > 0) {
             <label>Destinazione</label>
             <input type="text" id="org5g_mezzo_dest" class="form-control" readonly style="background:#f3f4f6;">
         </div>
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Descrizione</label>
             <input type="text" name="org_descrizione" id="org5g_descrizione" class="form-control" placeholder="Breve descrizione">
         </div>
@@ -715,8 +731,8 @@ if ($gite5g && $gite5g->num_rows > 0) {
 </form>
 </div>
 <div class="modal-footer">
-    <button class="button cancel" onclick="document.getElementById('modalOrg5g').classList.add('hidden')">Annulla</button>
-    <button class="button" onclick="document.getElementById('formOrg5g').submit()">Metti in Organizzazione</button>
+    <button type="button" class="button cancel" onclick="document.getElementById('modalOrg5g').classList.add('hidden')">Annulla</button>
+    <button type="submit" form="formOrg5g" class="button">Metti in Organizzazione</button>
 </div>
 </div>
 </div>
@@ -733,11 +749,11 @@ if ($gite5g && $gite5g->num_rows > 0) {
     <input type="hidden" name="action"  value="modifica_1g">
     <input type="hidden" name="id_gita" id="mod1g_id">
     <div class="form-grid">
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Destinazione *</label>
             <input type="text" name="mod_destinazione" id="mod1g_destinazione" class="form-control" required>
         </div>
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Descrizione</label>
             <input type="text" name="mod_descrizione" id="mod1g_descrizione" class="form-control" placeholder="Breve descrizione">
         </div>
@@ -766,8 +782,8 @@ if ($gite5g && $gite5g->num_rows > 0) {
 </form>
 </div>
 <div class="modal-footer">
-    <button class="button cancel" onclick="document.getElementById('modalMod1g').classList.add('hidden')">Annulla</button>
-    <button class="button" onclick="document.getElementById('formMod1g').submit()">Salva Modifiche</button>
+    <button type="button" class="button cancel" onclick="document.getElementById('modalMod1g').classList.add('hidden')">Annulla</button>
+    <button type="submit" form="formMod1g" class="button">Salva Modifiche</button>
 </div>
 </div>
 </div>
@@ -785,11 +801,11 @@ if ($gite5g && $gite5g->num_rows > 0) {
     <input type="hidden" name="action"  value="modifica_5g">
     <input type="hidden" name="id_gita" id="mod5g_id">
     <div class="form-grid">
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Destinazione *</label>
             <input type="text" name="mod_destinazione" id="mod5g_destinazione" class="form-control" required>
         </div>
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Descrizione</label>
             <input type="text" name="mod_descrizione" id="mod5g_descrizione" class="form-control" placeholder="Breve descrizione">
         </div>
@@ -818,8 +834,8 @@ if ($gite5g && $gite5g->num_rows > 0) {
 </form>
 </div>
 <div class="modal-footer">
-    <button class="button cancel" onclick="document.getElementById('modalMod5g').classList.add('hidden')">Annulla</button>
-    <button class="button" onclick="document.getElementById('formMod5g').submit()">Salva Modifiche</button>
+    <button type="button" class="button cancel" onclick="document.getElementById('modalMod5g').classList.add('hidden')">Annulla</button>
+    <button type="submit" form="formMod5g" class="button">Salva Modifiche</button>
 </div>
 </div>
 </div>
@@ -836,8 +852,8 @@ if ($gite5g && $gite5g->num_rows > 0) {
     <p>Sei sicuro di voler eliminare la gita verso <strong id="elimDest"></strong>? L'operazione non è reversibile.</p>
 </div>
 <div class="modal-footer">
-    <button class="button cancel" onclick="document.getElementById('modalElimina').classList.add('hidden')">Annulla</button>
-    <button class="button cancel" onclick="document.getElementById('formElimina').submit()">Elimina</button>
+    <button type="button" class="button cancel-outline" onclick="document.getElementById('modalElimina').classList.add('hidden')">Annulla</button>
+    <button type="submit" form="formElimina" class="button cancel">Elimina</button>
 </div>
 </div>
 </div>

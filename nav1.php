@@ -1,4 +1,4 @@
-﻿<header>
+<header>
     <div class="header-container header-left" style="flex: 1; flex-basis: 0;">
         <h2>Gestione Gite</h2>
     </div>

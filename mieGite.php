@@ -15,48 +15,72 @@ function formattaData($str, $formato = 'd/m/Y') {
 // modifica gita 1g in organizzazione
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'modifica_org_1g') {
     $idGita       = intval($_POST['id_gita']);
-    $dest         = $conn->real_escape_string($_POST['mo_destinazione'] ?? '');
-    $desc         = $conn->real_escape_string($_POST['mo_descrizione']  ?? '');
-    $mezzo        = $conn->real_escape_string($_POST['mo_mezzo']        ?? '');
-    $periodo      = $conn->real_escape_string($_POST['mo_periodo']      ?? '');
-    $classi       = $conn->real_escape_string($_POST['mo_classi']       ?? '');
+    $dest         = $conn->real_escape_string(trim($_POST['mo_destinazione'] ?? ''));
+    $desc         = $conn->real_escape_string(trim($_POST['mo_descrizione']  ?? ''));
+    $mezzo        = $conn->real_escape_string(trim($_POST['mo_mezzo']        ?? ''));
+    $periodo      = $conn->real_escape_string(trim($_POST['mo_periodo']      ?? ''));
+    $classi       = $conn->real_escape_string(trim($_POST['mo_classi']       ?? ''));
     $giorno       = $_POST['mo_giorno'] ?: null;
-    // validazione: la data deve essere tra 2024 e 2030
+    
+    $is_valid = true;
+    if (empty($dest)) $is_valid = false;
     if ($giorno && (strtotime($giorno) === false || intval(date('Y', strtotime($giorno))) < 2024 || intval(date('Y', strtotime($giorno))) > 2030)) {
-        $giorno = null;
+        $is_valid = false;
     }
-    $giorno_s     = $giorno ? "'" . $conn->real_escape_string($giorno) . "'" : "NULL";
-    $costoMezzo   = $_POST['mo_costoMezzo']   !== '' ? floatval($_POST['mo_costoMezzo'])   : "NULL";
-    $costoAtt     = $_POST['mo_costoAttivita'] !== '' ? floatval($_POST['mo_costoAttivita']) : "NULL";
-    $costoAP      = $_POST['mo_costoAPersona'] !== '' ? floatval($_POST['mo_costoAPersona']) : "NULL";
-    $numAlunni    = $_POST['mo_numAlunni'] !== '' ? intval($_POST['mo_numAlunni']) : "NULL";
-    $conn->query("UPDATE gita1g SET destinazione='$dest', descrizione='$desc', mezzo='$mezzo', periodo='$periodo', classi='$classi', giorno=$giorno_s, costoMezzo=$costoMezzo, costoAttivita=$costoAtt, costoAPersona=$costoAP, numAlunni=$numAlunni WHERE idGita=$idGita AND idUtente=$idUtenteLoggato");
-    $messaggio = "modifica_org_ok";
+    
+    $costoMezzo   = $_POST['mo_costoMezzo']   !== '' ? floatval(str_replace(',', '.', $_POST['mo_costoMezzo']))   : null;
+    $costoAtt     = $_POST['mo_costoAttivita'] !== '' ? floatval(str_replace(',', '.', $_POST['mo_costoAttivita'])) : null;
+    $costoAP      = $_POST['mo_costoAPersona'] !== '' ? floatval(str_replace(',', '.', $_POST['mo_costoAPersona'])) : null;
+    $numAlunni    = $_POST['mo_numAlunni'] !== '' ? intval($_POST['mo_numAlunni']) : null;
+    
+    if ($is_valid) {
+        $giorno_s     = $giorno ? "'" . $conn->real_escape_string($giorno) . "'" : "NULL";
+        $cMezzo_s     = $costoMezzo !== null ? $costoMezzo : "NULL";
+        $cAtt_s       = $costoAtt   !== null ? $costoAtt   : "NULL";
+        $cAP_s        = $costoAP    !== null ? $costoAP    : "NULL";
+        $nAlunni_s    = $numAlunni  !== null ? $numAlunni  : "NULL";
+        
+        $conn->query("UPDATE gita1g SET destinazione='$dest', descrizione='$desc', mezzo='$mezzo', periodo='$periodo', classi='$classi', giorno=$giorno_s, costoMezzo=$cMezzo_s, costoAttivita=$cAtt_s, costoAPersona=$cAP_s, numAlunni=$nAlunni_s WHERE idGita=$idGita AND idUtente=$idUtenteLoggato");
+        $messaggio = "modifica_org_ok";
+    } else {
+        $messaggio = "errore_validazione";
+    }
 }
 
 // modifica gita 5g in organizzazione
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'modifica_org_5g') {
     $idGita       = intval($_POST['id_gita']);
-    $dest         = $conn->real_escape_string($_POST['mo_destinazione']  ?? '');
-    $desc         = $conn->real_escape_string($_POST['mo_descrizione']   ?? '');
-    $mezzo        = $conn->real_escape_string($_POST['mo_mezzo']         ?? '');
-    $periodo      = $conn->real_escape_string($_POST['mo_periodo']       ?? '');
-    $classi       = $conn->real_escape_string($_POST['mo_classi']        ?? '');
+    $dest         = $conn->real_escape_string(trim($_POST['mo_destinazione']  ?? ''));
+    $desc         = $conn->real_escape_string(trim($_POST['mo_descrizione']   ?? ''));
+    $mezzo        = $conn->real_escape_string(trim($_POST['mo_mezzo']         ?? ''));
+    $periodo      = $conn->real_escape_string(trim($_POST['mo_periodo']       ?? ''));
+    $classi       = $conn->real_escape_string(trim($_POST['mo_classi']        ?? ''));
     $gi           = $_POST['mo_giornoInizio'] ?: null;
     $gf           = $_POST['mo_giornoFine']   ?: null;
-    // validazione: le date devono essere tra 2024 e 2030
+    
+    $is_valid = true;
+    if (empty($dest)) $is_valid = false;
     if ($gi && (strtotime($gi) === false || intval(date('Y', strtotime($gi))) < 2024 || intval(date('Y', strtotime($gi))) > 2030)) {
-        $gi = null;
+        $is_valid = false;
     }
     if ($gf && (strtotime($gf) === false || intval(date('Y', strtotime($gf))) < 2024 || intval(date('Y', strtotime($gf))) > 2030)) {
-        $gf = null;
+        $is_valid = false;
     }
-    $gi_s         = $gi ? "'" . $conn->real_escape_string($gi) . "'" : "NULL";
-    $gf_s         = $gf ? "'" . $conn->real_escape_string($gf) . "'" : "NULL";
-    $costoAP      = $_POST['mo_costoAPersona'] !== '' ? floatval($_POST['mo_costoAPersona']) : "NULL";
-    $numAlunni    = $_POST['mo_numAlunni'] !== '' ? intval($_POST['mo_numAlunni']) : "NULL";
-    $conn->query("UPDATE gite5 SET destinazione='$dest', descrizione='$desc', mezzo='$mezzo', periodo='$periodo', classi='$classi', giornoInizio=$gi_s, giornoFine=$gf_s, costoAPersona=$costoAP, numAlunni=$numAlunni WHERE idGita=$idGita AND idUtente=$idUtenteLoggato");
-    $messaggio = "modifica_org_ok";
+    
+    $costoAP      = $_POST['mo_costoAPersona'] !== '' ? floatval(str_replace(',', '.', $_POST['mo_costoAPersona'])) : null;
+    $numAlunni    = $_POST['mo_numAlunni'] !== '' ? intval($_POST['mo_numAlunni']) : null;
+    
+    if ($is_valid) {
+        $gi_s         = $gi ? "'" . $conn->real_escape_string($gi) . "'" : "NULL";
+        $gf_s         = $gf ? "'" . $conn->real_escape_string($gf) . "'" : "NULL";
+        $cAP_s        = $costoAP    !== null ? $costoAP    : "NULL";
+        $nAlunni_s    = $numAlunni  !== null ? $numAlunni  : "NULL";
+        
+        $conn->query("UPDATE gite5 SET destinazione='$dest', descrizione='$desc', mezzo='$mezzo', periodo='$periodo', classi='$classi', giornoInizio=$gi_s, giornoFine=$gf_s, costoAPersona=$cAP_s, numAlunni=$nAlunni_s WHERE idGita=$idGita AND idUtente=$idUtenteLoggato");
+        $messaggio = "modifica_org_ok";
+    } else {
+        $messaggio = "errore_validazione";
+    }
 }
 
 // organizza gita 1 giorno (copia con stato 4)
@@ -248,6 +272,9 @@ function badgeClass($stato) {
 <?php endif; ?>
 <?php if ($messaggio === 'eliminata'): ?>
 <script>document.addEventListener('DOMContentLoaded',function(){ document.getElementById('modalEliminataOk').classList.remove('hidden'); });</script>
+<?php endif; ?>
+<?php if ($messaggio === 'errore_validazione'): ?>
+<script>document.addEventListener('DOMContentLoaded',function(){ document.getElementById('modalErroreValidazione').classList.remove('hidden'); });</script>
 <?php endif; ?>
 
 <!-- sezione 1: proposte create da me -->
@@ -458,11 +485,11 @@ function badgeClass($stato) {
     <input type="hidden" name="action"  value="modifica_org_1g">
     <input type="hidden" name="id_gita" id="modOrg1g_id">
     <div class="form-grid">
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Destinazione *</label>
             <input type="text" name="mo_destinazione" id="modOrg1g_dest" class="form-control" required>
         </div>
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Descrizione</label>
             <input type="text" name="mo_descrizione" id="modOrg1g_desc" class="form-control" placeholder="Breve descrizione">
         </div>
@@ -489,15 +516,15 @@ function badgeClass($stato) {
         </div>
         <div class="form-group">
             <label>Costo Mezzo (&euro;)</label>
-            <input type="number" name="mo_costoMezzo" id="modOrg1g_costoMezzo" class="form-control" step="0.01" min="0">
+            <input type="text" name="mo_costoMezzo" id="modOrg1g_costoMezzo" class="form-control" placeholder="es. 10,50">
         </div>
         <div class="form-group">
             <label>Costo Attività (&euro;)</label>
-            <input type="number" name="mo_costoAttivita" id="modOrg1g_costoAtt" class="form-control" step="0.01" min="0">
+            <input type="text" name="mo_costoAttivita" id="modOrg1g_costoAtt" class="form-control" placeholder="es. 5,00">
         </div>
         <div class="form-group">
             <label>Costo a Persona (&euro;)</label>
-            <input type="number" name="mo_costoAPersona" id="modOrg1g_costoAP" class="form-control" step="0.01" min="0">
+            <input type="text" name="mo_costoAPersona" id="modOrg1g_costoAP" class="form-control" placeholder="es. 15,50">
         </div>
         <div class="form-group">
             <label>Num. Alunni</label>
@@ -507,8 +534,8 @@ function badgeClass($stato) {
 </form>
 </div>
 <div class="modal-footer">
-    <button class="button cancel" onclick="document.getElementById('modalModOrg1g').classList.add('hidden')">Annulla</button>
-    <button class="button" onclick="document.getElementById('formModOrg1g').submit()">Salva</button>
+    <button type="button" class="button cancel" onclick="document.getElementById('modalModOrg1g').classList.add('hidden')">Annulla</button>
+    <button type="submit" form="formModOrg1g" class="button">Salva</button>
 </div>
 </div>
 </div>
@@ -525,11 +552,11 @@ function badgeClass($stato) {
     <input type="hidden" name="action"  value="modifica_org_5g">
     <input type="hidden" name="id_gita" id="modOrg5g_id">
     <div class="form-grid">
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Destinazione *</label>
             <input type="text" name="mo_destinazione" id="modOrg5g_dest" class="form-control" required>
         </div>
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Descrizione</label>
             <input type="text" name="mo_descrizione" id="modOrg5g_desc" class="form-control" placeholder="Breve descrizione">
         </div>
@@ -560,7 +587,7 @@ function badgeClass($stato) {
         </div>
         <div class="form-group">
             <label>Costo a Persona (&euro;)</label>
-            <input type="number" name="mo_costoAPersona" id="modOrg5g_costoAP" class="form-control" step="0.01" min="0">
+            <input type="text" name="mo_costoAPersona" id="modOrg5g_costoAP" class="form-control" placeholder="es. 150,00">
         </div>
         <div class="form-group">
             <label>Num. Alunni</label>
@@ -570,8 +597,8 @@ function badgeClass($stato) {
 </form>
 </div>
 <div class="modal-footer">
-    <button class="button cancel" onclick="document.getElementById('modalModOrg5g').classList.add('hidden')">Annulla</button>
-    <button class="button" onclick="document.getElementById('formModOrg5g').submit()">Salva</button>
+    <button type="button" class="button cancel" onclick="document.getElementById('modalModOrg5g').classList.add('hidden')">Annulla</button>
+    <button type="submit" form="formModOrg5g" class="button">Salva</button>
 </div>
 </div>
 </div>
@@ -604,7 +631,7 @@ function badgeClass($stato) {
     <input type="hidden" name="action" id="modAction">
     <input type="hidden" name="id_gita" id="modId">
     <div class="form-grid">
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Destinazione *</label>
             <input type="text" name="destinazione" id="modDest" class="form-control" required>
         </div>
@@ -624,8 +651,8 @@ function badgeClass($stato) {
 </form>
 </div>
 <div class="modal-footer">
-    <button class="button cancel" onclick="chiudiModifica()">Annulla</button>
-    <button class="button" onclick="document.getElementById('formModifica').submit()">Proponi di Nuovo</button>
+    <button type="button" class="button cancel" onclick="chiudiModifica()">Annulla</button>
+    <button type="submit" form="formModifica" class="button">Proponi di Nuovo</button>
 </div>
 </div>
 </div>
@@ -641,8 +668,8 @@ function badgeClass($stato) {
     <p>Sei sicuro di voler eliminare la gita verso <strong id="elimDestTxt"></strong>? L'operazione non è reversibile.</p>
 </div>
 <div class="modal-footer">
-    <button class="button cancel" onclick="chiudiElimina()">Annulla</button>
-    <button class="button cancel" onclick="document.getElementById('formElimina').submit()">Elimina</button>
+    <button type="button" class="button cancel-outline" onclick="chiudiElimina()">Annulla</button>
+    <button type="submit" form="formElimina" class="button cancel">Elimina</button>
 </div>
 </div>
 </div>
@@ -663,11 +690,11 @@ function badgeClass($stato) {
     <input type="hidden" name="action"  value="organizza_1g">
     <input type="hidden" name="id_gita" id="org1g_id">
     <div class="form-grid">
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Destinazione</label>
             <input type="text" id="org1g_mezzo_dest" class="form-control" readonly>
         </div>
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Descrizione</label>
             <input type="text" name="org_descrizione" id="org1g_descrizione" class="form-control" placeholder="Breve descrizione">
         </div>
@@ -712,8 +739,8 @@ function badgeClass($stato) {
 </form>
 </div>
 <div class="modal-footer">
-    <button class="button cancel" onclick="document.getElementById('modalOrg1g').classList.add('hidden')">Annulla</button>
-    <button class="button" onclick="document.getElementById('formOrg1g').submit()">Organizza</button>
+    <button type="button" class="button cancel" onclick="document.getElementById('modalOrg1g').classList.add('hidden')">Annulla</button>
+    <button type="submit" form="formOrg1g" class="button">Organizza</button>
 </div>
 </div>
 </div>
@@ -730,11 +757,11 @@ function badgeClass($stato) {
     <input type="hidden" name="action"  value="organizza_5g">
     <input type="hidden" name="id_gita" id="org5g_id">
     <div class="form-grid">
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Destinazione</label>
             <input type="text" id="org5g_mezzo_dest" class="form-control" readonly>
         </div>
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Descrizione</label>
             <input type="text" name="org_descrizione" id="org5g_descrizione" class="form-control" placeholder="Breve descrizione">
         </div>
@@ -775,8 +802,8 @@ function badgeClass($stato) {
 </form>
 </div>
 <div class="modal-footer">
-    <button class="button cancel" onclick="document.getElementById('modalOrg5g').classList.add('hidden')">Annulla</button>
-    <button class="button" onclick="document.getElementById('formOrg5g').submit()">Organizza</button>
+    <button type="button" class="button cancel" onclick="document.getElementById('modalOrg5g').classList.add('hidden')">Annulla</button>
+    <button type="submit" form="formOrg5g" class="button">Organizza</button>
 </div>
 </div>
 </div>
@@ -825,6 +852,22 @@ function badgeClass($stato) {
 </div>
 <div class="modal-footer" style="justify-content:center;">
     <button class="button" onclick="document.getElementById('modalEliminataOk').classList.add('hidden')">OK</button>
+</div>
+</div>
+</div>
+
+<!-- modal: errore validazione -->
+<div class="modal-overlay hidden" id="modalErroreValidazione">
+<div class="modal" style="text-align:center;max-width:400px;">
+<div class="modal-header" style="justify-content:center;border-bottom:none;padding-bottom:0;">
+    <button class="close-btn" style="position:absolute;right:1rem;top:1rem;" onclick="document.getElementById('modalErroreValidazione').classList.add('hidden')">&times;</button>
+</div>
+<div class="modal-body" style="padding-top:0.5rem;">
+    <h3 style="color:#dc2626;margin-bottom:0.5rem;">Errore di Validazione</h3>
+    <p style="color:#475569;">I dati inseriti non sono validi o sono incompleti. Controlla che le date siano corrette e tutti i campi obbligatori siano compilati.</p>
+</div>
+<div class="modal-footer" style="justify-content:center;">
+    <button class="button" onclick="document.getElementById('modalErroreValidazione').classList.add('hidden')">OK</button>
 </div>
 </div>
 </div>

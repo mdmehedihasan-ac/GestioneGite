@@ -274,13 +274,25 @@ button:hover, .button:hover {
 
 button.cancel, .button.cancel {
     background: var(--hex-red);
-    font-weight: bold;
+    color: white;
 }
 
 button.cancel:hover, .button.cancel:hover {
-    color: var(--hex-red);
+    background: #b91c1c;
+    color: white;
+    box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
+}
+
+button.cancel-outline, .button.cancel-outline {
     background: white;
-    outline: 1px solid var(--hex-red);
+    color: var(--hex-red);
+    border: 2px solid var(--hex-red);
+}
+
+button.cancel-outline:hover, .button.cancel-outline:hover {
+    background: var(--hex-red);
+    color: white;
+    box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
 }
 
 button.xs, .button.xs {
@@ -494,11 +506,12 @@ button.outline:hover, .button.outline:hover {
     background: var(--my-white);
     border-radius: var(--radius-1);
     width: 95%;
-    max-width: 700px;
+    max-width: 900px;
     max-height: 90vh;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
+    overflow: hidden;
     animation: slideIn 0.3s ease-out;
     
     .modal-header {
@@ -507,6 +520,7 @@ button.outline:hover, .button.outline:hover {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        flex-shrink: 0;
         
         h3 {
             color: var(--blue-700);
@@ -537,6 +551,7 @@ button.outline:hover, .button.outline:hover {
         color: var(--blue-900);
         overflow-y: auto;
         flex: 1;
+        min-height: 0;
 
         p {
             color: var(--blue-900);
@@ -549,6 +564,7 @@ button.outline:hover, .button.outline:hover {
         display: flex;
         justify-content: flex-end;
         gap: 1rem;
+        flex-shrink: 0;
     }
 }
 
@@ -673,6 +689,7 @@ table {
         padding: 1rem;
         text-align: left;
         border-bottom: 1px solid var(--my-white-h);
+        white-space: nowrap;
     }
     
     th {

@@ -257,11 +257,7 @@ $numAlunniDisp = $gita['numAlunni'] ?? '';
                         <td><?php echo $pScad ?: ''; ?></td>
                         <td><?php echo $pNote ?: ''; ?></td>
                         <td>
-                            <form method="POST" action="partecipanti.php?id=<?php echo $idGita; ?>" style="margin:0;" onsubmit="return confirm('Rimuovere questo partecipante?');">
-                                <input type="hidden" name="action"  value="elimina">
-                                <input type="hidden" name="id_part" value="<?php echo $pId; ?>">
-                                <button type="submit" class="button cancel xs">Rimuovi</button>
-                            </form>
+                            <button type="button" class="button cancel xs" onclick="apriRimuoviPart(<?php echo $pId; ?>, '<?php echo addslashes($pNome . ' ' . $pCognome); ?>')">Rimuovi</button>
                         </td>
                     </tr>
                 <?php endwhile; else: ?>
@@ -302,7 +298,7 @@ $numAlunniDisp = $gita['numAlunni'] ?? '';
             <label>Scadenza documento</label>
             <input type="date" name="acc_scadenza" id="modAccScad" class="form-control">
         </div>
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Allergeni / Note</label>
             <input type="text" name="acc_note" id="modAccNote" class="form-control" placeholder="es. allergie, intolleranze...">
         </div>
@@ -310,8 +306,8 @@ $numAlunniDisp = $gita['numAlunni'] ?? '';
 </form>
 </div>
 <div class="modal-footer">
-    <button class="button cancel" onclick="document.getElementById('modalModAcc').classList.add('hidden')">Annulla</button>
-    <button class="button" onclick="document.getElementById('formModAcc').submit()">Salva</button>
+    <button type="button" class="button cancel" onclick="document.getElementById('modalModAcc').classList.add('hidden')">Annulla</button>
+    <button type="submit" form="formModAcc" class="button">Salva</button>
 </div>
 </div>
 </div>
@@ -367,7 +363,7 @@ $numAlunniDisp = $gita['numAlunni'] ?? '';
             <label>Scadenza documento *</label>
             <input type="date" name="scadenza" class="form-control" required>
         </div>
-        <div class="form-group full-row">
+        <div class="form-group">
             <label>Allergeni / Note (facoltativo)</label>
             <input type="text" name="note" class="form-control" placeholder="es. allergie, intolleranze...">
         </div>
@@ -377,6 +373,27 @@ $numAlunniDisp = $gita['numAlunni'] ?? '';
 <div class="modal-footer">
     <button class="button cancel" onclick="document.getElementById('modalAggiungi').classList.add('hidden')">Annulla</button>
     <button class="button" type="submit" form="formAggiungi">Aggiungi</button>
+</div>
+</div>
+</div>
+
+<!-- modal: conferma rimozione partecipante -->
+<div class="modal-overlay hidden" id="modalRimuoviPart">
+<div class="modal" style="max-width:400px;text-align:center;">
+<div class="modal-header" style="justify-content:center;border-bottom:none;padding-bottom:0;">
+    <button class="close-btn" style="position:absolute;right:1rem;top:1rem;" onclick="document.getElementById('modalRimuoviPart').classList.add('hidden')">&times;</button>
+</div>
+<div class="modal-body" style="padding-top:0.5rem;">
+    <h3 style="color:var(--hex-red);margin-bottom:0.5rem;">Conferma Rimozione</h3>
+    <p style="color:var(--blue-900);">Rimuovere il partecipante <strong id="rimuoviPartNome"></strong>?</p>
+</div>
+<div class="modal-footer" style="justify-content:center;">
+    <button type="button" class="button cancel-outline" onclick="document.getElementById('modalRimuoviPart').classList.add('hidden')">Annulla</button>
+    <form id="formRimuoviPart" method="POST" action="partecipanti.php?id=<?php echo $idGita; ?>" style="margin:0;">
+        <input type="hidden" name="action" value="elimina">
+        <input type="hidden" name="id_part" id="rimuoviPartId">
+        <button type="submit" class="button cancel">Rimuovi</button>
+    </form>
 </div>
 </div>
 </div>
@@ -403,11 +420,17 @@ function apriModAcc(btn) {
 }
 
 window.addEventListener('click', function(e) {
-    ['modalAggiungi','modalModAcc'].forEach(function(id) {
+    ['modalAggiungi','modalModAcc','modalRimuoviPart'].forEach(function(id) {
         var m = document.getElementById(id);
         if (e.target === m) m.classList.add('hidden');
     });
 });
+
+function apriRimuoviPart(id, nome) {
+    document.getElementById('rimuoviPartId').value = id;
+    document.getElementById('rimuoviPartNome').textContent = nome;
+    document.getElementById('modalRimuoviPart').classList.remove('hidden');
+}
 <?php if ($messaggio === 'campi' || $messaggio === 'error'): ?>
 document.getElementById('modalAggiungi').classList.remove('hidden');
 <?php endif; ?>
