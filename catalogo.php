@@ -1,5 +1,6 @@
 <?php
 include('nav.php');
+include('utils.php');
 
 $messaggio = "";
 
@@ -8,17 +9,8 @@ function validaData($str) {
     if (empty($str)) return false;
     $ts = strtotime($str);
     if ($ts === false) return false;
-    // controlla che la data abbia senso
     $y = intval(date('Y', $ts));
     return ($y >= 2000 && $y <= 2100);
-}
-
-// funzione per formattare data in modo sicuro
-function formattaData($str, $formato = 'd/m/Y') {
-    if (empty($str)) return '—';
-    $ts = strtotime($str);
-    if ($ts === false) return '—';
-    return date($formato, $ts);
 }
 
 // nuova proposta gita 1 giorno

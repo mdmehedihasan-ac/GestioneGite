@@ -14,27 +14,25 @@
         } elseif ($password === '') {
             $errore = "Inserisci la password.";
         } else {
-            $istruzione = mysqli_prepare($conn, "SELECT IDUtente, Nome, Cognome, Password, IDTipo FROM utente WHERE Mail = ?");
-            mysqli_stmt_bind_param($istruzione, "s", $email);
-            mysqli_stmt_execute($istruzione);
-            $result = mysqli_stmt_get_result($istruzione);
-        
-        if ($row = mysqli_fetch_assoc($result)) {
-            if (password_verify($password, $row['Password'])) {
-                
-                $_SESSION['id_utente'] = $row['IDUtente'];
-                $_SESSION['username'] = $row['Nome'] . " " . $row['Cognome'];
-                $_SESSION['ruolo'] = $row['IDTipo'];
-                
-                header("Location: index.php");
-                exit;
+            $comando = mysqli_prepare($conn, "SELECT IDUtente, Nome, Cognome, Password, IDTipo FROM utente WHERE Mail = ?");
+            mysqli_stmt_bind_param($comando, "s", $email);
+            mysqli_stmt_execute($comando);
+            $risultato = mysqli_stmt_get_result($comando);
+
+            if ($riga = mysqli_fetch_assoc($risultato)) {
+                if (password_verify($password, $riga['Password'])) {
+                    $_SESSION['id_utente'] = $riga['IDUtente'];
+                    $_SESSION['username'] = $riga['Nome'] . " " . $riga['Cognome'];
+                    $_SESSION['ruolo'] = $riga['IDTipo'];
+                    header("Location: index.php");
+                    exit;
+                } else {
+                    $errore = "Password errata.";
+                }
             } else {
-                $errore = "Password errata.";
+                $errore = "Nessun account trovato con questa email.";
             }
-        } else {
-            $errore = "Nessun account trovato con questa email.";
-        }
-        mysqli_stmt_close($istruzione);
+            mysqli_stmt_close($comando);
         }
     }
 ?>

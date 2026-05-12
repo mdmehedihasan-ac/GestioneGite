@@ -10,12 +10,12 @@ if (!isset($_SESSION['id_utente'])) {
 $idUtente = intval($_SESSION['id_utente']);
 
 // carica dati utente dal database
-$stmt = mysqli_prepare($conn, "SELECT u.Nome, u.Cognome, u.Mail, t.Descrizione AS Ruolo FROM utente u JOIN tipoutente t ON u.IDTipo = t.IDTipo WHERE u.IDUtente = ?");
-mysqli_stmt_bind_param($stmt, "i", $idUtente);
-mysqli_stmt_execute($stmt);
-$result = mysqli_stmt_get_result($stmt);
-$utente = mysqli_fetch_assoc($result);
-mysqli_stmt_close($stmt);
+$comando = mysqli_prepare($conn, "SELECT u.Nome, u.Cognome, u.Mail, t.Descrizione AS Ruolo FROM utente u JOIN tipoutente t ON u.IDTipo = t.IDTipo WHERE u.IDUtente = ?");
+mysqli_stmt_bind_param($comando, "i", $idUtente);
+mysqli_stmt_execute($comando);
+$risultato = mysqli_stmt_get_result($comando);
+$utente = mysqli_fetch_assoc($risultato);
+mysqli_stmt_close($comando);
 
 if (!$utente) {
     header("Location: login.php");
@@ -23,19 +23,19 @@ if (!$utente) {
 }
 
 // conta le proposte create dall'utente (stato 1,2,3)
-$r1 = mysqli_query($conn, "SELECT COUNT(*) AS tot FROM gita1g WHERE idUtente = $idUtente AND idStato IN (1,2,3)");
-$r2 = mysqli_query($conn, "SELECT COUNT(*) AS tot FROM gite5 WHERE idUtente = $idUtente AND idStato IN (1,2,3)");
-$totProposte = (mysqli_fetch_assoc($r1)['tot'] ?? 0) + (mysqli_fetch_assoc($r2)['tot'] ?? 0);
+$proposte1g = mysqli_query($conn, "SELECT COUNT(*) AS tot FROM gita1g WHERE idUtente = $idUtente AND idStato IN (1,2,3)");
+$proposte5g = mysqli_query($conn, "SELECT COUNT(*) AS tot FROM gite5 WHERE idUtente = $idUtente AND idStato IN (1,2,3)");
+$totProposte = (mysqli_fetch_assoc($proposte1g)['tot'] ?? 0) + (mysqli_fetch_assoc($proposte5g)['tot'] ?? 0);
 
 // conta le gite in organizzazione (stato 4)
-$r3 = mysqli_query($conn, "SELECT COUNT(*) AS tot FROM gita1g WHERE idUtente = $idUtente AND idStato = 4");
-$r4 = mysqli_query($conn, "SELECT COUNT(*) AS tot FROM gite5 WHERE idUtente = $idUtente AND idStato = 4");
-$totOrganizzazione = (mysqli_fetch_assoc($r3)['tot'] ?? 0) + (mysqli_fetch_assoc($r4)['tot'] ?? 0);
+$organizza1g = mysqli_query($conn, "SELECT COUNT(*) AS tot FROM gita1g WHERE idUtente = $idUtente AND idStato = 4");
+$organizza5g = mysqli_query($conn, "SELECT COUNT(*) AS tot FROM gite5 WHERE idUtente = $idUtente AND idStato = 4");
+$totOrganizzazione = (mysqli_fetch_assoc($organizza1g)['tot'] ?? 0) + (mysqli_fetch_assoc($organizza5g)['tot'] ?? 0);
 
 // conta le gite dove e accompagnatore (ma non autore)
-$r5 = mysqli_query($conn, "SELECT COUNT(*) AS tot FROM accompagnatori a JOIN gita1g g ON a.idgita = g.idGita AND a.tipo_gita = '1g' WHERE a.idutente = $idUtente AND g.idUtente <> $idUtente");
-$r6 = mysqli_query($conn, "SELECT COUNT(*) AS tot FROM accompagnatori a JOIN gite5 g ON a.idgita = g.idGita AND a.tipo_gita = '5g' WHERE a.idutente = $idUtente AND g.idUtente <> $idUtente");
-$totAccompagnatore = (mysqli_fetch_assoc($r5)['tot'] ?? 0) + (mysqli_fetch_assoc($r6)['tot'] ?? 0);
+$accomp1g = mysqli_query($conn, "SELECT COUNT(*) AS tot FROM accompagnatori a JOIN gita1g g ON a.idgita = g.idGita AND a.tipo_gita = '1g' WHERE a.idutente = $idUtente AND g.idUtente <> $idUtente");
+$accomp5g = mysqli_query($conn, "SELECT COUNT(*) AS tot FROM accompagnatori a JOIN gite5 g ON a.idgita = g.idGita AND a.tipo_gita = '5g' WHERE a.idutente = $idUtente AND g.idUtente <> $idUtente");
+$totAccompagnatore = (mysqli_fetch_assoc($accomp1g)['tot'] ?? 0) + (mysqli_fetch_assoc($accomp5g)['tot'] ?? 0);
 ?>
 <!DOCTYPE html>
 <html lang="it">

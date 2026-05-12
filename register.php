@@ -27,28 +27,28 @@
             $errore = "La password deve contenere almeno 6 caratteri.";
         } else {
             // Controllo email esistente
-            $controllo_email = mysqli_prepare($conn, "SELECT Mail FROM utente WHERE Mail = ?");
-            mysqli_stmt_bind_param($controllo_email, "s", $email);
-            mysqli_stmt_execute($controllo_email);
-            mysqli_stmt_store_result($controllo_email);
-            
-            if (mysqli_stmt_num_rows($controllo_email) > 0) {
+            $controllo = mysqli_prepare($conn, "SELECT Mail FROM utente WHERE Mail = ?");
+            mysqli_stmt_bind_param($controllo, "s", $email);
+            mysqli_stmt_execute($controllo);
+            mysqli_stmt_store_result($controllo);
+
+            if (mysqli_stmt_num_rows($controllo) > 0) {
                 $errore = "L'indirizzo email è già in uso.";
             } else {
-                $hash = password_hash($password, PASSWORD_DEFAULT);
-                $idTipo = 1; 
-                
-                $istruzione = mysqli_prepare($conn, "INSERT INTO utente (Nome, Cognome, Mail, Password, IDTipo) VALUES (?, ?, ?, ?, ?)");
-                mysqli_stmt_bind_param($istruzione, "ssssi", $nome, $cognome, $email, $hash, $idTipo);
-                
-                if (mysqli_stmt_execute($istruzione)) {
+                $psw_hash = password_hash($password, PASSWORD_DEFAULT);
+                $tipo = 1;
+
+                $inserimento = mysqli_prepare($conn, "INSERT INTO utente (Nome, Cognome, Mail, Password, IDTipo) VALUES (?, ?, ?, ?, ?)");
+                mysqli_stmt_bind_param($inserimento, "ssssi", $nome, $cognome, $email, $psw_hash, $tipo);
+
+                if (mysqli_stmt_execute($inserimento)) {
                     $successo = "Registrazione completata! Puoi ora accedere.";
                 } else {
                     $errore = "Errore durante la registrazione.";
                 }
-                mysqli_stmt_close($istruzione);
+                mysqli_stmt_close($inserimento);
             }
-            mysqli_stmt_close($controllo_email);
+            mysqli_stmt_close($controllo);
         }
     }
 ?>

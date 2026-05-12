@@ -1,16 +1,9 @@
 <?php
 include('nav.php');
+include('utils.php');
 
 $idUtenteLoggato = $_SESSION['id_utente'];
 $messaggio = "";
-
-// funzione per formattare data in modo sicuro
-function formattaData($str, $formato = 'd/m/Y') {
-    if (empty($str)) return '—';
-    $ts = strtotime($str);
-    if ($ts === false) return '—';
-    return date($formato, $ts);
-}
 
 // modifica gita 1g in organizzazione
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'modifica_org_1g') {
@@ -197,9 +190,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 // query: proposte create da me (stato 1,2,3)
 $proposte = [];
 $r1 = $conn->query("SELECT g.*, s.Stato, '1g' AS tipo FROM gita1g g JOIN statogita s ON g.idStato = s.IDStato WHERE g.idUtente = $idUtenteLoggato AND g.idStato IN (1,2,3) ORDER BY g.idGita DESC");
-if ($r1) { while ($row = $r1->fetch_assoc()) $proposte[] = $row; }
+if ($r1) { while ($riga = $r1->fetch_assoc()) $proposte[] = $riga; }
 $r2 = $conn->query("SELECT g.*, s.Stato, '5g' AS tipo FROM gite5 g JOIN statogita s ON g.idStato = s.IDStato WHERE g.idUtente = $idUtenteLoggato AND g.idStato IN (1,2,3) ORDER BY g.idGita DESC");
-if ($r2) { while ($row = $r2->fetch_assoc()) $proposte[] = $row; }
+if ($r2) { while ($riga = $r2->fetch_assoc()) $proposte[] = $riga; }
 
 // query: gite in organizzazione/concluse (stato 4,5)
 // Include sia le gite create dall'utente che quelle a cui partecipa come accompagnatore
@@ -215,7 +208,7 @@ $r3 = $conn->query("
     WHERE a.idutente = $idUtenteLoggato AND g.idUtente <> $idUtenteLoggato AND g.idStato IN (4,5)
     ORDER BY idGita DESC
 ");
-if ($r3) { while ($row = $r3->fetch_assoc()) $organizzate[] = $row; }
+if ($r3) { while ($riga = $r3->fetch_assoc()) $organizzate[] = $riga; }
 $r4 = $conn->query("
     SELECT g.*, s.Stato, '5g' AS tipo, 1 AS sono_autore
     FROM gite5 g JOIN statogita s ON g.idStato = s.IDStato
@@ -227,7 +220,7 @@ $r4 = $conn->query("
     WHERE a.idutente = $idUtenteLoggato AND g.idUtente <> $idUtenteLoggato AND g.idStato IN (4,5)
     ORDER BY idGita DESC
 ");
-if ($r4) { while ($row = $r4->fetch_assoc()) $organizzate[] = $row; }
+if ($r4) { while ($riga = $r4->fetch_assoc()) $organizzate[] = $riga; }
 
 function badgeClass($stato) {
     switch ($stato) {
@@ -288,30 +281,30 @@ function badgeClass($stato) {
         <p style="color:#64748b;font-style:italic;">Non hai ancora creato nessuna proposta.</p>
     <?php else: ?>
     <div class="miegite-grid">
-        <?php foreach ($proposte as $row):
-            $tipo      = $row['tipo'] === '1g' ? 'Gita 1 Giorno' : 'Gita Più Giorni';
-            $dest      = htmlspecialchars($row['destinazione']);
-            $destJs    = htmlspecialchars($row['destinazione'], ENT_QUOTES);
-            $mezzo     = htmlspecialchars($row['mezzo'] ?? '');
-            $mezzoJs   = htmlspecialchars($row['mezzo'] ?? '', ENT_QUOTES);
-            $periodo   = htmlspecialchars($row['periodo'] ?? '');
-            $periodoJs = htmlspecialchars($row['periodo'] ?? '', ENT_QUOTES);
-            $descJs    = htmlspecialchars($row['descrizione'] ?? '', ENT_QUOTES);
-            $classiJs  = htmlspecialchars($row['classi'] ?? '', ENT_QUOTES);
-            $descDisp  = htmlspecialchars($row['descrizione'] ?? '');
-            $costoRaw  = $row['costoAPersona'] ?? 0;
+        <?php foreach ($proposte as $riga):
+            $tipo      = $riga['tipo'] === '1g' ? 'Gita 1 Giorno' : 'Gita Più Giorni';
+            $dest      = htmlspecialchars($riga['destinazione']);
+            $destJs    = htmlspecialchars($riga['destinazione'], ENT_QUOTES);
+            $mezzo     = htmlspecialchars($riga['mezzo'] ?? '');
+            $mezzoJs   = htmlspecialchars($riga['mezzo'] ?? '', ENT_QUOTES);
+            $periodo   = htmlspecialchars($riga['periodo'] ?? '');
+            $periodoJs = htmlspecialchars($riga['periodo'] ?? '', ENT_QUOTES);
+            $descJs    = htmlspecialchars($riga['descrizione'] ?? '', ENT_QUOTES);
+            $classiJs  = htmlspecialchars($riga['classi'] ?? '', ENT_QUOTES);
+            $descDisp  = htmlspecialchars($riga['descrizione'] ?? '');
+            $costoRaw  = $riga['costoAPersona'] ?? 0;
             $costo     = $costoRaw !== null ? '€ ' . number_format($costoRaw, 2, ',', '.') : '—';
-            $stato     = $row['Stato'];
+            $stato     = $riga['Stato'];
             $badge     = badgeClass($stato);
-            $id        = intval($row['idGita']);
-            $tipoTabella = $row['tipo'];
+            $id        = intval($riga['idGita']);
+            $tipoTabella = $riga['tipo'];
 
-            if ($row['tipo'] === '1g') {
-                $data = formattaData($row['giorno']);
+            if ($riga['tipo'] === '1g') {
+                $data = formattaData($riga['giorno']);
                 $dataLabel = 'Giorno';
             } else {
-                $ini = formattaData($row['giornoInizio']);
-                $fin = formattaData($row['giornoFine']);
+                $ini = formattaData($riga['giornoInizio']);
+                $fin = formattaData($riga['giornoFine']);
                 $data = "$ini → $fin";
                 $dataLabel = 'Date';
             }
@@ -375,43 +368,43 @@ function badgeClass($stato) {
         <p style="color:#64748b;font-style:italic;">Non stai organizzando nessuna gita al momento.</p>
     <?php else: ?>
     <div class="miegite-grid">
-        <?php foreach ($organizzate as $row):
-            $tipo    = $row['tipo'] === '1g' ? 'Gita 1 Giorno' : 'Gita Più Giorni';
-            $dest    = htmlspecialchars($row['destinazione']);
-            $destJs  = htmlspecialchars($row['destinazione'], ENT_QUOTES);
-            $mezzo   = htmlspecialchars($row['mezzo'] ?? '—');
-            $mezzoJs = htmlspecialchars($row['mezzo'] ?? '', ENT_QUOTES);
-            $periodo = htmlspecialchars($row['periodo'] ?? '—');
-            $periodoJs = htmlspecialchars($row['periodo'] ?? '', ENT_QUOTES);
-            $descJs  = htmlspecialchars($row['descrizione'] ?? '', ENT_QUOTES);
-            $descDisp = htmlspecialchars($row['descrizione'] ?? '');
-            $classiJs= htmlspecialchars($row['classi'] ?? '', ENT_QUOTES);
-            $costo   = $row['costoAPersona'] !== null ? '€ ' . number_format($row['costoAPersona'], 2, ',', '.') : '—';
-            $stato   = $row['Stato'];
+        <?php foreach ($organizzate as $riga):
+            $tipo    = $riga['tipo'] === '1g' ? 'Gita 1 Giorno' : 'Gita Più Giorni';
+            $dest    = htmlspecialchars($riga['destinazione']);
+            $destJs  = htmlspecialchars($riga['destinazione'], ENT_QUOTES);
+            $mezzo   = htmlspecialchars($riga['mezzo'] ?? '—');
+            $mezzoJs = htmlspecialchars($riga['mezzo'] ?? '', ENT_QUOTES);
+            $periodo = htmlspecialchars($riga['periodo'] ?? '—');
+            $periodoJs = htmlspecialchars($riga['periodo'] ?? '', ENT_QUOTES);
+            $descJs  = htmlspecialchars($riga['descrizione'] ?? '', ENT_QUOTES);
+            $descDisp = htmlspecialchars($riga['descrizione'] ?? '');
+            $classiJs= htmlspecialchars($riga['classi'] ?? '', ENT_QUOTES);
+            $costo   = $riga['costoAPersona'] !== null ? '€ ' . number_format($riga['costoAPersona'], 2, ',', '.') : '—';
+            $stato   = $riga['Stato'];
             $badge   = badgeClass($stato);
-            $numAl   = $row['numAlunni'] !== null ? $row['numAlunni'] : '—';
-            $id      = intval($row['idGita']);
-            $tipoTabella = $row['tipo'];
-            if ($row['tipo'] === '1g') {
-                $dataRaw   = $row['giorno'] ?? '';
+            $numAl   = $riga['numAlunni'] !== null ? $riga['numAlunni'] : '—';
+            $id      = intval($riga['idGita']);
+            $tipoTabella = $riga['tipo'];
+            if ($riga['tipo'] === '1g') {
+                $dataRaw   = $riga['giorno'] ?? '';
                 $data      = formattaData($dataRaw);
                 $dataLabel = 'Giorno';
-                $costoMezzoRaw = $row['costoMezzo'] ?? '';
-                $costoAttRaw   = $row['costoAttivita'] ?? '';
-                $costoAPRaw    = $row['costoAPersona'] ?? '';
+                $costoMezzoRaw = $riga['costoMezzo'] ?? '';
+                $costoAttRaw   = $riga['costoAttivita'] ?? '';
+                $costoAPRaw    = $riga['costoAPersona'] ?? '';
                 $costoMezzo = $costoMezzoRaw !== null && $costoMezzoRaw !== '' ? '€ ' . number_format($costoMezzoRaw, 2, ',', '.') : '—';
                 $costoAtt   = $costoAttRaw   !== null && $costoAttRaw   !== '' ? '€ ' . number_format($costoAttRaw,   2, ',', '.') : '—';
                 $extraInfo  = "<span><strong>Costo mezzo:</strong> $costoMezzo</span><span><strong>Costo attività:</strong> $costoAtt</span>";
             } else {
                 $dataRaw = '';
-                $ini = formattaData($row['giornoInizio']);
-                $fin = formattaData($row['giornoFine']);
+                $ini = formattaData($riga['giornoInizio']);
+                $fin = formattaData($riga['giornoFine']);
                 $data      = "$ini → $fin";
                 $dataLabel = 'Date';
                 $extraInfo = "";
                 $costoMezzoRaw = '';
                 $costoAttRaw   = '';
-                $costoAPRaw    = $row['costoAPersona'] ?? '';
+                $costoAPRaw    = $riga['costoAPersona'] ?? '';
             }
         ?>
         <div class="miegite-card">
@@ -440,20 +433,20 @@ function badgeClass($stato) {
                     data-mezzo="<?php echo $mezzoJs; ?>"
                     data-periodo="<?php echo $periodoJs; ?>"
                     data-classi="<?php echo $classiJs; ?>"
-                    data-giorno="<?php echo htmlspecialchars($row['tipo']==='1g' ? ($row['giorno']??'') : '', ENT_QUOTES); ?>"
-                    data-giorno-inizio="<?php echo htmlspecialchars($row['tipo']==='5g' ? ($row['giornoInizio']??'') : '', ENT_QUOTES); ?>"
-                    data-giorno-fine="<?php echo htmlspecialchars($row['tipo']==='5g' ? ($row['giornoFine']??'') : '', ENT_QUOTES); ?>"
+                    data-giorno="<?php echo htmlspecialchars($riga['tipo']==='1g' ? ($riga['giorno']??'') : '', ENT_QUOTES); ?>"
+                    data-giorno-inizio="<?php echo htmlspecialchars($riga['tipo']==='5g' ? ($riga['giornoInizio']??'') : '', ENT_QUOTES); ?>"
+                    data-giorno-fine="<?php echo htmlspecialchars($riga['tipo']==='5g' ? ($riga['giornoFine']??'') : '', ENT_QUOTES); ?>"
                     data-costo-mezzo="<?php echo $costoMezzoRaw; ?>"
                     data-costo-att="<?php echo $costoAttRaw; ?>"
                     data-costo-ap="<?php echo $costoAPRaw; ?>"
-                    data-num-alunni="<?php echo $row['numAlunni'] ?? ''; ?>"
+                    data-num-alunni="<?php echo $riga['numAlunni'] ?? ''; ?>"
                     onclick="apriModOrg(this)">
                     Modifica
                 </button>
-                <?php if ($row['tipo'] === '1g'):
-                    $accRes = $conn->query("SELECT CONCAT(u.Nome,' ',u.Cognome) AS nome FROM accompagnatori a JOIN utente u ON a.idutente=u.IDUtente WHERE a.idgita={$row['idGita']} AND a.tipo_gita='1g' ORDER BY u.Cognome,u.Nome");
+                <?php if ($riga['tipo'] === '1g'):
+                    $accRes = $conn->query("SELECT CONCAT(u.Nome,' ',u.Cognome) AS nome FROM accompagnatori a JOIN utente u ON a.idutente=u.IDUtente WHERE a.idgita={$riga['idGita']} AND a.tipo_gita='1g' ORDER BY u.Cognome,u.Nome");
                     $accList = [];
-                    if ($accRes) { while ($aRow = $accRes->fetch_assoc()) $accList[] = $aRow['nome']; }
+                    if ($accRes) { while ($aRiga = $accRes->fetch_assoc()) $accList[] = $aRiga['nome']; }
                     $accJson = htmlspecialchars(json_encode($accList), ENT_QUOTES);
                 ?>
                 <button type="button" class="button xs outline"
@@ -461,8 +454,8 @@ function badgeClass($stato) {
                     data-acc="<?php echo $accJson; ?>"
                     onclick="apriAccompagnatori(this)">Accompagnatori</button>
                 <?php endif; ?>
-                <?php if ($row['tipo'] === '5g'): ?>
-                <a href="partecipanti.php?id=<?php echo $row['idGita']; ?>" class="button xs" style="text-decoration:none;">Partecipanti</a>
+                <?php if ($riga['tipo'] === '5g'): ?>
+                <a href="partecipanti.php?id=<?php echo $riga['idGita']; ?>" class="button xs" style="text-decoration:none;">Partecipanti</a>
                 <?php endif; ?>
             </div>
         </div>

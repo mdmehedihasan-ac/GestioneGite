@@ -137,23 +137,23 @@ $res5g = mysqli_query($conn,
 <?php
 $n = 1;
 if ($res1g && mysqli_num_rows($res1g) > 0):
-    while ($row = mysqli_fetch_assoc($res1g)):
-        $id      = intval($row['idGita']);
-        $dest    = htmlspecialchars($row['destinazione'] ?? '');
-        $mezzo   = htmlspecialchars($row['mezzo']   ?? '');
-        $classi  = htmlspecialchars($row['classi']  ?? '');
-        $giorno  = $row['giorno'] ? (strtotime($row['giorno']) !== false ? date('d/m/Y', strtotime($row['giorno'])) : '—') : '—';
-        $giornoV = $row['giorno'] ?? '';
-        $costo   = $row['costoAPersona'] !== null ? '&euro; ' . number_format($row['costoAPersona'], 2, ',', '.') : '—';
-        $numAl   = $row['numAlunni'] ?? '';
-        $autore  = htmlspecialchars($row['autore'] ?? '');
-        $costoMV = $row['costoMezzo']    ?? '';
-        $costoAV = $row['costoAttivita'] ?? '';
-        $costoPA = $row['costoAPersona'] ?? '';
-        $dJ      = htmlspecialchars($row['destinazione'] ?? '', ENT_QUOTES);
+    while ($riga = mysqli_fetch_assoc($res1g)):
+        $id      = intval($riga['idGita']);
+        $dest    = htmlspecialchars($riga['destinazione'] ?? '');
+        $mezzo   = htmlspecialchars($riga['mezzo']   ?? '');
+        $classi  = htmlspecialchars($riga['classi']  ?? '');
+        $giorno  = $riga['giorno'] ? (strtotime($riga['giorno']) !== false ? date('d/m/Y', strtotime($riga['giorno'])) : '—') : '—';
+        $giornoV = $riga['giorno'] ?? '';
+        $costo   = $riga['costoAPersona'] !== null ? '&euro; ' . number_format($riga['costoAPersona'], 2, ',', '.') : '—';
+        $numAl   = $riga['numAlunni'] ?? '';
+        $autore  = htmlspecialchars($riga['autore'] ?? '');
+        $costoMV = $riga['costoMezzo']    ?? '';
+        $costoAV = $riga['costoAttivita'] ?? '';
+        $costoPA = $riga['costoAPersona'] ?? '';
+        $dJ      = htmlspecialchars($riga['destinazione'] ?? '', ENT_QUOTES);
         // iscritto se è accompagnatore OPPURE se è l'autore della gita
         $chk = mysqli_query($conn, "SELECT id FROM accompagnatori WHERE idgita=$id AND idutente=$idUtenteLoggato AND tipo_gita='1g'");
-        $giaPart = ($chk && mysqli_num_rows($chk) > 0) || ($row['idUtente'] == $idUtenteLoggato);
+        $giaPart = ($chk && mysqli_num_rows($chk) > 0) || ($riga['idUtente'] == $idUtenteLoggato);
 ?>
     <tr>
         <td><?php echo $n++; ?></td>
@@ -179,10 +179,10 @@ if ($res1g && mysqli_num_rows($res1g) > 0):
             <button type="button" class="button xs"
                 data-id="<?php echo $id; ?>"
                 data-dest="<?php echo $dJ; ?>"
-                data-desc="<?php echo htmlspecialchars($row['descrizione'] ?? '', ENT_QUOTES); ?>"
-                data-mezzo="<?php echo htmlspecialchars($row['mezzo'] ?? '', ENT_QUOTES); ?>"
-                data-periodo="<?php echo htmlspecialchars($row['periodo'] ?? '', ENT_QUOTES); ?>"
-                data-classi="<?php echo htmlspecialchars($row['classi'] ?? '', ENT_QUOTES); ?>"
+                data-desc="<?php echo htmlspecialchars($riga['descrizione'] ?? '', ENT_QUOTES); ?>"
+                data-mezzo="<?php echo htmlspecialchars($riga['mezzo'] ?? '', ENT_QUOTES); ?>"
+                data-periodo="<?php echo htmlspecialchars($riga['periodo'] ?? '', ENT_QUOTES); ?>"
+                data-classi="<?php echo htmlspecialchars($riga['classi'] ?? '', ENT_QUOTES); ?>"
                 data-giorno="<?php echo $giornoV; ?>"
                 data-costo-mezzo="<?php echo $costoMV; ?>"
                 data-costo-att="<?php echo $costoAV; ?>"
@@ -216,23 +216,23 @@ if ($res1g && mysqli_num_rows($res1g) > 0):
 <?php
 $n = 1;
 if ($res5g && mysqli_num_rows($res5g) > 0):
-    while ($row = mysqli_fetch_assoc($res5g)):
-        $id     = intval($row['idGita']);
-        $dest   = htmlspecialchars($row['destinazione'] ?? '');
-        $mezzo  = htmlspecialchars($row['mezzo']   ?? '');
-        $classi = htmlspecialchars($row['classi']  ?? '');
-        $gi     = $row['giornoInizio'] ? (strtotime($row['giornoInizio']) !== false ? date('d/m/Y', strtotime($row['giornoInizio'])) : '—') : '—';
-        $gf     = $row['giornoFine']   ? (strtotime($row['giornoFine'])   !== false ? date('d/m/Y', strtotime($row['giornoFine']))   : '—') : '—';
-        $giV    = $row['giornoInizio'] ?? '';
-        $gfV    = $row['giornoFine']   ?? '';
-        $costo  = $row['costoAPersona'] !== null ? '&euro; ' . number_format($row['costoAPersona'], 2, ',', '.') : '—';
-        $numAl  = $row['numAlunni'] ?? '';
-        $autore = htmlspecialchars($row['autore'] ?? '');
-        $costoPA = $row['costoAPersona'] ?? '';
-        $dJ     = htmlspecialchars($row['destinazione'] ?? '', ENT_QUOTES);
+    while ($riga = mysqli_fetch_assoc($res5g)):
+        $id     = intval($riga['idGita']);
+        $dest   = htmlspecialchars($riga['destinazione'] ?? '');
+        $mezzo  = htmlspecialchars($riga['mezzo']   ?? '');
+        $classi = htmlspecialchars($riga['classi']  ?? '');
+        $gi     = $riga['giornoInizio'] ? (strtotime($riga['giornoInizio']) !== false ? date('d/m/Y', strtotime($riga['giornoInizio'])) : '—') : '—';
+        $gf     = $riga['giornoFine']   ? (strtotime($riga['giornoFine'])   !== false ? date('d/m/Y', strtotime($riga['giornoFine']))   : '—') : '—';
+        $giV    = $riga['giornoInizio'] ?? '';
+        $gfV    = $riga['giornoFine']   ?? '';
+        $costo  = $riga['costoAPersona'] !== null ? '&euro; ' . number_format($riga['costoAPersona'], 2, ',', '.') : '—';
+        $numAl  = $riga['numAlunni'] ?? '';
+        $autore = htmlspecialchars($riga['autore'] ?? '');
+        $costoPA = $riga['costoAPersona'] ?? '';
+        $dJ     = htmlspecialchars($riga['destinazione'] ?? '', ENT_QUOTES);
         // iscritto se è accompagnatore OPPURE se è l'autore della gita
         $chk = mysqli_query($conn, "SELECT id FROM accompagnatori WHERE idgita=$id AND idutente=$idUtenteLoggato AND tipo_gita='5g'");
-        $giaPart = ($chk && mysqli_num_rows($chk) > 0) || ($row['idUtente'] == $idUtenteLoggato);
+        $giaPart = ($chk && mysqli_num_rows($chk) > 0) || ($riga['idUtente'] == $idUtenteLoggato);
 ?>
     <tr>
         <td><?php echo $n++; ?></td>
@@ -260,10 +260,10 @@ if ($res5g && mysqli_num_rows($res5g) > 0):
             <button type="button" class="button xs"
                 data-id="<?php echo $id; ?>"
                 data-dest="<?php echo $dJ; ?>"
-                data-desc="<?php echo htmlspecialchars($row['descrizione'] ?? '', ENT_QUOTES); ?>"
-                data-mezzo="<?php echo htmlspecialchars($row['mezzo'] ?? '', ENT_QUOTES); ?>"
-                data-periodo="<?php echo htmlspecialchars($row['periodo'] ?? '', ENT_QUOTES); ?>"
-                data-classi="<?php echo htmlspecialchars($row['classi'] ?? '', ENT_QUOTES); ?>"
+                data-desc="<?php echo htmlspecialchars($riga['descrizione'] ?? '', ENT_QUOTES); ?>"
+                data-mezzo="<?php echo htmlspecialchars($riga['mezzo'] ?? '', ENT_QUOTES); ?>"
+                data-periodo="<?php echo htmlspecialchars($riga['periodo'] ?? '', ENT_QUOTES); ?>"
+                data-classi="<?php echo htmlspecialchars($riga['classi'] ?? '', ENT_QUOTES); ?>"
                 data-gi="<?php echo $giV; ?>"
                 data-gf="<?php echo $gfV; ?>"
                 data-costo-ap="<?php echo $costoPA; ?>"
