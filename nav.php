@@ -27,17 +27,17 @@
     </div>
     
     <nav class="header-nav">
-        <a href="index.php">Home</a>
+        <a href="index.php" class="<?php echo ($paginaCorrente == 'index.php') ? 'active' : ''; ?>">Home</a>
         <?php if ($ruolo): ?>
-            <a href="catalogo.php">Proposte</a>
-            <a href="mieGite.php">Le mie Gite</a>
-            <a href="inProgramma.php">In Programma</a>
+            <a href="catalogo.php" class="<?php echo ($paginaCorrente == 'catalogo.php') ? 'active' : ''; ?>">Proposte</a>
+            <a href="mieGite.php" class="<?php echo ($paginaCorrente == 'mieGite.php') ? 'active' : ''; ?>">Le mie Gite</a>
+            <a href="inProgramma.php" class="<?php echo ($paginaCorrente == 'inProgramma.php') ? 'active' : ''; ?>">In Programma</a>
             <?php if ($ruolo == 2): ?>
-                <a href="elencoBozze.php">Bozze</a>
+                <a href="elencoBozze.php" class="<?php echo ($paginaCorrente == 'elencoBozze.php') ? 'active' : ''; ?>">Bozze</a>
             <?php endif; ?>
         <?php else: ?>
-            <a href="login.php">Accedi</a>
-            <a href="register.php">Registrati</a>
+            <a href="login.php" class="<?php echo ($paginaCorrente == 'login.php') ? 'active' : ''; ?>">Accedi</a>
+            <a href="register.php" class="<?php echo ($paginaCorrente == 'register.php') ? 'active' : ''; ?>">Registrati</a>
         <?php endif; ?>
     </nav>
 

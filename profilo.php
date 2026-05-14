@@ -1,5 +1,6 @@
 <?php
 include('nav.php');
+require_once('utils.php');
 
 // protezione: solo utenti loggati
 if (!isset($_SESSION['id_utente'])) {

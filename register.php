@@ -89,8 +89,12 @@
         .register-container .card {
             width: 100%;
             box-sizing: border-box;
-            padding: 1rem !important;
+            padding: 1.5rem !important;
             gap: 0.5rem !important;
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
         .register-container .card-header {
@@ -103,7 +107,7 @@
         }
 
         .register-container .form-group {
-            margin-bottom: 0.4rem !important;
+            margin-bottom: 1.2rem !important;
         }
 
         .register-container .card-footer {
@@ -161,16 +165,9 @@
                         <input type="password" id="confirm-password" name="confirm-password" placeholder="********" required>
                     </div>
                     
-                    <div class="checkbox-group" style="justify-content: flex-start; width: 100%; padding-left: 0.5rem;">
-                        <input type="checkbox" id="terms" required>
-                        <label for="terms">Accetto i Termini e Condizioni</label>
-                    </div>
-                    
+
                     <button type="submit" class="m full-width">Registrati</button>
 
-                    <div class="divider">oppure</div>
-
-                    <button type="button" class="m full-width outline" onclick="alert('Funzionalità Portale Calvino non ancora disponibile')">Registrati con Portale Calvino</button>
                 </form>
                 
                 <div class="card-footer" style="justify-content: center; border: none; padding-top: 0;">

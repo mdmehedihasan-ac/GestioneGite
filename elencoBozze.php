@@ -8,9 +8,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $idGita     = intval($_POST['id_gita']);
     $nuovoStato = ($_POST['azione'] === 'approva') ? 2 : 3;
     if ($conn->query("UPDATE gita1g SET idStato = $nuovoStato WHERE idGita = $idGita")) {
-        $messaggio = "<div class='alert-success'>Operazione completata.</div>";
+        $messaggio = "<div class='alert alert-success'>Operazione completata.</div>";
     } else {
-        $messaggio = "<div class='alert-error'>Errore aggiornamento.</div>";
+        $messaggio = "<div class='alert alert-error'>Errore aggiornamento.</div>";
     }
 }
 
@@ -19,9 +19,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $idGita     = intval($_POST['id_gita']);
     $nuovoStato = ($_POST['azione'] === 'approva') ? 2 : 3;
     if ($conn->query("UPDATE gite5 SET idStato = $nuovoStato WHERE idGita = $idGita")) {
-        $messaggio = "<div class='alert-success'>Operazione completata.</div>";
+        $messaggio = "<div class='alert alert-success'>Operazione completata.</div>";
     } else {
-        $messaggio = "<div class='alert-error'>Errore aggiornamento.</div>";
+        $messaggio = "<div class='alert alert-error'>Errore aggiornamento.</div>";
     }
 }
 
@@ -64,10 +64,11 @@ $tot5g = $bozze5g ? $bozze5g->num_rows : 0;
         var modal = document.getElementById('modalConferma');
         var titolo = azione === 'approva' ? 'Approva Proposta' : 'Boccia Proposta';
         var testo  = azione === 'approva'
-            ? 'Sei sicuro di voler <strong>approvare</strong> la gita verso <strong>' + destinazione + '</strong>?'
-            : 'Sei sicuro di voler <strong>bocciare</strong> la gita verso <strong>' + destinazione + '</strong>?';
+            ? 'Sei sicuro di voler <strong>approvare</strong> la gita verso <br><strong style="font-size:1.1rem;color:var(--blue-700);">' + destinazione + '</strong>?'
+            : 'Sei sicuro di voler <strong>bocciare</strong> la gita verso <br><strong style="font-size:1.1rem;color:var(--blue-700);">' + destinazione + '</strong>?';
 
         document.getElementById('confTitolo').innerHTML   = titolo;
+        document.getElementById('confTitolo').style.color = azione === 'approva' ? 'var(--blue-700)' : 'var(--hex-red)';
         document.getElementById('confTesto').innerHTML    = testo;
         document.getElementById('confIdGita').value       = idGita;
         document.getElementById('confAzione').value       = azione;
@@ -202,16 +203,16 @@ if ($bozze5g && $bozze5g->num_rows > 0) {
      MODAL — Conferma Approva / Boccia
 --------------------------------------------------------------- -->
 <div class="modal-overlay hidden" id="modalConferma">
-<div class="modal">
-<div class="modal-header">
-    <h3 id="confTitolo">Conferma</h3>
-    <button class="close-btn" onclick="chiudiConferma()">&times;</button>
+<div class="modal" style="max-width:400px;text-align:center;">
+<div class="modal-header" style="justify-content:center;border-bottom:none;padding-bottom:0;">
+    <button class="close-btn" style="position:absolute;right:1rem;top:1rem;" onclick="chiudiConferma()">&times;</button>
 </div>
-<div class="modal-body">
-    <p id="confTesto" style="font-size:1rem;"></p>
+<div class="modal-body" style="padding-top:0.5rem;">
+    <h3 id="confTitolo" style="margin-bottom:0.5rem;">Conferma</h3>
+    <p id="confTesto" style="color:var(--blue-900);font-size:1rem;margin-bottom:0.5rem;"></p>
 </div>
-<div class="modal-footer">
-    <button class="button cancel" onclick="chiudiConferma()">Annulla</button>
+<div class="modal-footer" style="justify-content:center;">
+    <button class="button cancel-outline" onclick="chiudiConferma()">Annulla</button>
     <button class="button" id="btnConferma" onclick="document.getElementById('formConferma').submit()">Conferma</button>
 </div>
 </div>

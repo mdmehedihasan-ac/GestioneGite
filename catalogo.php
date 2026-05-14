@@ -25,9 +25,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
     // validazione input
     if ($destinazione === '' || mb_strlen($destinazione) > 255) {
-        $messaggio = "<div class='alert-error'>Destinazione obbligatoria (max 255 caratteri).</div>";
+        $messaggio = "<div class='alert alert-error'>Destinazione obbligatoria (max 255 caratteri).</div>";
     } elseif ($costo < 0) {
-        $messaggio = "<div class='alert-error'>Il costo non puo essere negativo.</div>";
+        $messaggio = "<div class='alert alert-error'>Il costo non puo essere negativo.</div>";
     } else {
         $destinazione = $conn->real_escape_string($destinazione);
         $descrizione  = $conn->real_escape_string($descrizione);
@@ -36,9 +36,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $classi       = $conn->real_escape_string($classi);
 
         if ($conn->query("INSERT INTO gita1g (idUtente, destinazione, descrizione, mezzo, periodo, classi, costoAPersona, idStato) VALUES ($idUtente, '$destinazione', '$descrizione', '$mezzo', '$periodo', '$classi', $costo, 1)")) {
-            $messaggio = "<div class='alert-success'>Proposta gita 1 giorno salvata come bozza.</div>";
+            $messaggio = "<div class='alert alert-success'>Proposta gita 1 giorno salvata come bozza.</div>";
         } else {
-            $messaggio = "<div class='alert-error'>Errore durante il salvataggio: " . htmlspecialchars($conn->error) . "</div>";
+            $messaggio = "<div class='alert alert-error'>Errore durante il salvataggio: " . htmlspecialchars($conn->error) . "</div>";
         }
     }
 }
@@ -55,9 +55,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
     // validazione input
     if ($destinazione === '' || mb_strlen($destinazione) > 255) {
-        $messaggio = "<div class='alert-error'>Destinazione obbligatoria (max 255 caratteri).</div>";
+        $messaggio = "<div class='alert alert-error'>Destinazione obbligatoria (max 255 caratteri).</div>";
     } elseif ($costo < 0) {
-        $messaggio = "<div class='alert-error'>Il costo non puo essere negativo.</div>";
+        $messaggio = "<div class='alert alert-error'>Il costo non puo essere negativo.</div>";
     } else {
         $destinazione = $conn->real_escape_string($destinazione);
         $descrizione  = $conn->real_escape_string($descrizione);
@@ -66,9 +66,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $classi       = $conn->real_escape_string($classi);
 
         if ($conn->query("INSERT INTO gite5 (idUtente, destinazione, descrizione, mezzo, periodo, classi, costoAPersona, idStato) VALUES ($idUtente, '$destinazione', '$descrizione', '$mezzo', '$periodo', '$classi', $costo, 1)")) {
-            $messaggio = "<div class='alert-success'>Proposta gita di piu giorni salvata come bozza.</div>";
+            $messaggio = "<div class='alert alert-success'>Proposta gita di piu giorni salvata come bozza.</div>";
         } else {
-            $messaggio = "<div class='alert-error'>Errore durante il salvataggio: " . htmlspecialchars($conn->error) . "</div>";
+            $messaggio = "<div class='alert alert-error'>Errore durante il salvataggio: " . htmlspecialchars($conn->error) . "</div>";
         }
     }
 }
@@ -92,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 
     if (!$valido) {
-        $messaggio = "<div class='alert-error'>Errore di validazione: la data inserita non è valida.</div>";
+        $messaggio = "<div class='alert alert-error'>Errore di validazione: la data inserita non è valida.</div>";
     } else {
         // Leggi la riga originale
         $orig = $conn->query("SELECT * FROM gita1g WHERE idGita = $idGita")->fetch_assoc();
@@ -113,7 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             if ($conn->query($sql)) {
                 $messaggio = "organizza_ok";
             } else {
-                $messaggio = "<div class='alert-error'>Errore: " . htmlspecialchars($conn->error) . "</div>";
+                $messaggio = "<div class='alert alert-error'>Errore: " . htmlspecialchars($conn->error) . "</div>";
             }
         }
     }
@@ -142,7 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 
     if (!$valido) {
-        $messaggio = "<div class='alert-error'>Errore di validazione: le date inserite non sono valide.</div>";
+        $messaggio = "<div class='alert alert-error'>Errore di validazione: le date inserite non sono valide.</div>";
     } else {
         $orig = $conn->query("SELECT * FROM gite5 WHERE idGita = $idGita")->fetch_assoc();
         if ($orig) {
@@ -161,7 +161,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             if ($conn->query($sql)) {
                 $messaggio = "organizza_ok";
             } else {
-                $messaggio = "<div class='alert-error'>Errore: " . htmlspecialchars($conn->error) . "</div>";
+                $messaggio = "<div class='alert alert-error'>Errore: " . htmlspecialchars($conn->error) . "</div>";
             }
         }
     }
@@ -178,9 +178,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $classi       = $conn->real_escape_string($_POST['mod_classi']       ?? '');
         $costo        = floatval($_POST['mod_costo'] ?? 0);
         if ($conn->query("UPDATE gita1g SET destinazione='$destinazione', descrizione='$descrizione', mezzo='$mezzo', periodo='$periodo', classi='$classi', costoAPersona=$costo WHERE idGita=$idGita")) {
-            $messaggio = "<div class='alert-success'>Gita 1 giorno modificata.</div>";
+            $messaggio = "<div class='alert alert-success'>Gita 1 giorno modificata.</div>";
         } else {
-            $messaggio = "<div class='alert-error'>Errore modifica: " . htmlspecialchars($conn->error) . "</div>";
+            $messaggio = "<div class='alert alert-error'>Errore modifica: " . htmlspecialchars($conn->error) . "</div>";
         }
     }
 }
@@ -190,9 +190,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     if ($_SESSION['ruolo'] == 2) {
         $idGita = intval($_POST['id_gita']);
         if ($conn->query("DELETE FROM gita1g WHERE idGita=$idGita")) {
-            $messaggio = "<div class='alert-success'>Gita 1 giorno eliminata.</div>";
+            $messaggio = "<div class='alert alert-success'>Gita 1 giorno eliminata.</div>";
         } else {
-            $messaggio = "<div class='alert-error'>Errore eliminazione: " . htmlspecialchars($conn->error) . "</div>";
+            $messaggio = "<div class='alert alert-error'>Errore eliminazione: " . htmlspecialchars($conn->error) . "</div>";
         }
     }
 }
@@ -208,9 +208,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $classi       = $conn->real_escape_string($_POST['mod_classi']       ?? '');
         $costo        = floatval($_POST['mod_costo'] ?? 0);
         if ($conn->query("UPDATE gite5 SET destinazione='$destinazione', descrizione='$descrizione', mezzo='$mezzo', periodo='$periodo', classi='$classi', costoAPersona=$costo WHERE idGita=$idGita")) {
-            $messaggio = "<div class='alert-success'>Gita di più giorni modificata.</div>";
+            $messaggio = "<div class='alert alert-success'>Gita di più giorni modificata.</div>";
         } else {
-            $messaggio = "<div class='alert-error'>Errore modifica: " . htmlspecialchars($conn->error) . "</div>";
+            $messaggio = "<div class='alert alert-error'>Errore modifica: " . htmlspecialchars($conn->error) . "</div>";
         }
     }
 }
@@ -220,9 +220,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     if ($_SESSION['ruolo'] == 2) {
         $idGita = intval($_POST['id_gita']);
         if ($conn->query("DELETE FROM gite5 WHERE idGita=$idGita")) {
-            $messaggio = "<div class='alert-success'>Gita di più giorni eliminata.</div>";
+            $messaggio = "<div class='alert alert-success'>Gita di più giorni eliminata.</div>";
         } else {
-            $messaggio = "<div class='alert-error'>Errore eliminazione: " . htmlspecialchars($conn->error) . "</div>";
+            $messaggio = "<div class='alert alert-error'>Errore eliminazione: " . htmlspecialchars($conn->error) . "</div>";
         }
     }
 }
@@ -534,7 +534,7 @@ if ($gite5g && $gite5g->num_rows > 0) {
         </div>
         <div class="form-group">
             <label>Costo a persona (&euro;) *</label>
-            <input type="number" name="costo" class="form-control" step="0.01" min="0" required placeholder="es. 45.00">
+            <input type="number" name="costo" class="form-control" step="0.50" min="0" required placeholder="es. 45.00">
         </div>
     </div>
 </form>
@@ -585,7 +585,7 @@ if ($gite5g && $gite5g->num_rows > 0) {
         </div>
         <div class="form-group">
             <label>Costo a persona (&euro;) *</label>
-            <input type="number" name="costo" class="form-control" step="0.01" min="0" required placeholder="es. 350.00">
+            <input type="number" name="costo" class="form-control" step="0.50" min="0" required placeholder="es. 350.00">
         </div>
     </div>
 </form>
@@ -637,7 +637,7 @@ if ($gite5g && $gite5g->num_rows > 0) {
         </div>
         <div class="form-group">
             <label>Costo a Persona (&euro;)</label>
-            <input type="number" name="org_costoAPersona" id="org1g_costoPersona" class="form-control" step="0.01" min="0" placeholder="es. 45.00">
+            <input type="number" name="org_costoAPersona" id="org1g_costoPersona" class="form-control" step="0.50" min="0" placeholder="es. 45.00">
         </div>
         <div class="form-group">
             <label>Giorno</label>
@@ -645,11 +645,11 @@ if ($gite5g && $gite5g->num_rows > 0) {
         </div>
         <div class="form-group">
             <label>Costo Mezzo (&euro;)</label>
-            <input type="number" name="org_costoMezzo" id="org1g_costoMezzo" class="form-control" step="0.01" min="0" placeholder="es. 200.00">
+            <input type="number" name="org_costoMezzo" id="org1g_costoMezzo" class="form-control" step="0.50" min="0" placeholder="es. 200.00">
         </div>
         <div class="form-group">
             <label>Costo Attività/Giorno (&euro;)</label>
-            <input type="number" name="org_costoGiorno" id="org1g_costoGiorno" class="form-control" step="0.01" min="0" placeholder="es. 15.00">
+            <input type="number" name="org_costoGiorno" id="org1g_costoGiorno" class="form-control" step="0.50" min="0" placeholder="es. 15.00">
         </div>
         <div class="form-group">
             <label>Num. Alunni</label>
@@ -705,7 +705,7 @@ if ($gite5g && $gite5g->num_rows > 0) {
         </div>
         <div class="form-group">
             <label>Costo a Persona (&euro;)</label>
-            <input type="number" name="org_costoAPersona" id="org5g_costoAPersona" class="form-control" step="0.01" min="0" placeholder="es. 350.00">
+            <input type="number" name="org_costoAPersona" id="org5g_costoAPersona" class="form-control" step="0.50" min="0" placeholder="es. 350.00">
         </div>
         <div class="form-group">
             <label>Giorno Inizio</label>
@@ -768,7 +768,7 @@ if ($gite5g && $gite5g->num_rows > 0) {
         </div>
         <div class="form-group">
             <label>Costo a Persona (&euro;)</label>
-            <input type="number" name="mod_costo" id="mod1g_costo" class="form-control" step="0.01" min="0">
+            <input type="number" name="mod_costo" id="mod1g_costo" class="form-control" step="0.50" min="0">
         </div>
     </div>
 </form>
@@ -820,7 +820,7 @@ if ($gite5g && $gite5g->num_rows > 0) {
         </div>
         <div class="form-group">
             <label>Costo a Persona (&euro;)</label>
-            <input type="number" name="mod_costo" id="mod5g_costo" class="form-control" step="0.01" min="0">
+            <input type="number" name="mod_costo" id="mod5g_costo" class="form-control" step="0.50" min="0">
         </div>
     </div>
 </form>
@@ -835,15 +835,17 @@ if ($gite5g && $gite5g->num_rows > 0) {
 
 <!-- modal: conferma elimina (solo commissione) -->
 <div class="modal-overlay hidden" id="modalElimina">
-<div class="modal">
-<div class="modal-header">
-    <h3>Conferma Eliminazione</h3>
-    <button class="close-btn" onclick="document.getElementById('modalElimina').classList.add('hidden')">&times;</button>
+<div class="modal" style="max-width:400px;text-align:center;">
+<div class="modal-header" style="justify-content:center;border-bottom:none;padding-bottom:0;">
+    <button class="close-btn" style="position:absolute;right:1rem;top:1rem;" onclick="document.getElementById('modalElimina').classList.add('hidden')">&times;</button>
 </div>
-<div class="modal-body">
-    <p>Sei sicuro di voler eliminare la gita verso <strong id="elimDest"></strong>? L'operazione non è reversibile.</p>
+<div class="modal-body" style="padding-top:0.5rem;">
+    <h3 style="color:var(--hex-red);margin-bottom:0.5rem;">Conferma Eliminazione</h3>
+    <p style="color:var(--blue-900);margin-bottom:0.5rem;">Sei sicuro di voler eliminare la gita verso:</p>
+    <p style="font-weight:600;color:var(--blue-700);font-size:1.1rem;margin-bottom:0.5rem;" id="elimDest"></p>
+    <p style="color:#64748b;font-size:0.9rem;">L'operazione non è reversibile.</p>
 </div>
-<div class="modal-footer">
+<div class="modal-footer" style="justify-content:center;">
     <button type="button" class="button cancel-outline" onclick="document.getElementById('modalElimina').classList.add('hidden')">Annulla</button>
     <button type="submit" form="formElimina" class="button cancel">Elimina</button>
 </div>

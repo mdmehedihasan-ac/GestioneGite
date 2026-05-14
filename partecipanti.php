@@ -60,6 +60,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'elimi
     exit;
 }
 
+// handler elimina accompagnatore (solo commissione)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'elimina_acc' && $ruolo == 2) {
+    $idAcc = intval($_POST['id_acc'] ?? 0);
+    if ($idAcc > 0) {
+        mysqli_query($conn, "DELETE FROM accompagnatori WHERE id = $idAcc AND idgita = $idGita");
+    }
+    header("Location: partecipanti.php?id=$idGita&rem_acc=1");
+    exit;
+}
+
 // handler modifica dati accompagnatore
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'mod_acc') {
     $accId     = intval($_POST['acc_id'] ?? 0);
@@ -129,6 +139,8 @@ $numAlunniDisp = $gita['numAlunni'] ?? '';
 
     <?php if (($_GET['acc'] ?? '') === '1'): ?>
         <div class="alert alert-success" style="margin-bottom:1rem;">Dati accompagnatore aggiornati.</div>
+    <?php elseif (($_GET['rem_acc'] ?? '') === '1'): ?>
+        <div class="alert alert-success" style="margin-bottom:1rem;">Accompagnatore rimosso con successo.</div>
     <?php endif; ?>
     <?php if ($messaggio === 'ok'): ?>
         <div class="alert alert-success" style="margin-bottom:1rem;">Partecipante aggiunto con successo.</div>
@@ -188,7 +200,7 @@ $numAlunniDisp = $gita['numAlunni'] ?? '';
                         <td><?php echo $aNDoc ?: '<span style="color:#94a3b8;">—</span>'; ?></td>
                         <td><?php echo $aScad ?: '<span style="color:#94a3b8;">—</span>'; ?></td>
                         <td><?php echo $aNote ?: '<span style="color:#94a3b8;">—</span>'; ?></td>
-                        <td>
+                        <td style="display:flex;gap:0.4rem;">
                             <?php if ($canEdit): ?>
                             <button type="button" class="button xs"
                                 data-acc-id="<?php echo $aId; ?>"
@@ -198,6 +210,9 @@ $numAlunniDisp = $gita['numAlunni'] ?? '';
                                 data-scad="<?php echo $aScadV; ?>"
                                 data-note="<?php echo $aNoteJ; ?>"
                                 onclick="apriModAcc(this)">Modifica</button>
+                            <?php endif; ?>
+                            <?php if ($ruolo == 2): ?>
+                            <button type="button" class="button cancel xs" onclick="apriRimuoviAcc(<?php echo $aId; ?>, '<?php echo addslashes($aNome . ' ' . $aCognome); ?>')">Rimuovi</button>
                             <?php endif; ?>
                         </td>
                     </tr>
@@ -377,6 +392,27 @@ $numAlunniDisp = $gita['numAlunni'] ?? '';
 </div>
 </div>
 
+<!-- modal: conferma rimozione accompagnatore -->
+<div class="modal-overlay hidden" id="modalRimuoviAcc">
+<div class="modal" style="max-width:400px;text-align:center;">
+<div class="modal-header" style="justify-content:center;border-bottom:none;padding-bottom:0;">
+    <button class="close-btn" style="position:absolute;right:1rem;top:1rem;" onclick="document.getElementById('modalRimuoviAcc').classList.add('hidden')">&times;</button>
+</div>
+<div class="modal-body" style="padding-top:0.5rem;">
+    <h3 style="color:var(--hex-red);margin-bottom:0.5rem;">Conferma Rimozione</h3>
+    <p style="color:var(--blue-900);">Rimuovere l'accompagnatore <strong id="rimuoviAccNome"></strong>?</p>
+</div>
+<div class="modal-footer" style="justify-content:center;">
+    <button type="button" class="button cancel-outline" onclick="document.getElementById('modalRimuoviAcc').classList.add('hidden')">Annulla</button>
+    <form id="formRimuoviAcc" method="POST" action="partecipanti.php?id=<?php echo $idGita; ?>" style="margin:0;">
+        <input type="hidden" name="action" value="elimina_acc">
+        <input type="hidden" name="id_acc" id="rimuoviAccId">
+        <button type="submit" class="button cancel">Rimuovi</button>
+    </form>
+</div>
+</div>
+</div>
+
 <!-- modal: conferma rimozione partecipante -->
 <div class="modal-overlay hidden" id="modalRimuoviPart">
 <div class="modal" style="max-width:400px;text-align:center;">
@@ -420,11 +456,17 @@ function apriModAcc(btn) {
 }
 
 window.addEventListener('click', function(e) {
-    ['modalAggiungi','modalModAcc','modalRimuoviPart'].forEach(function(id) {
+    ['modalAggiungi','modalModAcc','modalRimuoviPart','modalRimuoviAcc'].forEach(function(id) {
         var m = document.getElementById(id);
         if (e.target === m) m.classList.add('hidden');
     });
 });
+
+function apriRimuoviAcc(id, nome) {
+    document.getElementById('rimuoviAccId').value = id;
+    document.getElementById('rimuoviAccNome').textContent = nome;
+    document.getElementById('modalRimuoviAcc').classList.remove('hidden');
+}
 
 function apriRimuoviPart(id, nome) {
     document.getElementById('rimuoviPartId').value = id;

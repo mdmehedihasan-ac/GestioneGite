@@ -73,6 +73,12 @@
         .login-container .card {
             width: 100%;
             box-sizing: border-box;
+            padding: 1.5rem !important;
+            gap: 0.5rem !important;
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
         .login-container .card-header {
@@ -80,7 +86,7 @@
         }
 
         .login-container .form-group {
-            margin-bottom: 0.5rem !important;
+            margin-bottom: 1.2rem !important;
         }
 
         .login-container .card-footer {
@@ -123,10 +129,6 @@
                     
                     <button type="submit" class="m full-width">Accedi</button>
                     
-                    <div class="divider">oppure</div>
-
-                    <button type="button" class="m full-width outline" onclick="alert('Funzionalità Portale Calvino non ancora disponibile')">Accedi con Portale Calvino</button>
-
                 </form>
                 
                 <div class="card-footer" style="justify-content: center; border: none; padding-top: 0;">

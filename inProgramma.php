@@ -15,6 +15,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'parte
     exit;
 }
 
+// handler disiscriviti
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'disiscriviti') {
+    $idGita   = intval($_POST['id_gita']   ?? 0);
+    $tipoGita = ($_POST['tipo_gita'] ?? '') === 'gite5' ? '5g' : '1g';
+    if ($idGita > 0 && $idUtenteLoggato > 0) {
+        mysqli_query($conn, "DELETE FROM accompagnatori WHERE idgita = $idGita AND idutente = $idUtenteLoggato AND tipo_gita = '$tipoGita'");
+    }
+    header("Location: inProgramma.php?disiscritto=1");
+    exit;
+}
+
 // handler elimina (solo commissione)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'elimina' && $ruolo == 2) {
     $idGita = intval($_POST['id_gita'] ?? 0);
@@ -39,6 +50,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'modif
     
     // validazione
     if ($gio && (strtotime($gio) === false || intval(date('Y', strtotime($gio))) < 2024 || intval(date('Y', strtotime($gio))) > 2030)) {
+        $gio = '';
+    }
+    if ($gio && strtotime($gio) <= strtotime(date('Y-m-d'))) {
         $gio = '';
     }
     
@@ -70,6 +84,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'modif
         $gi = '';
     }
     if ($gf && (strtotime($gf) === false || intval(date('Y', strtotime($gf))) < 2024 || intval(date('Y', strtotime($gf))) > 2030)) {
+        $gf = '';
+    }
+    if ($gi && strtotime($gi) <= strtotime(date('Y-m-d'))) {
+        $gi = '';
+    }
+    if ($gi && $gf && strtotime($gi) >= strtotime($gf)) {
+        $gi = '';
         $gf = '';
     }
 
@@ -125,6 +146,12 @@ $res5g = mysqli_query($conn,
 </div>
 <?php endif; ?>
 
+<?php if (($_GET['disiscritto'] ?? '') === '1'): ?>
+<div class="alert alert-success" style="margin-bottom:1rem;">
+    Ti sei disiscritto correttamente dalla gita.
+</div>
+<?php endif; ?>
+
 <!-- gite 1 giorno -->
 <h3 style="color:var(--blue-700);margin-bottom:0.75rem;">Gite di 1 Giorno</h3>
 <div class="table-section"><div class="table-container">
@@ -153,7 +180,8 @@ if ($res1g && mysqli_num_rows($res1g) > 0):
         $dJ      = htmlspecialchars($riga['destinazione'] ?? '', ENT_QUOTES);
         // iscritto se è accompagnatore OPPURE se è l'autore della gita
         $chk = mysqli_query($conn, "SELECT id FROM accompagnatori WHERE idgita=$id AND idutente=$idUtenteLoggato AND tipo_gita='1g'");
-        $giaPart = ($chk && mysqli_num_rows($chk) > 0) || ($riga['idUtente'] == $idUtenteLoggato);
+        $isAccompagnatore = ($chk && mysqli_num_rows($chk) > 0);
+        $isAutore = ($riga['idUtente'] == $idUtenteLoggato);
 ?>
     <tr>
         <td><?php echo $n++; ?></td>
@@ -165,8 +193,13 @@ if ($res1g && mysqli_num_rows($res1g) > 0):
         <td><?php echo $numAl ?: '—'; ?></td>
         <td><?php echo $autore; ?></td>
         <td style="display:flex;gap:0.4rem;flex-wrap:wrap;align-items:center;">
-            <?php if ($giaPart): ?>
-                <span class="badge badge-success" style="font-size:0.78rem;">Iscritto</span>
+            <?php if ($isAccompagnatore): ?>
+                <form method="POST" action="inProgramma.php" style="margin:0;">
+                    <input type="hidden" name="action"    value="disiscriviti">
+                    <input type="hidden" name="id_gita"   value="<?php echo $id; ?>">
+                    <input type="hidden" name="tipo_gita" value="gita1g">
+                    <button type="submit" class="button cancel xs">Disiscriviti</button>
+                </form>
             <?php else: ?>
                 <form method="POST" action="inProgramma.php" style="margin:0;">
                     <input type="hidden" name="action"    value="partecipa">
@@ -232,7 +265,8 @@ if ($res5g && mysqli_num_rows($res5g) > 0):
         $dJ     = htmlspecialchars($riga['destinazione'] ?? '', ENT_QUOTES);
         // iscritto se è accompagnatore OPPURE se è l'autore della gita
         $chk = mysqli_query($conn, "SELECT id FROM accompagnatori WHERE idgita=$id AND idutente=$idUtenteLoggato AND tipo_gita='5g'");
-        $giaPart = ($chk && mysqli_num_rows($chk) > 0) || ($riga['idUtente'] == $idUtenteLoggato);
+        $isAccompagnatore = ($chk && mysqli_num_rows($chk) > 0);
+        $isAutore = ($riga['idUtente'] == $idUtenteLoggato);
 ?>
     <tr>
         <td><?php echo $n++; ?></td>
@@ -245,9 +279,13 @@ if ($res5g && mysqli_num_rows($res5g) > 0):
         <td><?php echo $numAl ?: '—'; ?></td>
         <td><?php echo $autore; ?></td>
         <td style="display:flex;gap:0.4rem;flex-wrap:wrap;align-items:center;">
-            <?php if ($giaPart): ?>
-                <!-- blocco disdetta: una volta iscritto non si puo annullare -->
-                <span class="badge badge-success" style="font-size:0.78rem;">Iscritto</span>
+            <?php if ($isAccompagnatore): ?>
+                <form method="POST" action="inProgramma.php" style="margin:0;">
+                    <input type="hidden" name="action"    value="disiscriviti">
+                    <input type="hidden" name="id_gita"   value="<?php echo $id; ?>">
+                    <input type="hidden" name="tipo_gita" value="gite5">
+                    <button type="submit" class="button cancel xs">Disiscriviti</button>
+                </form>
             <?php else: ?>
                 <form method="POST" action="inProgramma.php" style="margin:0;">
                     <input type="hidden" name="action"    value="partecipa">
@@ -288,17 +326,17 @@ if ($res5g && mysqli_num_rows($res5g) > 0):
 
 <!-- modal: conferma elimina -->
 <div class="modal-overlay hidden" id="modalElimina">
-<div class="modal" style="max-width:420px;">
-<div class="modal-header">
-    <h3>Conferma eliminazione</h3>
-    <button class="close-btn" onclick="chiudi('modalElimina')">&times;</button>
+<div class="modal" style="max-width:400px;text-align:center;">
+<div class="modal-header" style="justify-content:center;border-bottom:none;padding-bottom:0;">
+    <button class="close-btn" style="position:absolute;right:1rem;top:1rem;" onclick="chiudi('modalElimina')">&times;</button>
 </div>
-<div class="modal-body" style="text-align:center;">
-    <p style="font-size:1rem;margin-bottom:0.5rem;">Stai per eliminare la gita:</p>
-    <p style="font-weight:600;color:var(--blue-700);font-size:1.1rem;" id="elimDest"></p>
+<div class="modal-body" style="padding-top:0.5rem;">
+    <h3 style="color:var(--hex-red);margin-bottom:0.5rem;">Conferma Eliminazione</h3>
+    <p style="color:var(--blue-900);margin-bottom:0.5rem;">Stai per eliminare la gita:</p>
+    <p style="font-weight:600;color:var(--blue-700);font-size:1.1rem;margin-bottom:0.5rem;" id="elimDest"></p>
     <p style="color:#64748b;font-size:0.9rem;">Questa azione non può essere annullata.</p>
 </div>
-<div class="modal-footer">
+<div class="modal-footer" style="justify-content:center;">
     <button class="button cancel-outline" onclick="chiudi('modalElimina')">Annulla</button>
     <form id="formElimina" method="POST" action="inProgramma.php" style="margin:0;">
         <input type="hidden" name="action"  value="elimina">
@@ -353,15 +391,15 @@ if ($res5g && mysqli_num_rows($res5g) > 0):
         </div>
         <div class="form-group">
             <label>Costo Mezzo (&euro;)</label>
-            <input type="number" name="costoMezzo" id="m1g_costoMezzo" class="form-control" step="0.01" min="0">
+            <input type="number" name="costoMezzo" id="m1g_costoMezzo" class="form-control" step="0.50" min="0">
         </div>
         <div class="form-group">
             <label>Costo Attività (&euro;)</label>
-            <input type="number" name="costoAttivita" id="m1g_costoAtt" class="form-control" step="0.01" min="0">
+            <input type="number" name="costoAttivita" id="m1g_costoAtt" class="form-control" step="0.50" min="0">
         </div>
         <div class="form-group">
             <label>Costo a Persona (&euro;)</label>
-            <input type="number" name="costoAPersona" id="m1g_costoAP" class="form-control" step="0.01" min="0">
+            <input type="number" name="costoAPersona" id="m1g_costoAP" class="form-control" step="0.50" min="0">
         </div>
         <div class="form-group">
             <label>Num. Alunni</label>
@@ -424,7 +462,7 @@ if ($res5g && mysqli_num_rows($res5g) > 0):
         </div>
         <div class="form-group">
             <label>Costo a Persona (&euro;)</label>
-            <input type="number" name="costoAPersona" id="m5g_costoAP" class="form-control" step="0.01" min="0">
+            <input type="number" name="costoAPersona" id="m5g_costoAP" class="form-control" step="0.50" min="0">
         </div>
         <div class="form-group">
             <label>Num. Alunni</label>
