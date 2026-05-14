@@ -26,29 +26,27 @@
         } elseif (strlen($password) < 6) {
             $errore = "La password deve contenere almeno 6 caratteri.";
         } else {
-            // Controllo email esistente
-            $controllo = mysqli_prepare($conn, "SELECT Mail FROM utente WHERE Mail = ?");
-            mysqli_stmt_bind_param($controllo, "s", $email);
-            mysqli_stmt_execute($controllo);
-            mysqli_stmt_store_result($controllo);
+            $email = $conn->real_escape_string($email);
+            
+            // controllo email esistente
+            $controllo = $conn->query("SELECT Mail FROM utente WHERE Mail = '$email'");
 
-            if (mysqli_stmt_num_rows($controllo) > 0) {
+            if ($controllo && $controllo->num_rows > 0) {
                 $errore = "L'indirizzo email è già in uso.";
             } else {
+                $nome = $conn->real_escape_string($nome);
+                $cognome = $conn->real_escape_string($cognome);
                 $psw_hash = password_hash($password, PASSWORD_DEFAULT);
                 $tipo = 1;
 
-                $inserimento = mysqli_prepare($conn, "INSERT INTO utente (Nome, Cognome, Mail, Password, IDTipo) VALUES (?, ?, ?, ?, ?)");
-                mysqli_stmt_bind_param($inserimento, "ssssi", $nome, $cognome, $email, $psw_hash, $tipo);
-
-                if (mysqli_stmt_execute($inserimento)) {
+                // inserimento nuovo utente
+                $sql = "INSERT INTO utente (Nome, Cognome, Mail, Password, IDTipo) VALUES ('$nome', '$cognome', '$email', '$psw_hash', $tipo)";
+                if ($conn->query($sql)) {
                     $successo = "Registrazione completata! Puoi ora accedere.";
                 } else {
                     $errore = "Errore durante la registrazione.";
                 }
-                mysqli_stmt_close($inserimento);
             }
-            mysqli_stmt_close($controllo);
         }
     }
 ?>

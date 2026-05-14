@@ -1,20 +1,18 @@
 <?php
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
+    @session_start();
     require_once('config.php');
 
-    $nome_utente = $_SESSION['username'] ?? 'Utente Sconosciuto';
-    $ruolo = $_SESSION['ruolo'] ?? null;
+    $nome_utente = isset($_SESSION['username']) ? $_SESSION['username'] : 'Utente Sconosciuto';
+    $ruolo = isset($_SESSION['ruolo']) ? $_SESSION['ruolo'] : null;
     $paginaCorrente = basename($_SERVER['PHP_SELF']);
 
-    // Protezione per chi non è loggato
-    if (!$ruolo && !in_array($paginaCorrente, ['login.php', 'register.php', 'index.php'])) {
+    // protezione per chi non e loggato
+    if (!$ruolo && $paginaCorrente != 'login.php' && $paginaCorrente != 'register.php' && $paginaCorrente != 'index.php') {
         header("Location: login.php");
         exit;
     }
 
-    // Protezione per pagine riservate alla Commissione (Ruolo 2)
+    // protezione per pagine riservate alla commissione
     if ($ruolo == 1 && $paginaCorrente == 'elencoBozze.php') {
         header("Location: index.php");
         exit;

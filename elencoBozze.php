@@ -3,7 +3,7 @@ include('nav.php');
 
 $messaggio = "";
 
-// --- AZIONI APPROVA / BOCCIA GITA 1 GIORNO -----------------------------------
+// azioni approva e boccia gita 1 giorno
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'azione_1g') {
     $idGita     = intval($_POST['id_gita']);
     $nuovoStato = ($_POST['azione'] === 'approva') ? 2 : 3;
@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
-// --- AZIONI APPROVA / BOCCIA GITA 5 GIORNI -----------------------------------
+// azioni approva e boccia gita 5 giorni
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'azione_5g') {
     $idGita     = intval($_POST['id_gita']);
     $nuovoStato = ($_POST['azione'] === 'approva') ? 2 : 3;
@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
-// --- QUERY BOZZE GITA 1 GIORNO (stato 1) -------------------------------------
+// query bozze gita 1 giorno
 $bozze1g = $conn->query("
     SELECT g.idGita, g.destinazione, g.mezzo, g.periodo, g.costoAPersona,
            u.Nome, u.Cognome
@@ -35,7 +35,7 @@ $bozze1g = $conn->query("
     ORDER BY g.idGita DESC
 ");
 
-// --- QUERY BOZZE GITA 5 GIORNI (stato 1) -------------------------------------
+// query bozze gita 5 giorni
 $bozze5g = $conn->query("
     SELECT g.idGita, g.destinazione, g.mezzo, g.periodo, g.costoAPersona,
            u.Nome, u.Cognome
@@ -95,9 +95,7 @@ $tot5g = $bozze5g ? $bozze5g->num_rows : 0;
 
 <?php echo $messaggio; ?>
 
-<!-- ---------------------------------------------------------------
-     SEZIONE BOZZE GITE 1 GIORNO
---------------------------------------------------------------- -->
+// sezione bozze gite 1 giorno
 <div style="display:flex;align-items:center;justify-content:space-between;margin-top:2rem;margin-bottom:1rem;">
     <h3 style="color:var(--blue-700);margin:0;">Gite di 1 Giorno <span style="font-size:.85rem;font-weight:400;color:#6b7280;">(<?= $tot1g ?> in attesa)</span></h3>
 </div>
@@ -146,9 +144,7 @@ if ($bozze1g && $bozze1g->num_rows > 0) {
 </table>
 </div></div>
 
-<!-- ---------------------------------------------------------------
-     SEZIONE BOZZE GITE 5 GIORNI
---------------------------------------------------------------- -->
+// sezione bozze gite 5 giorni
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
     <h3 style="color:var(--blue-700);margin:0;">Gite di 5 Giorni <span style="font-size:.85rem;font-weight:400;color:#6b7280;">(<?= $tot5g ?> in attesa)</span></h3>
 </div>
@@ -199,9 +195,7 @@ if ($bozze5g && $bozze5g->num_rows > 0) {
 
 </main>
 
-<!-- ---------------------------------------------------------------
-     MODAL — Conferma Approva / Boccia
---------------------------------------------------------------- -->
+<!-- modal conferma approva boccia -->
 <div class="modal-overlay hidden" id="modalConferma">
 <div class="modal" style="max-width:400px;text-align:center;">
 <div class="modal-header" style="justify-content:center;border-bottom:none;padding-bottom:0;">
@@ -218,7 +212,7 @@ if ($bozze5g && $bozze5g->num_rows > 0) {
 </div>
 </div>
 
-<!-- Form nascosto per invio POST -->
+<!-- form nascosto per invio post -->
 <form method="POST" id="formConferma" style="display:none;">
     <input type="hidden" name="action"   id="confTabella">
     <input type="hidden" name="id_gita"  id="confIdGita">

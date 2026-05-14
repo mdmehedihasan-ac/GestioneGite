@@ -1,14 +1,17 @@
 <?php
+// funzione per formattare la data
 function formattaData($data) {
     $d = strtotime($data);
     return $d ? date('d/m/Y', $d) : '';
 }
 
+// funzione per ottenere il nome dello stato
 function nomeStato($id) {
     $nomi = [1 => 'Bozza', 2 => 'Approvata', 3 => 'Bocciata', 4 => 'Organizzazione', 5 => 'Conclusa'];
-    return $nomi[$id] ?? 'Sconosciuto';
+    return isset($nomi[$id]) ? $nomi[$id] : 'Sconosciuto';
 }
 
+// funzione per ottenere il nome del ruolo
 function nomeRuolo($id) {
     return $id == 2 ? 'Commissione' : 'Docente';
 }

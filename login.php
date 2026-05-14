@@ -8,22 +8,21 @@
         $email = trim($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
 
-        // validazione email
+        // validazione email e password
         if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $errore = "Inserisci un indirizzo email valido.";
         } elseif ($password === '') {
             $errore = "Inserisci la password.";
         } else {
-            $comando = mysqli_prepare($conn, "SELECT IDUtente, Nome, Cognome, Password, IDTipo FROM utente WHERE Mail = ?");
-            mysqli_stmt_bind_param($comando, "s", $email);
-            mysqli_stmt_execute($comando);
-            $risultato = mysqli_stmt_get_result($comando);
+            $email = $conn->real_escape_string($email);
+            $risultato = $conn->query("SELECT IDUtente, Nome, Cognome, Password, IDTipo FROM utente WHERE Mail = '$email'");
 
-            if ($riga = mysqli_fetch_assoc($risultato)) {
+            if ($risultato && $risultato->num_rows > 0) {
+                $riga = $risultato->fetch_assoc();
                 if (password_verify($password, $riga['Password'])) {
                     $_SESSION['id_utente'] = $riga['IDUtente'];
-                    $_SESSION['username'] = $riga['Nome'] . " " . $riga['Cognome'];
-                    $_SESSION['ruolo'] = $riga['IDTipo'];
+                    $_SESSION['username']  = $riga['Nome'] . " " . $riga['Cognome'];
+                    $_SESSION['ruolo']     = $riga['IDTipo'];
                     header("Location: index.php");
                     exit;
                 } else {
@@ -32,7 +31,6 @@
             } else {
                 $errore = "Nessun account trovato con questa email.";
             }
-            mysqli_stmt_close($comando);
         }
     }
 ?>

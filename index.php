@@ -56,21 +56,25 @@
             // carica statistiche per la home
             $idUtente = intval($_SESSION['id_utente']);
 
-            // proposte e organizzazione personali (1g + 5g in una query per tabella)
-            $c1 = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(CASE WHEN idStato IN (1,2,3) THEN 1 END) AS prop, COUNT(CASE WHEN idStato = 4 THEN 1 END) AS org FROM gita1g WHERE idUtente = $idUtente"));
-            $c5 = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(CASE WHEN idStato IN (1,2,3) THEN 1 END) AS prop, COUNT(CASE WHEN idStato = 4 THEN 1 END) AS org FROM gite5 WHERE idUtente = $idUtente"));
+            // proposte e organizzazione personali
+            $res1 = $conn->query("SELECT COUNT(CASE WHEN idStato IN (1,2,3) THEN 1 END) AS prop, COUNT(CASE WHEN idStato = 4 THEN 1 END) AS org FROM gita1g WHERE idUtente = $idUtente");
+            $c1 = $res1 ? $res1->fetch_assoc() : [];
+            $res5 = $conn->query("SELECT COUNT(CASE WHEN idStato IN (1,2,3) THEN 1 END) AS prop, COUNT(CASE WHEN idStato = 4 THEN 1 END) AS org FROM gite5 WHERE idUtente = $idUtente");
+            $c5 = $res5 ? $res5->fetch_assoc() : [];
             $totProposte = ($c1['prop'] ?? 0) + ($c5['prop'] ?? 0);
             $totOrg = ($c1['org'] ?? 0) + ($c5['org'] ?? 0);
 
-            // totale gite in programma (stato 4, tutti)
-            $totInProgramma = (mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS tot FROM gita1g WHERE idStato = 4"))['tot'] ?? 0)
-                            + (mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS tot FROM gite5 WHERE idStato = 4"))['tot'] ?? 0);
+            // totale gite in programma
+            $resProg1 = $conn->query("SELECT COUNT(*) AS tot FROM gita1g WHERE idStato = 4");
+            $resProg5 = $conn->query("SELECT COUNT(*) AS tot FROM gite5 WHERE idStato = 4");
+            $totInProgramma = ($resProg1 ? $resProg1->fetch_assoc()['tot'] : 0) + ($resProg5 ? $resProg5->fetch_assoc()['tot'] : 0);
 
-            // bozze in attesa (solo per commissione, stato 1)
+            // bozze in attesa (solo commissione)
             $totBozze = 0;
             if ($ruolo == 2) {
-                $totBozze = (mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS tot FROM gita1g WHERE idStato = 1"))['tot'] ?? 0)
-                          + (mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS tot FROM gite5 WHERE idStato = 1"))['tot'] ?? 0);
+                $resBozze1 = $conn->query("SELECT COUNT(*) AS tot FROM gita1g WHERE idStato = 1");
+                $resBozze5 = $conn->query("SELECT COUNT(*) AS tot FROM gite5 WHERE idStato = 1");
+                $totBozze = ($resBozze1 ? $resBozze1->fetch_assoc()['tot'] : 0) + ($resBozze5 ? $resBozze5->fetch_assoc()['tot'] : 0);
             }
             ?>
 

@@ -10,7 +10,7 @@ if ($idGita === 0) {
 $idUtenteLoggato = intval($_SESSION['id_utente'] ?? 0);
 $ruolo           = $_SESSION['ruolo']     ?? 0;
 
-// Verifica accesso: deve essere autore oppure accompagnatore della gita5
+// verifica accesso autore o accompagnatore gita
 $sqlGita = "SELECT * FROM gite5 WHERE idGita = $idGita";
 $resGita = mysqli_query($conn, $sqlGita);
 if (!$resGita || mysqli_num_rows($resGita) == 0) {
@@ -19,7 +19,7 @@ if (!$resGita || mysqli_num_rows($resGita) == 0) {
 }
 $gita = mysqli_fetch_assoc($resGita);
 
-// Controlla che sia autore o accompagnatore
+// controlla che sia autore o accompagnatore
 $isAutore = ($gita['idUtente'] == $idUtenteLoggato);
 $chkAcc = mysqli_query($conn, "SELECT id FROM accompagnatori WHERE idgita=$idGita AND idutente=$idUtenteLoggato AND tipo_gita='5g'");
 $isAccompagnatore = ($chkAcc && mysqli_num_rows($chkAcc) > 0);
@@ -31,7 +31,7 @@ if (!$isAutore && !$isAccompagnatore && $ruolo != 2) {
 
 $messaggio = '';
 
-// handler aggiungi partecipante
+// aggiungi partecipante
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'aggiungi') {
     $nome      = mysqli_real_escape_string($conn, trim($_POST['nome']       ?? ''));
     $cognome   = mysqli_real_escape_string($conn, trim($_POST['cognome']    ?? ''));
@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'aggiu
     }
 }
 
-// handler elimina partecipante
+// elimina partecipante
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'elimina') {
     $idPart = intval($_POST['id_part'] ?? 0);
     if ($idPart > 0) {
@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'elimi
     exit;
 }
 
-// handler elimina accompagnatore (solo commissione)
+// elimina accompagnatore solo per commissione
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'elimina_acc' && $ruolo == 2) {
     $idAcc = intval($_POST['id_acc'] ?? 0);
     if ($idAcc > 0) {
@@ -70,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'elimi
     exit;
 }
 
-// handler modifica dati accompagnatore
+// modifica dati accompagnatore
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'mod_acc') {
     $accId     = intval($_POST['acc_id'] ?? 0);
     $documento = mysqli_real_escape_string($conn, trim($_POST['acc_documento']  ?? ''));
@@ -85,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'mod_a
     exit;
 }
 
-// carica accompagnatori della gita
+// carica accompagnatori
 $resAcc = mysqli_query($conn,
     "SELECT a.*, CONCAT(u.Nome, ' ', u.Cognome) AS nomeUtente, u.Nome AS nome_u, u.Cognome AS cognome_u
      FROM accompagnatori a JOIN utente u ON a.idutente = u.IDUtente
@@ -189,7 +189,7 @@ $numAlunniDisp = $gita['numAlunni'] ?? '';
                         $aNDocJ   = htmlspecialchars($acc['nDocumento'] ?? '', ENT_QUOTES);
                         $aScadV   = $acc['scadenza'] ?? '';
                         $aNoteJ   = htmlspecialchars($acc['note'] ?? '', ENT_QUOTES);
-                        // solo l'accompagnatore stesso (o commissione) puo modificare i propri dati
+                        // solo accompagnatore o commissione puo modificare
                         $canEdit = ($acc['idutente'] == $idUtenteLoggato || $ruolo == 2);
                 ?>
                     <tr>

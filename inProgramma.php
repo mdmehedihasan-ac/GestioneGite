@@ -4,7 +4,7 @@ include('nav.php');
 $ruolo           = $_SESSION['ruolo']     ?? 0;
 $idUtenteLoggato = intval($_SESSION['id_utente'] ?? 0);
 
-// handler partecipa
+// partecipa
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'partecipa') {
     $idGita   = intval($_POST['id_gita']   ?? 0);
     $tipoGita = ($_POST['tipo_gita'] ?? '') === 'gite5' ? '5g' : '1g';
@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'parte
     exit;
 }
 
-// handler disiscriviti
+// disiscriviti
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'disiscriviti') {
     $idGita   = intval($_POST['id_gita']   ?? 0);
     $tipoGita = ($_POST['tipo_gita'] ?? '') === 'gite5' ? '5g' : '1g';
@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'disis
     exit;
 }
 
-// handler elimina (solo commissione)
+// elimina solo per commissione
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'elimina' && $ruolo == 2) {
     $idGita = intval($_POST['id_gita'] ?? 0);
     $tab    = $_POST['tabella'] === 'gite5' ? 'gite5' : 'gita1g';
@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'elimi
     exit;
 }
 
-// handler modifica 1g (solo commissione)
+// modifica gita 1g solo per commissione
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'modifica_1g' && $ruolo == 2) {
     $id   = intval($_POST['id_gita'] ?? 0);
     $dest = mysqli_real_escape_string($conn, trim($_POST['destinazione'] ?? ''));
@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'modif
     $cls  = mysqli_real_escape_string($conn, trim($_POST['classi']       ?? ''));
     $gio  = trim($_POST['giorno'] ?? '');
     
-    // validazione
+    // validazione dati
     if ($gio && (strtotime($gio) === false || intval(date('Y', strtotime($gio))) < 2024 || intval(date('Y', strtotime($gio))) > 2030)) {
         $gio = '';
     }
@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'modif
     exit;
 }
 
-// handler modifica 5g (solo commissione)
+// modifica gita 5g solo per commissione
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'modifica_5g' && $ruolo == 2) {
     $id   = intval($_POST['id_gita'] ?? 0);
     $dest = mysqli_real_escape_string($conn, trim($_POST['destinazione'] ?? ''));
@@ -79,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'modif
     $gi   = trim($_POST['giornoInizio'] ?? '');
     $gf   = trim($_POST['giornoFine']   ?? '');
 
-    // validazione
+    // validazione dati
     if ($gi && (strtotime($gi) === false || intval(date('Y', strtotime($gi))) < 2024 || intval(date('Y', strtotime($gi))) > 2030)) {
         $gi = '';
     }
@@ -105,14 +105,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'modif
     exit;
 }
 
-// query gite 1 giorno stato 4
+// query gite 1 giorno
 $res1g = mysqli_query($conn,
     "SELECT g.*, CONCAT(u.Nome, ' ', u.Cognome) AS autore
      FROM gita1g g JOIN utente u ON g.idUtente = u.IDUtente
      WHERE g.idStato = 4 ORDER BY g.giorno ASC"
 );
 
-// query gite piu giorni stato 4
+// query gite piu giorni
 $res5g = mysqli_query($conn,
     "SELECT g.*, CONCAT(u.Nome, ' ', u.Cognome) AS autore
      FROM gite5 g JOIN utente u ON g.idUtente = u.IDUtente

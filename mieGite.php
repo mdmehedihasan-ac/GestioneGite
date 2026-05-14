@@ -121,7 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
-// organizza gita 1 giorno (copia con stato 4)
+// organizza gita 1 giorno
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'organizza_1g') {
     $idGita      = intval($_POST['id_gita']);
     $idUtente    = $_SESSION['id_utente'];
@@ -171,7 +171,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
-// organizza gita piu giorni (copia con stato 4)
+// organizza gita piu giorni
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'organizza_5g') {
     $idGita       = intval($_POST['id_gita']);
     $idUtente     = $_SESSION['id_utente'];
@@ -262,15 +262,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     }
 }
 
-// query: proposte create da me (stato 1,2,3)
+// query proposte create da me
 $proposte = [];
 $r1 = $conn->query("SELECT *, '1g' AS tipo FROM gita1g WHERE idUtente = $idUtenteLoggato AND idStato IN (1,2,3) ORDER BY idGita DESC");
 if ($r1) { while ($riga = $r1->fetch_assoc()) $proposte[] = $riga; }
 $r2 = $conn->query("SELECT *, '5g' AS tipo FROM gite5 WHERE idUtente = $idUtenteLoggato AND idStato IN (1,2,3) ORDER BY idGita DESC");
 if ($r2) { while ($riga = $r2->fetch_assoc()) $proposte[] = $riga; }
 
-// query: gite in organizzazione/concluse (stato 4,5)
-// Include sia le gite create dall'utente che quelle a cui partecipa come accompagnatore
+// query gite in organizzazione e concluse
+// include gite create da utente e dove e accompagnatore
 $organizzate = [];
 $r3 = $conn->query("
     SELECT g.*, '1g' AS tipo, IF(g.idUtente = $idUtenteLoggato, 1, 0) AS sono_autore, IF(a.idutente IS NOT NULL, 1, 0) AS sono_accompagnatore
