@@ -16,8 +16,8 @@ $conn->query("CREATE TABLE IF NOT EXISTS gite_archiviate_utente (
 
 // disiscriviti da accompagnatore
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'disiscriviti') {
-    $idGita   = intval($_POST['id_gita']);
-    $tipoGita = ($_POST['tipo_gita'] ?? '') === '5g' ? '5g' : '1g';
+    $idGita   = (int)$_POST['id_gita'];
+    $tipoGita = isset($_POST['tipo_gita']) && $_POST['tipo_gita'] === '5g' ? '5g' : '1g';
     if ($idGita > 0 && $idUtenteLoggato > 0) {
         $conn->query("
         DELETE FROM accompagnatori WHERE idgita = $idGita AND idutente = $idUtenteLoggato AND tipo_gita = '$tipoGita'");
@@ -27,8 +27,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 // partecipa da mieGite
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'partecipa') {
-    $idGita   = intval($_POST['id_gita']);
-    $tipoGita = ($_POST['tipo_gita'] ?? '') === '5g' ? '5g' : '1g';
+    $idGita   = (int)$_POST['id_gita'];
+    $tipoGita = isset($_POST['tipo_gita']) && $_POST['tipo_gita'] === '5g' ? '5g' : '1g';
     if ($idGita > 0 && $idUtenteLoggato > 0) {
         $conn->query(
             "INSERT IGNORE INTO accompagnatori (idgita, idutente, tipo_gita) VALUES ($idGita, $idUtenteLoggato, '$tipoGita')");
@@ -38,9 +38,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 // archivia gita conclusa
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'archivia') {
-    $idGita   = intval($_POST['id_gita']);
-    $tipoGita = ($_POST['tipo_gita'] ?? '') === '5g' ? '5g' : '1g';
-    $sonoAutore = intval($_POST['sono_autore'] ?? 0);
+    $idGita   = (int)$_POST['id_gita'];
+    $tipoGita = isset($_POST['tipo_gita']) && $_POST['tipo_gita'] === '5g' ? '5g' : '1g';
+    $sonoAutore = isset($_POST['sono_autore']) ? (int)$_POST['sono_autore'] : 0;
     if ($idGita > 0 && $idUtenteLoggato > 0) {
         $conn->query("INSERT IGNORE INTO gite_archiviate_utente (idutente, idgita, tipo_gita) VALUES ($idUtenteLoggato, $idGita, '$tipoGita')");
         $messaggio = "archiviata_ok";
@@ -49,27 +49,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 // modifica gita 1g in organizzazione
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'modifica_org_1g') {
-    $idGita       = intval($_POST['id_gita']);
-    $dest         = $conn->real_escape_string(trim($_POST['mo_destinazione'] ?? ''));
-    $desc         = $conn->real_escape_string(trim($_POST['mo_descrizione']  ?? ''));
-    $mezzo        = $conn->real_escape_string(trim($_POST['mo_mezzo']        ?? ''));
-    $periodo      = $conn->real_escape_string(trim($_POST['mo_periodo']      ?? ''));
-    $classi       = $conn->real_escape_string(trim($_POST['mo_classi']       ?? ''));
-    $giorno       = $_POST['mo_giorno'] ?: null;
-    
+    $idGita       = (int)$_POST['id_gita'];
+    $dest         = $conn->real_escape_string(trim(isset($_POST['mo_destinazione']) ? $_POST['mo_destinazione'] : ''));
+    $desc         = $conn->real_escape_string(trim(isset($_POST['mo_descrizione'])  ? $_POST['mo_descrizione']  : ''));
+    $mezzo        = $conn->real_escape_string(trim(isset($_POST['mo_mezzo'])        ? $_POST['mo_mezzo']        : ''));
+    $periodo      = $conn->real_escape_string(trim(isset($_POST['mo_periodo'])      ? $_POST['mo_periodo']      : ''));
+    $classi       = $conn->real_escape_string(trim(isset($_POST['mo_classi'])       ? $_POST['mo_classi']       : ''));
+    $giorno       = isset($_POST['mo_giorno']) && $_POST['mo_giorno'] !== '' ? $_POST['mo_giorno'] : null;
+
     $is_valid = true;
     if (empty($dest)) $is_valid = false;
-    if ($giorno && (strtotime($giorno) === false || intval(date('Y', strtotime($giorno))) < 2024 || intval(date('Y', strtotime($giorno))) > 2030)) {
+    if ($giorno && (strtotime($giorno) === false || (int)date('Y', strtotime($giorno)) < 2024 || (int)date('Y', strtotime($giorno)) > 2030)) {
         $is_valid = false;
     }
     if ($giorno && strtotime($giorno) <= strtotime(date('Y-m-d'))) {
         $is_valid = false;
     }
-    
-    $costoMezzo   = $_POST['mo_costoMezzo']   !== '' ? floatval(str_replace(',', '.', $_POST['mo_costoMezzo']))   : null;
-    $costoAtt     = $_POST['mo_costoAttivita'] !== '' ? floatval(str_replace(',', '.', $_POST['mo_costoAttivita'])) : null;
-    $costoAP      = $_POST['mo_costoAPersona'] !== '' ? floatval(str_replace(',', '.', $_POST['mo_costoAPersona'])) : null;
-    $numAlunni    = $_POST['mo_numAlunni'] !== '' ? intval($_POST['mo_numAlunni']) : null;
+
+    $costoMezzo   = isset($_POST['mo_costoMezzo'])   && $_POST['mo_costoMezzo']   !== '' ? (float)str_replace(',', '.', $_POST['mo_costoMezzo'])   : null;
+    $costoAtt     = isset($_POST['mo_costoAttivita']) && $_POST['mo_costoAttivita'] !== '' ? (float)str_replace(',', '.', $_POST['mo_costoAttivita']) : null;
+    $costoAP      = isset($_POST['mo_costoAPersona']) && $_POST['mo_costoAPersona'] !== '' ? (float)str_replace(',', '.', $_POST['mo_costoAPersona']) : null;
+    $numAlunni    = isset($_POST['mo_numAlunni']) && $_POST['mo_numAlunni'] !== '' ? (int)$_POST['mo_numAlunni'] : null;
     
     if ($is_valid) {
         $giorno_s     = $giorno ? "'" . $conn->real_escape_string($giorno) . "'" : "NULL";
@@ -87,21 +87,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 // modifica gita 5g in organizzazione
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'modifica_org_5g') {
-    $idGita       = intval($_POST['id_gita']);
-    $dest         = $conn->real_escape_string(trim($_POST['mo_destinazione']  ?? ''));
-    $desc         = $conn->real_escape_string(trim($_POST['mo_descrizione']   ?? ''));
-    $mezzo        = $conn->real_escape_string(trim($_POST['mo_mezzo']         ?? ''));
-    $periodo      = $conn->real_escape_string(trim($_POST['mo_periodo']       ?? ''));
-    $classi       = $conn->real_escape_string(trim($_POST['mo_classi']        ?? ''));
-    $gi           = $_POST['mo_giornoInizio'] ?: null;
-    $gf           = $_POST['mo_giornoFine']   ?: null;
-    
+    $idGita       = (int)$_POST['id_gita'];
+    $dest         = $conn->real_escape_string(trim(isset($_POST['mo_destinazione'])  ? $_POST['mo_destinazione']  : ''));
+    $desc         = $conn->real_escape_string(trim(isset($_POST['mo_descrizione'])   ? $_POST['mo_descrizione']   : ''));
+    $mezzo        = $conn->real_escape_string(trim(isset($_POST['mo_mezzo'])         ? $_POST['mo_mezzo']         : ''));
+    $periodo      = $conn->real_escape_string(trim(isset($_POST['mo_periodo'])       ? $_POST['mo_periodo']       : ''));
+    $classi       = $conn->real_escape_string(trim(isset($_POST['mo_classi'])        ? $_POST['mo_classi']        : ''));
+    $gi           = isset($_POST['mo_giornoInizio']) && $_POST['mo_giornoInizio'] !== '' ? $_POST['mo_giornoInizio'] : null;
+    $gf           = isset($_POST['mo_giornoFine'])   && $_POST['mo_giornoFine']   !== '' ? $_POST['mo_giornoFine']   : null;
+
     $is_valid = true;
     if (empty($dest)) $is_valid = false;
-    if ($gi && (strtotime($gi) === false || intval(date('Y', strtotime($gi))) < 2024 || intval(date('Y', strtotime($gi))) > 2030)) {
+    if ($gi && (strtotime($gi) === false || (int)date('Y', strtotime($gi)) < 2024 || (int)date('Y', strtotime($gi)) > 2030)) {
         $is_valid = false;
     }
-    if ($gf && (strtotime($gf) === false || intval(date('Y', strtotime($gf))) < 2024 || intval(date('Y', strtotime($gf))) > 2030)) {
+    if ($gf && (strtotime($gf) === false || (int)date('Y', strtotime($gf)) < 2024 || (int)date('Y', strtotime($gf)) > 2030)) {
         $is_valid = false;
     }
     if ($gi && strtotime($gi) <= strtotime(date('Y-m-d'))) {
@@ -110,9 +110,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     if ($gi && $gf && strtotime($gi) >= strtotime($gf)) {
         $is_valid = false;
     }
-    
-    $costoAP      = $_POST['mo_costoAPersona'] !== '' ? floatval(str_replace(',', '.', $_POST['mo_costoAPersona'])) : null;
-    $numAlunni    = $_POST['mo_numAlunni'] !== '' ? intval($_POST['mo_numAlunni']) : null;
+
+    $costoAP      = isset($_POST['mo_costoAPersona']) && $_POST['mo_costoAPersona'] !== '' ? (float)str_replace(',', '.', $_POST['mo_costoAPersona']) : null;
+    $numAlunni    = isset($_POST['mo_numAlunni']) && $_POST['mo_numAlunni'] !== '' ? (int)$_POST['mo_numAlunni'] : null;
     
     if ($is_valid) {
         $gi_s         = $gi ? "'" . $conn->real_escape_string($gi) . "'" : "NULL";
@@ -129,21 +129,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 // organizza gita 1 giorno
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'organizza_1g') {
-    $idGita      = intval($_POST['id_gita']);
+    $idGita      = (int)$_POST['id_gita'];
     $idUtente    = $_SESSION['id_utente'];
-    $descrizione = $_POST['org_descrizione'] ?? '';
-    $mezzo       = $_POST['org_mezzo']       ?? '';
-    $classi      = $_POST['org_classe']      ?? '';
-    $periodo     = $_POST['org_periodo']    ?: null;
-    $giorno      = $_POST['org_giorno']     ?: null;
-    $costoMezzo  = $_POST['org_costoMezzo']  !== '' ? floatval($_POST['org_costoMezzo'])  : null;
-    $costoGiorno = $_POST['org_costoGiorno'] !== '' ? floatval($_POST['org_costoGiorno']) : null;
-    $numAlunni   = $_POST['org_numAlunni']   !== '' ? intval($_POST['org_numAlunni'])     : null;
+    $descrizione = isset($_POST['org_descrizione']) ? $_POST['org_descrizione'] : '';
+    $mezzo       = isset($_POST['org_mezzo'])       ? $_POST['org_mezzo']       : '';
+    $classi      = isset($_POST['org_classe'])      ? $_POST['org_classe']      : '';
+    $periodo     = isset($_POST['org_periodo'])    && $_POST['org_periodo']    !== '' ? $_POST['org_periodo']    : null;
+    $giorno      = isset($_POST['org_giorno'])     && $_POST['org_giorno']     !== '' ? $_POST['org_giorno']     : null;
+    $costoMezzo  = isset($_POST['org_costoMezzo'])  && $_POST['org_costoMezzo']  !== '' ? (float)$_POST['org_costoMezzo']  : null;
+    $costoGiorno = isset($_POST['org_costoGiorno']) && $_POST['org_costoGiorno'] !== '' ? (float)$_POST['org_costoGiorno'] : null;
+    $numAlunni   = isset($_POST['org_numAlunni'])   && $_POST['org_numAlunni']   !== '' ? (int)$_POST['org_numAlunni']     : null;
 
     $orig = $conn->query("SELECT * FROM gita1g WHERE idGita = $idGita")->fetch_assoc();
     if ($orig) {
         $is_valid = true;
-        if ($giorno && (strtotime($giorno) === false || intval(date('Y', strtotime($giorno))) < 2024 || intval(date('Y', strtotime($giorno))) > 2030)) {
+        if ($giorno && (strtotime($giorno) === false || (int)date('Y', strtotime($giorno)) < 2024 || (int)date('Y', strtotime($giorno)) > 2030)) {
             $is_valid = false;
         }
         if ($giorno && strtotime($giorno) <= strtotime(date('Y-m-d'))) {
@@ -153,14 +153,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         if ($is_valid) {
             $dest_s       = $conn->real_escape_string($orig['destinazione']);
             $desc_s       = $conn->real_escape_string($descrizione);
-            $mezzoFin_s   = $conn->real_escape_string($mezzo ?: ($orig['mezzo'] ?? ''));
+            $mezzoTmp     = !empty($mezzo) ? $mezzo : (isset($orig['mezzo']) ? $orig['mezzo'] : '');
+            $mezzoFin_s   = $conn->real_escape_string($mezzoTmp);
             $classi_s     = $conn->real_escape_string($classi);
-            $perFin_s     = $conn->real_escape_string($periodo ?? $orig['periodo'] ?? '');
+            $perTmp       = !empty($periodo) ? $periodo : (isset($orig['periodo']) ? $orig['periodo'] : '');
+            $perFin_s     = $conn->real_escape_string($perTmp);
             $giorno_s     = $giorno      ? "'" . $conn->real_escape_string($giorno) . "'" : "NULL";
-            $costoMezzo_s = $costoMezzo  !== null ? floatval($costoMezzo)  : "NULL";
-            $costoGiorno_s= $costoGiorno !== null ? floatval($costoGiorno) : "NULL";
-            $costoA_s     = floatval($orig['costoAPersona']);
-            $numAlunni_s  = $numAlunni   !== null ? intval($numAlunni)     : "NULL";
+            $costoMezzo_s = $costoMezzo  !== null ? (float)$costoMezzo  : "NULL";
+            $costoGiorno_s= $costoGiorno !== null ? (float)$costoGiorno : "NULL";
+            $costoA_s     = (float)$orig['costoAPersona'];
+            $numAlunni_s  = $numAlunni   !== null ? (int)$numAlunni     : "NULL";
 
             $sql = "INSERT INTO gita1g (idUtente, destinazione, descrizione, mezzo, periodo, classi, giorno, costoMezzo, costoAttivita, costoAPersona, numAlunni, idStato)
                     VALUES ($idUtente, '$dest_s', '$desc_s', '$mezzoFin_s', '$perFin_s', '$classi_s', $giorno_s, $costoMezzo_s, $costoGiorno_s, $costoA_s, $numAlunni_s, 4)";
@@ -179,24 +181,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 // organizza gita piu giorni
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'organizza_5g') {
-    $idGita       = intval($_POST['id_gita']);
+    $idGita       = (int)$_POST['id_gita'];
     $idUtente     = $_SESSION['id_utente'];
-    $descrizione  = $_POST['org_descrizione']  ?? '';
-    $mezzo        = $_POST['org_mezzo']         ?? '';
-    $classi       = $_POST['org_classe']        ?? '';
-    $periodo      = $_POST['org_periodo']      ?: null;
-    $giornoInizio = $_POST['org_giornoInizio'] ?: null;
-    $giornoFine   = $_POST['org_giornoFine']   ?: null;
-    $costoAPersona= $_POST['org_costoAPersona'] !== '' ? floatval($_POST['org_costoAPersona']) : null;
-    $numAlunni    = $_POST['org_numAlunni']     !== '' ? intval($_POST['org_numAlunni'])       : null;
+    $descrizione  = isset($_POST['org_descrizione'])  ? $_POST['org_descrizione']  : '';
+    $mezzo        = isset($_POST['org_mezzo'])         ? $_POST['org_mezzo']         : '';
+    $classi       = isset($_POST['org_classe'])        ? $_POST['org_classe']        : '';
+    $periodo      = isset($_POST['org_periodo'])      && $_POST['org_periodo']      !== '' ? $_POST['org_periodo']      : null;
+    $giornoInizio = isset($_POST['org_giornoInizio']) && $_POST['org_giornoInizio'] !== '' ? $_POST['org_giornoInizio'] : null;
+    $giornoFine   = isset($_POST['org_giornoFine'])   && $_POST['org_giornoFine']   !== '' ? $_POST['org_giornoFine']   : null;
+    $costoAPersona= isset($_POST['org_costoAPersona']) && $_POST['org_costoAPersona'] !== '' ? (float)$_POST['org_costoAPersona'] : null;
+    $numAlunni    = isset($_POST['org_numAlunni'])     && $_POST['org_numAlunni']     !== '' ? (int)$_POST['org_numAlunni']       : null;
 
     $orig = $conn->query("SELECT * FROM gite5 WHERE idGita = $idGita")->fetch_assoc();
     if ($orig) {
         $is_valid = true;
-        if ($giornoInizio && (strtotime($giornoInizio) === false || intval(date('Y', strtotime($giornoInizio))) < 2024 || intval(date('Y', strtotime($giornoInizio))) > 2030)) {
+        if ($giornoInizio && (strtotime($giornoInizio) === false || (int)date('Y', strtotime($giornoInizio)) < 2024 || (int)date('Y', strtotime($giornoInizio)) > 2030)) {
             $is_valid = false;
         }
-        if ($giornoFine && (strtotime($giornoFine) === false || intval(date('Y', strtotime($giornoFine))) < 2024 || intval(date('Y', strtotime($giornoFine))) > 2030)) {
+        if ($giornoFine && (strtotime($giornoFine) === false || (int)date('Y', strtotime($giornoFine)) < 2024 || (int)date('Y', strtotime($giornoFine)) > 2030)) {
             $is_valid = false;
         }
         if ($giornoInizio && strtotime($giornoInizio) <= strtotime(date('Y-m-d'))) {
@@ -209,13 +211,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         if ($is_valid) {
             $dest_s      = $conn->real_escape_string($orig['destinazione']);
             $desc_s      = $conn->real_escape_string($descrizione);
-            $mezzoFin_s  = $conn->real_escape_string($mezzo ?: ($orig['mezzo'] ?? ''));
+            $mezzoTmp    = !empty($mezzo) ? $mezzo : (isset($orig['mezzo']) ? $orig['mezzo'] : '');
+            $mezzoFin_s  = $conn->real_escape_string($mezzoTmp);
             $classi_s    = $conn->real_escape_string($classi);
-            $perFin_s    = $conn->real_escape_string($periodo ?? $orig['periodo'] ?? '');
+            $perTmp      = !empty($periodo) ? $periodo : (isset($orig['periodo']) ? $orig['periodo'] : '');
+            $perFin_s    = $conn->real_escape_string($perTmp);
             $gi_s        = $giornoInizio ? "'" . $conn->real_escape_string($giornoInizio) . "'" : "NULL";
             $gf_s        = $giornoFine   ? "'" . $conn->real_escape_string($giornoFine)   . "'" : "NULL";
-            $costoFin    = $costoAPersona !== null ? floatval($costoAPersona) : floatval($orig['costoAPersona'] ?? 0);
-            $numAlunni_s = $numAlunni !== null ? intval($numAlunni) : "NULL";
+            $costoOrig   = isset($orig['costoAPersona']) ? (float)$orig['costoAPersona'] : 0;
+            $costoFin    = $costoAPersona !== null ? (float)$costoAPersona : $costoOrig;
+            $numAlunni_s = $numAlunni !== null ? (int)$numAlunni : "NULL";
 
             $sql = "INSERT INTO gite5 (idUtente, destinazione, descrizione, mezzo, periodo, classi, giornoInizio, giornoFine, costoAPersona, numAlunni, idStato)
                     VALUES ($idUtente, '$dest_s', '$desc_s', '$mezzoFin_s', '$perFin_s', '$classi_s', $gi_s, $gf_s, $costoFin, $numAlunni_s, 4)";
@@ -236,33 +241,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
     if ($_POST['action'] === 'riproponi_1g') {
-        $idGita       = intval($_POST['id_gita']);
+        $idGita       = (int)$_POST['id_gita'];
         $destinazione = $conn->real_escape_string($_POST['destinazione']);
-        $mezzo        = $conn->real_escape_string($_POST['mezzo'] ?? '');
-        $periodo      = $conn->real_escape_string($_POST['periodo'] ?? '');
-        $costo        = floatval($_POST['costo'] ?? 0);
+        $mezzo        = $conn->real_escape_string(isset($_POST['mezzo']) ? $_POST['mezzo'] : '');
+        $periodo      = $conn->real_escape_string(isset($_POST['periodo']) ? $_POST['periodo'] : '');
+        $costo        = isset($_POST['costo']) ? (float)$_POST['costo'] : 0;
         $conn->query("UPDATE gita1g SET destinazione='$destinazione', mezzo='$mezzo', periodo='$periodo', costoAPersona=$costo, idStato=1 WHERE idGita=$idGita AND idUtente=$idUtenteLoggato");
         $messaggio = "ok";
     }
 
     if ($_POST['action'] === 'riproponi_5g') {
-        $idGita       = intval($_POST['id_gita']);
+        $idGita       = (int)$_POST['id_gita'];
         $destinazione = $conn->real_escape_string($_POST['destinazione']);
-        $mezzo        = $conn->real_escape_string($_POST['mezzo'] ?? '');
-        $periodo      = $conn->real_escape_string($_POST['periodo'] ?? '');
-        $costo        = floatval($_POST['costo'] ?? 0);
+        $mezzo        = $conn->real_escape_string(isset($_POST['mezzo']) ? $_POST['mezzo'] : '');
+        $periodo      = $conn->real_escape_string(isset($_POST['periodo']) ? $_POST['periodo'] : '');
+        $costo        = isset($_POST['costo']) ? (float)$_POST['costo'] : 0;
         $conn->query("UPDATE gite5 SET destinazione='$destinazione', mezzo='$mezzo', periodo='$periodo', costoAPersona=$costo, idStato=1 WHERE idGita=$idGita AND idUtente=$idUtenteLoggato");
         $messaggio = "ok";
     }
 
     if ($_POST['action'] === 'elimina_bocciata_1g') {
-        $idGita = intval($_POST['id_gita']);
+        $idGita = (int)$_POST['id_gita'];
         $conn->query("DELETE FROM gita1g WHERE idGita=$idGita AND idUtente=$idUtenteLoggato AND idStato=3");
         $messaggio = "eliminata";
     }
 
     if ($_POST['action'] === 'elimina_bocciata_5g') {
-        $idGita = intval($_POST['id_gita']);
+        $idGita = (int)$_POST['id_gita'];
         $conn->query("DELETE FROM gite5 WHERE idGita=$idGita AND idUtente=$idUtenteLoggato AND idStato=3");
         $messaggio = "eliminata";
     }
@@ -275,37 +280,68 @@ if ($r1) { while ($riga = $r1->fetch_assoc()) $proposte[] = $riga; }
 $r2 = $conn->query("SELECT *, '5g' AS tipo FROM gite5 WHERE idUtente = $idUtenteLoggato AND idStato IN (1,2,3) ORDER BY idGita DESC");
 if ($r2) { while ($riga = $r2->fetch_assoc()) $proposte[] = $riga; }
 
-// query gite in organizzazione e concluse
-// include gite create da utente e dove e accompagnatore
-$organizzate = [];
-$r3 = $conn->query("
-    SELECT g.*, '1g' AS tipo, IF(g.idUtente = $idUtenteLoggato, 1, 0) AS sono_autore, IF(a.idutente IS NOT NULL, 1, 0) AS sono_accompagnatore
-    FROM gita1g g
-    LEFT JOIN accompagnatori a ON a.idgita = g.idGita AND a.tipo_gita = '1g' AND a.idutente = $idUtenteLoggato
-    LEFT JOIN gite_archiviate_utente ar ON ar.idgita = g.idGita AND ar.tipo_gita = '1g' AND ar.idutente = $idUtenteLoggato
-    WHERE g.idStato IN (4,5) AND ar.id IS NULL AND (g.idUtente = $idUtenteLoggato OR a.idutente IS NOT NULL)
-    ORDER BY g.idGita DESC
-");
-if ($r3) { while ($riga = $r3->fetch_assoc()) $organizzate[] = $riga; }
-$r4 = $conn->query("
-    SELECT g.*, '5g' AS tipo, IF(g.idUtente = $idUtenteLoggato, 1, 0) AS sono_autore, IF(a.idutente IS NOT NULL, 1, 0) AS sono_accompagnatore
-    FROM gite5 g
-    LEFT JOIN accompagnatori a ON a.idgita = g.idGita AND a.tipo_gita = '5g' AND a.idutente = $idUtenteLoggato
-    LEFT JOIN gite_archiviate_utente ar ON ar.idgita = g.idGita AND ar.tipo_gita = '5g' AND ar.idutente = $idUtenteLoggato
-    WHERE g.idStato IN (4,5) AND ar.id IS NULL AND (g.idUtente = $idUtenteLoggato OR a.idutente IS NOT NULL)
-    ORDER BY g.idGita DESC
-");
-if ($r4) { while ($riga = $r4->fetch_assoc()) $organizzate[] = $riga; }
+// query gite in organizzazione e concluse (in piu parti, senza LEFT JOIN)
+$organizzateMap = [];
 
-function badgeClass($stato) {
-    switch ($stato) {
-        case 'Approvata':      return 'badge-success';
-        case 'Bocciata':       return 'badge-danger';
-        case 'Bozza':          return 'badge-warning';
-        case 'Organizzazione': return 'badge-primary';
-        case 'Conclusa':       return 'badge-secondary';
-        default:               return 'badge-secondary';
+// gite 1g create da me
+$r = $conn->query("SELECT *, '1g' AS tipo, 1 AS sono_autore, 0 AS sono_accompagnatore FROM gita1g WHERE idUtente = $idUtenteLoggato AND idStato IN (4,5)");
+if ($r) while ($row = $r->fetch_assoc()) $organizzateMap['1g_' . $row['idGita']] = $row;
+
+// gite 1g dove sono accompagnatore
+$r = $conn->query("SELECT g.*, '1g' AS tipo, 0 AS sono_autore, 1 AS sono_accompagnatore FROM gita1g g JOIN accompagnatori a ON a.idgita = g.idGita AND a.tipo_gita = '1g' WHERE a.idutente = $idUtenteLoggato AND g.idStato IN (4,5)");
+if ($r) {
+    while ($row = $r->fetch_assoc()) {
+        $k = '1g_' . $row['idGita'];
+        if (isset($organizzateMap[$k])) {
+            $organizzateMap[$k]['sono_accompagnatore'] = 1;
+        } else {
+            $organizzateMap[$k] = $row;
+        }
     }
+}
+
+// gite 5g create da me
+$r = $conn->query("SELECT *, '5g' AS tipo, 1 AS sono_autore, 0 AS sono_accompagnatore FROM gite5 WHERE idUtente = $idUtenteLoggato AND idStato IN (4,5)");
+if ($r) while ($row = $r->fetch_assoc()) $organizzateMap['5g_' . $row['idGita']] = $row;
+
+// gite 5g dove sono accompagnatore
+$r = $conn->query("SELECT g.*, '5g' AS tipo, 0 AS sono_autore, 1 AS sono_accompagnatore FROM gite5 g JOIN accompagnatori a ON a.idgita = g.idGita AND a.tipo_gita = '5g' WHERE a.idutente = $idUtenteLoggato AND g.idStato IN (4,5)");
+if ($r) {
+    while ($row = $r->fetch_assoc()) {
+        $k = '5g_' . $row['idGita'];
+        if (isset($organizzateMap[$k])) {
+            $organizzateMap[$k]['sono_accompagnatore'] = 1;
+        } else {
+            $organizzateMap[$k] = $row;
+        }
+    }
+}
+
+// escludi archiviate
+$arch = $conn->query("SELECT idgita, tipo_gita FROM gite_archiviate_utente WHERE idutente = $idUtenteLoggato");
+if ($arch) while ($a = $arch->fetch_assoc()) unset($organizzateMap[$a['tipo_gita'] . '_' . $a['idgita']]);
+
+// ordina bubble sort per idGita discendente
+$organizzate = array_values($organizzateMap);
+$n = count($organizzate);
+for ($i = 0; $i < $n; $i++) {
+    for ($j = 0; $j < $n - $i - 1; $j++) {
+        if ($organizzate[$j]['idGita'] < $organizzate[$j + 1]['idGita']) {
+            $temp = $organizzate[$j];
+            $organizzate[$j] = $organizzate[$j + 1];
+            $organizzate[$j + 1] = $temp;
+        }
+    }
+}
+
+//per modificare il colore
+function badgeClass($stato) {
+    if ($stato === 'Approvata')      return 'badge-success';
+    if ($stato === 'Bocciata')       return 'badge-danger';
+    if ($stato === 'Bozza')          return 'badge-warning';
+    if ($stato === 'Organizzazione') return 'badge-primary';
+    if ($stato === 'Conclusa')       return 'badge-secondary';
+    return 'badge-secondary';
 }
 ?>
 <!DOCTYPE html>
@@ -390,19 +426,19 @@ function badgeClass($stato) {
         <?php foreach ($proposte as $riga):
             $tipo      = $riga['tipo'] === '1g' ? 'Gita 1 Giorno' : 'Gita Più Giorni';
             $dest      = htmlspecialchars($riga['destinazione']);
-            $destJs    = htmlspecialchars($riga['destinazione'], ENT_QUOTES);
-            $mezzo     = htmlspecialchars($riga['mezzo'] ?? '');
-            $mezzoJs   = htmlspecialchars($riga['mezzo'] ?? '', ENT_QUOTES);
-            $periodo   = htmlspecialchars($riga['periodo'] ?? '');
-            $periodoJs = htmlspecialchars($riga['periodo'] ?? '', ENT_QUOTES);
-            $descJs    = htmlspecialchars($riga['descrizione'] ?? '', ENT_QUOTES);
-            $classiJs  = htmlspecialchars($riga['classi'] ?? '', ENT_QUOTES);
-            $descDisp  = htmlspecialchars($riga['descrizione'] ?? '');
-            $costoRaw  = $riga['costoAPersona'] ?? 0;
+            $destJs    = htmlspecialchars($riga['destinazione']);
+            $mezzo     = htmlspecialchars(isset($riga['mezzo']) ? $riga['mezzo'] : '');
+            $mezzoJs   = htmlspecialchars(isset($riga['mezzo']) ? $riga['mezzo'] : '');
+            $periodo   = htmlspecialchars(isset($riga['periodo']) ? $riga['periodo'] : '');
+            $periodoJs = htmlspecialchars(isset($riga['periodo']) ? $riga['periodo'] : '');
+            $descJs    = htmlspecialchars(isset($riga['descrizione']) ? $riga['descrizione'] : '');
+            $classiJs  = htmlspecialchars(isset($riga['classi']) ? $riga['classi'] : '');
+            $descDisp  = htmlspecialchars(isset($riga['descrizione']) ? $riga['descrizione'] : '');
+            $costoRaw  = isset($riga['costoAPersona']) ? $riga['costoAPersona'] : 0;
             $costo     = $costoRaw !== null ? '€ ' . number_format($costoRaw, 2, ',', '.') : '—';
             $stato     = nomeStato($riga['idStato']);
             $badge     = badgeClass($stato);
-            $id        = intval($riga['idGita']);
+            $id        = (int)$riga['idGita'];
             $tipoTabella = $riga['tipo'];
 
             if ($riga['tipo'] === '1g') {
@@ -423,8 +459,8 @@ function badgeClass($stato) {
             <div class="miegite-card-body">
                 <div class="miegite-card-info">
                     <span><strong>Tipo:</strong> <?php echo $tipo; ?></span>
-                    <span><strong>Mezzo:</strong> <?php echo $mezzo ?: '—'; ?></span>
-                    <span><strong>Periodo:</strong> <?php echo $periodo ?: '—'; ?></span>
+                    <span><strong>Mezzo:</strong> <?php echo !empty($mezzo) ? $mezzo : '—'; ?></span>
+                    <span><strong>Periodo:</strong> <?php echo !empty($periodo) ? $periodo : '—'; ?></span>
                     <span><strong><?php echo $dataLabel; ?>:</strong> <?php echo $data; ?></span>
                     <span><strong>Costo a persona:</strong> <?php echo $costo; ?></span>
                     <?php if ($descDisp): ?><span><strong>Descrizione:</strong> <?php echo $descDisp; ?></span><?php endif; ?>
@@ -439,7 +475,7 @@ function badgeClass($stato) {
                     data-mezzo="<?php echo $mezzoJs; ?>"
                     data-periodo="<?php echo $periodoJs; ?>"
                     data-classi="<?php echo $classiJs; ?>"
-                    data-costo="<?php echo floatval($costoRaw); ?>"
+                    data-costo="<?php echo (float)$costoRaw; ?>"
                     data-tipo="<?php echo $tipoTabella; ?>"
                     onclick="apriOrg(this)">
                     Organizza
@@ -448,7 +484,7 @@ function badgeClass($stato) {
             <?php elseif ($stato === 'Bocciata'): ?>
             <div class="miegite-card-footer">
                 <button type="button" class="button xs"
-                    onclick="apriModifica(<?php echo $id; ?>,'<?php echo $destJs; ?>','<?php echo $mezzoJs; ?>','<?php echo $periodoJs; ?>',<?php echo floatval($costoRaw); ?>,'<?php echo $tipoTabella; ?>')">
+                    onclick="apriModifica(<?php echo $id; ?>,'<?php echo $destJs; ?>','<?php echo $mezzoJs; ?>','<?php echo $periodoJs; ?>',<?php echo (float)$costoRaw; ?>,'<?php echo $tipoTabella; ?>')">
                     Modifica
                 </button>
                 <button type="button" class="button cancel xs"
@@ -477,27 +513,27 @@ function badgeClass($stato) {
         <?php foreach ($organizzate as $riga):
             $tipo    = $riga['tipo'] === '1g' ? 'Gita 1 Giorno' : 'Gita Più Giorni';
             $dest    = htmlspecialchars($riga['destinazione']);
-            $destJs  = htmlspecialchars($riga['destinazione'], ENT_QUOTES);
-            $mezzo   = htmlspecialchars($riga['mezzo'] ?? '—');
-            $mezzoJs = htmlspecialchars($riga['mezzo'] ?? '', ENT_QUOTES);
-            $periodo = htmlspecialchars($riga['periodo'] ?? '—');
-            $periodoJs = htmlspecialchars($riga['periodo'] ?? '', ENT_QUOTES);
-            $descJs  = htmlspecialchars($riga['descrizione'] ?? '', ENT_QUOTES);
-            $descDisp = htmlspecialchars($riga['descrizione'] ?? '');
-            $classiJs= htmlspecialchars($riga['classi'] ?? '', ENT_QUOTES);
+            $destJs  = htmlspecialchars($riga['destinazione']);
+            $mezzo   = htmlspecialchars(isset($riga['mezzo']) ? $riga['mezzo'] : '—');
+            $mezzoJs = htmlspecialchars(isset($riga['mezzo']) ? $riga['mezzo'] : '');
+            $periodo = htmlspecialchars(isset($riga['periodo']) ? $riga['periodo'] : '—');
+            $periodoJs = htmlspecialchars(isset($riga['periodo']) ? $riga['periodo'] : '');
+            $descJs  = htmlspecialchars(isset($riga['descrizione']) ? $riga['descrizione'] : '');
+            $descDisp = htmlspecialchars(isset($riga['descrizione']) ? $riga['descrizione'] : '');
+            $classiJs= htmlspecialchars(isset($riga['classi']) ? $riga['classi'] : '');
             $costo   = $riga['costoAPersona'] !== null ? '€ ' . number_format($riga['costoAPersona'], 2, ',', '.') : '—';
             $stato   = nomeStato($riga['idStato']);
             $badge   = badgeClass($stato);
             $numAl   = $riga['numAlunni'] !== null ? $riga['numAlunni'] : '—';
-            $id      = intval($riga['idGita']);
+            $id      = (int)$riga['idGita'];
             $tipoTabella = $riga['tipo'];
             if ($riga['tipo'] === '1g') {
-                $dataRaw   = $riga['giorno'] ?? '';
+                $dataRaw   = isset($riga['giorno']) ? $riga['giorno'] : '';
                 $data      = formattaData($dataRaw);
                 $dataLabel = 'Giorno';
-                $costoMezzoRaw = $riga['costoMezzo'] ?? '';
-                $costoAttRaw   = $riga['costoAttivita'] ?? '';
-                $costoAPRaw    = $riga['costoAPersona'] ?? '';
+                $costoMezzoRaw = isset($riga['costoMezzo']) ? $riga['costoMezzo'] : '';
+                $costoAttRaw   = isset($riga['costoAttivita']) ? $riga['costoAttivita'] : '';
+                $costoAPRaw    = isset($riga['costoAPersona']) ? $riga['costoAPersona'] : '';
                 $costoMezzo = $costoMezzoRaw !== null && $costoMezzoRaw !== '' ? '€ ' . number_format($costoMezzoRaw, 2, ',', '.') : '—';
                 $costoAtt   = $costoAttRaw   !== null && $costoAttRaw   !== '' ? '€ ' . number_format($costoAttRaw,   2, ',', '.') : '—';
                 $extraInfo  = "<span><strong>Costo mezzo:</strong> $costoMezzo</span><span><strong>Costo attività:</strong> $costoAtt</span>";
@@ -510,7 +546,7 @@ function badgeClass($stato) {
                 $extraInfo = "";
                 $costoMezzoRaw = '';
                 $costoAttRaw   = '';
-                $costoAPRaw    = $riga['costoAPersona'] ?? '';
+                $costoAPRaw    = isset($riga['costoAPersona']) ? $riga['costoAPersona'] : '';
             }
         ?>
         <div class="miegite-card">
@@ -541,13 +577,13 @@ function badgeClass($stato) {
                         data-mezzo="<?php echo $mezzoJs; ?>"
                         data-periodo="<?php echo $periodoJs; ?>"
                         data-classi="<?php echo $classiJs; ?>"
-                        data-giorno="<?php echo htmlspecialchars($riga['tipo']==='1g' ? ($riga['giorno']??'') : '', ENT_QUOTES); ?>"
-                        data-giorno-inizio="<?php echo htmlspecialchars($riga['tipo']==='5g' ? ($riga['giornoInizio']??'') : '', ENT_QUOTES); ?>"
-                        data-giorno-fine="<?php echo htmlspecialchars($riga['tipo']==='5g' ? ($riga['giornoFine']??'') : '', ENT_QUOTES); ?>"
+                        data-giorno="<?php echo htmlspecialchars($riga['tipo']==='1g' ? (isset($riga['giorno']) ? $riga['giorno'] : '') : ''); ?>"
+                        data-giorno-inizio="<?php echo htmlspecialchars($riga['tipo']==='5g' ? (isset($riga['giornoInizio']) ? $riga['giornoInizio'] : '') : ''); ?>"
+                        data-giorno-fine="<?php echo htmlspecialchars($riga['tipo']==='5g' ? (isset($riga['giornoFine']) ? $riga['giornoFine'] : '') : ''); ?>"
                         data-costo-mezzo="<?php echo $costoMezzoRaw; ?>"
                         data-costo-att="<?php echo $costoAttRaw; ?>"
                         data-costo-ap="<?php echo $costoAPRaw; ?>"
-                        data-num-alunni="<?php echo $riga['numAlunni'] ?? ''; ?>"
+                        data-num-alunni="<?php echo isset($riga['numAlunni']) ? $riga['numAlunni'] : ''; ?>"
                         onclick="apriModOrg(this)">
                         Modifica
                     </button>
@@ -578,7 +614,7 @@ function badgeClass($stato) {
                     $accRes = $conn->query("SELECT CONCAT(u.Nome,' ',u.Cognome) AS nome FROM accompagnatori a JOIN utente u ON a.idutente=u.IDUtente WHERE a.idgita={$riga['idGita']} AND a.tipo_gita='1g' ORDER BY u.Cognome,u.Nome");
                     $accList = [];
                     if ($accRes) { while ($aRiga = $accRes->fetch_assoc()) $accList[] = $aRiga['nome']; }
-                    $accJson = htmlspecialchars(json_encode($accList), ENT_QUOTES);
+                    $accJson = htmlspecialchars(json_encode($accList));
                 ?>
                 <button type="button" class="button xs outline"
                     data-dest="<?php echo $destJs; ?>"

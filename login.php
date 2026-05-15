@@ -5,8 +5,8 @@
     $errore = "";
 
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        $email = trim($_POST['email'] ?? '');
-        $password = $_POST['password'] ?? '';
+        $email = trim(isset($_POST['email']) ? $_POST['email'] : '');
+        $password = isset($_POST['password']) ? $_POST['password'] : '';
 
         // validazione email e password
         if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {

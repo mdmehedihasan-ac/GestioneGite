@@ -8,7 +8,7 @@ if (!isset($_SESSION['id_utente'])) {
     exit;
 }
 
-$idUtente = intval($_SESSION['id_utente']);
+$idUtente = (int)$_SESSION['id_utente'];
 
 // carica dati utente dal database
 $risultato = $conn->query("SELECT Nome, Cognome, Mail, IDTipo FROM utente WHERE IDUtente = $idUtente");
@@ -27,8 +27,8 @@ $c1 = $conta1g ? $conta1g->fetch_assoc() : [];
 $conta5g = $conn->query("SELECT COUNT(CASE WHEN idStato IN (1,2,3) THEN 1 END) AS proposte, COUNT(CASE WHEN idStato = 4 THEN 1 END) AS organizza FROM gite5 WHERE idUtente = $idUtente");
 $c5 = $conta5g ? $conta5g->fetch_assoc() : [];
 
-$totProposte = ($c1['proposte'] ?? 0) + ($c5['proposte'] ?? 0);
-$totOrganizzazione = ($c1['organizza'] ?? 0) + ($c5['organizza'] ?? 0);
+$totProposte = (isset($c1['proposte']) ? $c1['proposte'] : 0) + (isset($c5['proposte']) ? $c5['proposte'] : 0);
+$totOrganizzazione = (isset($c1['organizza']) ? $c1['organizza'] : 0) + (isset($c5['organizza']) ? $c5['organizza'] : 0);
 
 // conta gite dove e accompagnatore (ma non autore)
 $accomp1g = $conn->query("SELECT COUNT(*) AS tot FROM accompagnatori a JOIN gita1g g ON a.idgita = g.idGita AND a.tipo_gita = '1g' WHERE a.idutente = $idUtente AND g.idUtente <> $idUtente");
@@ -162,11 +162,11 @@ $totAccompagnatore = ($accomp1g ? $accomp1g->fetch_assoc()['tot'] : 0) + ($accom
         <!-- intestazione profilo -->
         <div class="profilo-header">
             <div class="profilo-avatar">
-                <span><?php echo mb_strtoupper(mb_substr($utente['Nome'], 0, 1) . mb_substr($utente['Cognome'], 0, 1)); ?></span>
+                <span><?php echo strtoupper(substr($utente['Nome'], 0, 1) . substr($utente['Cognome'], 0, 1)); ?></span>
             </div>
             <div>
                 <h2 class="profilo-nome"><?php echo htmlspecialchars($utente['Nome'] . ' ' . $utente['Cognome']); ?></h2>
-                <span class="profilo-ruolo"><?php echo nomeRuolo($utente['IDTipo'] ?? 1); ?></span>
+                <span class="profilo-ruolo"><?php echo nomeRuolo(isset($utente['IDTipo']) ? $utente['IDTipo'] : 1); ?></span>
             </div>
         </div>
 

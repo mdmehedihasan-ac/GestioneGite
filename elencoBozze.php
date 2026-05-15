@@ -5,7 +5,7 @@ $messaggio = "";
 
 // azioni approva e boccia gita 1 giorno
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'azione_1g') {
-    $idGita     = intval($_POST['id_gita']);
+    $idGita     = (int)$_POST['id_gita'];
     $nuovoStato = ($_POST['azione'] === 'approva') ? 2 : 3;
     if ($conn->query("UPDATE gita1g SET idStato = $nuovoStato WHERE idGita = $idGita")) {
         $messaggio = "<div class='alert alert-success'>Operazione completata.</div>";
@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 // azioni approva e boccia gita 5 giorni
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'azione_5g') {
-    $idGita     = intval($_POST['id_gita']);
+    $idGita     = (int)$_POST['id_gita'];
     $nuovoStato = ($_POST['azione'] === 'approva') ? 2 : 3;
     if ($conn->query("UPDATE gite5 SET idStato = $nuovoStato WHERE idGita = $idGita")) {
         $messaggio = "<div class='alert alert-success'>Operazione completata.</div>";
@@ -109,11 +109,11 @@ $tot5g = $bozze5g ? $bozze5g->num_rows : 0;
 if ($bozze1g && $bozze1g->num_rows > 0) {
     while ($r = $bozze1g->fetch_assoc()) {
         $dest   = htmlspecialchars($r['destinazione']);
-        $mezzo  = htmlspecialchars($r['mezzo'] ?? '—');
-        $per    = htmlspecialchars($r['periodo'] ?? '—');
+        $mezzo  = htmlspecialchars(isset($r['mezzo']) ? $r['mezzo'] : '—');
+        $per    = htmlspecialchars(isset($r['periodo']) ? $r['periodo'] : '—');
         $costo  = number_format($r['costoAPersona'], 2, ',', '.');
         $autore = htmlspecialchars($r['Nome'] . ' ' . $r['Cognome']);
-        $id     = intval($r['idGita']);
+        $id     = (int)$r['idGita'];
         echo "<tr>
             <td>$dest</td>
             <td>$mezzo</td>
@@ -153,11 +153,11 @@ if ($bozze1g && $bozze1g->num_rows > 0) {
 if ($bozze5g && $bozze5g->num_rows > 0) {
     while ($r = $bozze5g->fetch_assoc()) {
         $dest   = htmlspecialchars($r['destinazione']);
-        $mezzo  = htmlspecialchars($r['mezzo'] ?? '—');
-        $per    = htmlspecialchars($r['periodo'] ?? '—');
+        $mezzo  = htmlspecialchars(isset($r['mezzo']) ? $r['mezzo'] : '—');
+        $per    = htmlspecialchars(isset($r['periodo']) ? $r['periodo'] : '—');
         $costo  = number_format($r['costoAPersona'], 2, ',', '.');
         $autore = htmlspecialchars($r['Nome'] . ' ' . $r['Cognome']);
-        $id     = intval($r['idGita']);
+        $id     = (int)$r['idGita'];
         echo "<tr>
             <td>$dest</td>
             <td>$mezzo</td>

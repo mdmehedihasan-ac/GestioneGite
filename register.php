@@ -6,16 +6,16 @@
     $successo = "";
 
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        $nome = trim($_POST['nome'] ?? '');
-        $cognome = trim($_POST['cognome'] ?? '');
-        $email = trim($_POST['email'] ?? '');
-        $password = $_POST['password'] ?? '';
-        $conferma_password = $_POST['confirm-password'] ?? '';
+        $nome = trim(isset($_POST['nome']) ? $_POST['nome'] : '');
+        $cognome = trim(isset($_POST['cognome']) ? $_POST['cognome'] : '');
+        $email = trim(isset($_POST['email']) ? $_POST['email'] : '');
+        $password = isset($_POST['password']) ? $_POST['password'] : '';
+        $conferma_password = isset($_POST['confirm-password']) ? $_POST['confirm-password'] : '';
 
         // validazione campi obbligatori
-        if ($nome === '' || mb_strlen($nome) > 50) {
+        if ($nome === '' || strlen($nome) > 50) {
             $errore = "Nome obbligatorio (max 50 caratteri).";
-        } elseif ($cognome === '' || mb_strlen($cognome) > 50) {
+        } elseif ($cognome === '' || strlen($cognome) > 50) {
             $errore = "Cognome obbligatorio (max 50 caratteri).";
         } elseif (!preg_match('/^[a-zA-ZÀ-ÿ\s\'-]+$/', $nome) || !preg_match('/^[a-zA-ZÀ-ÿ\s\'-]+$/', $cognome)) {
             $errore = "Nome e cognome possono contenere solo lettere.";

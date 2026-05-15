@@ -1,13 +1,13 @@
 <?php
 include('nav.php');
 
-$ruolo           = $_SESSION['ruolo']     ?? 0;
-$idUtenteLoggato = intval($_SESSION['id_utente'] ?? 0);
+$ruolo           = isset($_SESSION['ruolo'])     ? $_SESSION['ruolo']     : 0;
+$idUtenteLoggato = isset($_SESSION['id_utente']) ? (int)$_SESSION['id_utente'] : 0;
 
 // partecipa
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'partecipa') {
-    $idGita   = intval($_POST['id_gita']   ?? 0);
-    $tipoGita = ($_POST['tipo_gita'] ?? '') === 'gite5' ? '5g' : '1g';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'partecipa') {
+    $idGita   = isset($_POST['id_gita'])   ? (int)$_POST['id_gita']   : 0;
+    $tipoGita = isset($_POST['tipo_gita']) && $_POST['tipo_gita'] === 'gite5' ? '5g' : '1g';
     if ($idGita > 0 && $idUtenteLoggato > 0) {
         mysqli_query($conn, "INSERT IGNORE INTO accompagnatori (idgita, idutente, tipo_gita) VALUES ($idGita, $idUtenteLoggato, '$tipoGita')");
     }
@@ -16,9 +16,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'parte
 }
 
 // disiscriviti
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'disiscriviti') {
-    $idGita   = intval($_POST['id_gita']   ?? 0);
-    $tipoGita = ($_POST['tipo_gita'] ?? '') === 'gite5' ? '5g' : '1g';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'disiscriviti') {
+    $idGita   = isset($_POST['id_gita'])   ? (int)$_POST['id_gita']   : 0;
+    $tipoGita = isset($_POST['tipo_gita']) && $_POST['tipo_gita'] === 'gite5' ? '5g' : '1g';
     if ($idGita > 0 && $idUtenteLoggato > 0) {
         mysqli_query($conn, "DELETE FROM accompagnatori WHERE idgita = $idGita AND idutente = $idUtenteLoggato AND tipo_gita = '$tipoGita'");
     }
@@ -27,8 +27,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'disis
 }
 
 // elimina solo per commissione
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'elimina' && $ruolo == 2) {
-    $idGita = intval($_POST['id_gita'] ?? 0);
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'elimina' && $ruolo == 2) {
+    $idGita = isset($_POST['id_gita']) ? (int)$_POST['id_gita'] : 0;
     $tab    = $_POST['tabella'] === 'gite5' ? 'gite5' : 'gita1g';
     if ($idGita > 0) {
         mysqli_query($conn, "DELETE FROM $tab WHERE idGita = $idGita");
@@ -39,28 +39,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'elimi
 }
 
 // modifica gita 1g solo per commissione
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'modifica_1g' && $ruolo == 2) {
-    $id   = intval($_POST['id_gita'] ?? 0);
-    $dest = mysqli_real_escape_string($conn, trim($_POST['destinazione'] ?? ''));
-    $desc = mysqli_real_escape_string($conn, trim($_POST['descrizione']  ?? ''));
-    $mezz = mysqli_real_escape_string($conn, trim($_POST['mezzo']        ?? ''));
-    $per  = mysqli_real_escape_string($conn, trim($_POST['periodo']      ?? ''));
-    $cls  = mysqli_real_escape_string($conn, trim($_POST['classi']       ?? ''));
-    $gio  = trim($_POST['giorno'] ?? '');
-    
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'modifica_1g' && $ruolo == 2) {
+    $id   = isset($_POST['id_gita']) ? (int)$_POST['id_gita'] : 0;
+    $dest = mysqli_real_escape_string($conn, trim(isset($_POST['destinazione']) ? $_POST['destinazione'] : ''));
+    $desc = mysqli_real_escape_string($conn, trim(isset($_POST['descrizione'])  ? $_POST['descrizione']  : ''));
+    $mezz = mysqli_real_escape_string($conn, trim(isset($_POST['mezzo'])        ? $_POST['mezzo']        : ''));
+    $per  = mysqli_real_escape_string($conn, trim(isset($_POST['periodo'])      ? $_POST['periodo']      : ''));
+    $cls  = mysqli_real_escape_string($conn, trim(isset($_POST['classi'])       ? $_POST['classi']       : ''));
+    $gio  = trim(isset($_POST['giorno']) ? $_POST['giorno'] : '');
+
     // validazione dati
-    if ($gio && (strtotime($gio) === false || intval(date('Y', strtotime($gio))) < 2024 || intval(date('Y', strtotime($gio))) > 2030)) {
+    if ($gio && (strtotime($gio) === false || (int)date('Y', strtotime($gio)) < 2024 || (int)date('Y', strtotime($gio)) > 2030)) {
         $gio = '';
     }
     if ($gio && strtotime($gio) <= strtotime(date('Y-m-d'))) {
         $gio = '';
     }
-    
+
     $gio_s   = $gio ? "'" . $conn->real_escape_string($gio) . "'" : "NULL";
-    $costoM = $_POST['costoMezzo']    !== '' ? floatval($_POST['costoMezzo'])    : 'NULL';
-    $costoA = $_POST['costoAttivita'] !== '' ? floatval($_POST['costoAttivita']) : 'NULL';
-    $costoP = $_POST['costoAPersona'] !== '' ? floatval($_POST['costoAPersona']) : 'NULL';
-    $numAl  = $_POST['numAlunni']     !== '' ? intval($_POST['numAlunni'])       : 'NULL';
+    $costoM = isset($_POST['costoMezzo'])    && $_POST['costoMezzo']    !== '' ? (float)$_POST['costoMezzo']    : 'NULL';
+    $costoA = isset($_POST['costoAttivita']) && $_POST['costoAttivita'] !== '' ? (float)$_POST['costoAttivita'] : 'NULL';
+    $costoP = isset($_POST['costoAPersona']) && $_POST['costoAPersona'] !== '' ? (float)$_POST['costoAPersona'] : 'NULL';
+    $numAl  = isset($_POST['numAlunni'])     && $_POST['numAlunni']     !== '' ? (int)$_POST['numAlunni']       : 'NULL';
     if ($id > 0) {
         mysqli_query($conn, "UPDATE gita1g SET destinazione='$dest', descrizione='$desc', mezzo='$mezz', periodo='$per', classi='$cls', giorno=$gio_s, costoMezzo=$costoM, costoAttivita=$costoA, costoAPersona=$costoP, numAlunni=$numAl WHERE idGita=$id");
     }
@@ -69,21 +69,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'modif
 }
 
 // modifica gita 5g solo per commissione
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'modifica_5g' && $ruolo == 2) {
-    $id   = intval($_POST['id_gita'] ?? 0);
-    $dest = mysqli_real_escape_string($conn, trim($_POST['destinazione'] ?? ''));
-    $desc = mysqli_real_escape_string($conn, trim($_POST['descrizione']  ?? ''));
-    $mezz = mysqli_real_escape_string($conn, trim($_POST['mezzo']        ?? ''));
-    $per  = mysqli_real_escape_string($conn, trim($_POST['periodo']      ?? ''));
-    $cls  = mysqli_real_escape_string($conn, trim($_POST['classi']       ?? ''));
-    $gi   = trim($_POST['giornoInizio'] ?? '');
-    $gf   = trim($_POST['giornoFine']   ?? '');
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'modifica_5g' && $ruolo == 2) {
+    $id   = isset($_POST['id_gita']) ? (int)$_POST['id_gita'] : 0;
+    $dest = mysqli_real_escape_string($conn, trim(isset($_POST['destinazione']) ? $_POST['destinazione'] : ''));
+    $desc = mysqli_real_escape_string($conn, trim(isset($_POST['descrizione'])  ? $_POST['descrizione']  : ''));
+    $mezz = mysqli_real_escape_string($conn, trim(isset($_POST['mezzo'])        ? $_POST['mezzo']        : ''));
+    $per  = mysqli_real_escape_string($conn, trim(isset($_POST['periodo'])      ? $_POST['periodo']      : ''));
+    $cls  = mysqli_real_escape_string($conn, trim(isset($_POST['classi'])       ? $_POST['classi']       : ''));
+    $gi   = trim(isset($_POST['giornoInizio']) ? $_POST['giornoInizio'] : '');
+    $gf   = trim(isset($_POST['giornoFine'])   ? $_POST['giornoFine']   : '');
 
     // validazione dati
-    if ($gi && (strtotime($gi) === false || intval(date('Y', strtotime($gi))) < 2024 || intval(date('Y', strtotime($gi))) > 2030)) {
+    if ($gi && (strtotime($gi) === false || (int)date('Y', strtotime($gi)) < 2024 || (int)date('Y', strtotime($gi)) > 2030)) {
         $gi = '';
     }
-    if ($gf && (strtotime($gf) === false || intval(date('Y', strtotime($gf))) < 2024 || intval(date('Y', strtotime($gf))) > 2030)) {
+    if ($gf && (strtotime($gf) === false || (int)date('Y', strtotime($gf)) < 2024 || (int)date('Y', strtotime($gf)) > 2030)) {
         $gf = '';
     }
     if ($gi && strtotime($gi) <= strtotime(date('Y-m-d'))) {
@@ -96,8 +96,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'modif
 
     $gi_s    = $gi ? "'" . $conn->real_escape_string($gi) . "'" : "NULL";
     $gf_s    = $gf ? "'" . $conn->real_escape_string($gf) . "'" : "NULL";
-    $costoP = $_POST['costoAPersona'] !== '' ? floatval($_POST['costoAPersona']) : 'NULL';
-    $numAl  = $_POST['numAlunni']     !== '' ? intval($_POST['numAlunni'])       : 'NULL';
+    $costoP = isset($_POST['costoAPersona']) && $_POST['costoAPersona'] !== '' ? (float)$_POST['costoAPersona'] : 'NULL';
+    $numAl  = isset($_POST['numAlunni'])     && $_POST['numAlunni']     !== '' ? (int)$_POST['numAlunni']       : 'NULL';
     if ($id > 0) {
         mysqli_query($conn, "UPDATE gite5 SET destinazione='$dest', descrizione='$desc', mezzo='$mezz', periodo='$per', classi='$cls', giornoInizio=$gi_s, giornoFine=$gf_s, costoAPersona=$costoP, numAlunni=$numAl WHERE idGita=$id");
     }
@@ -135,13 +135,13 @@ $res5g = mysqli_query($conn,
 <div class="container">
 <main class="content bozze-padding">
 
-<?php if (($_GET['partecipato'] ?? '') === '1'): ?>
+<?php if (isset($_GET['partecipato']) && $_GET['partecipato'] === '1'): ?>
 <div class="alert alert-success" style="margin-bottom:1rem;">
     Hai aderito alla gita come accompagnatore. La trovi ora in <a href="mieGite.php"><strong>Le Mie Gite</strong></a>.
 </div>
 <?php endif; ?>
 
-<?php if (($_GET['disiscritto'] ?? '') === '1'): ?>
+<?php if (isset($_GET['disiscritto']) && $_GET['disiscritto'] === '1'): ?>
 <div class="alert alert-success" style="margin-bottom:1rem;">
     Ti sei disiscritto correttamente dalla gita.
 </div>
@@ -159,19 +159,19 @@ $res5g = mysqli_query($conn,
 <?php
 if ($res1g && mysqli_num_rows($res1g) > 0):
     while ($riga = mysqli_fetch_assoc($res1g)):
-        $id      = intval($riga['idGita']);
-        $dest    = htmlspecialchars($riga['destinazione'] ?? '');
-        $mezzo   = htmlspecialchars($riga['mezzo']   ?? '');
-        $classi  = htmlspecialchars($riga['classi']  ?? '');
+        $id      = (int)($riga['idGita']);
+        $dest    = htmlspecialchars(isset($riga['destinazione']) ? $riga['destinazione'] : '');
+        $mezzo   = htmlspecialchars(isset($riga['mezzo'])   ? $riga['mezzo']   : '');
+        $classi  = htmlspecialchars(isset($riga['classi'])  ? $riga['classi']  : '');
         $giorno  = $riga['giorno'] ? (strtotime($riga['giorno']) !== false ? date('d/m/Y', strtotime($riga['giorno'])) : '—') : '—';
-        $giornoV = $riga['giorno'] ?? '';
+        $giornoV = isset($riga['giorno']) ? $riga['giorno'] : '';
         $costo   = $riga['costoAPersona'] !== null ? '&euro; ' . number_format($riga['costoAPersona'], 2, ',', '.') : '—';
-        $numAl   = $riga['numAlunni'] ?? '';
-        $autore  = htmlspecialchars($riga['autore'] ?? '');
-        $costoMV = $riga['costoMezzo']    ?? '';
-        $costoAV = $riga['costoAttivita'] ?? '';
-        $costoPA = $riga['costoAPersona'] ?? '';
-        $dJ      = htmlspecialchars($riga['destinazione'] ?? '', ENT_QUOTES);
+        $numAl   = isset($riga['numAlunni']) ? $riga['numAlunni'] : '';
+        $autore  = htmlspecialchars(isset($riga['autore']) ? $riga['autore'] : '');
+        $costoMV = isset($riga['costoMezzo'])    ? $riga['costoMezzo']    : '';
+        $costoAV = isset($riga['costoAttivita']) ? $riga['costoAttivita'] : '';
+        $costoPA = isset($riga['costoAPersona']) ? $riga['costoAPersona'] : '';
+        $dJ      = htmlspecialchars(isset($riga['destinazione']) ? $riga['destinazione'] : '');
         // iscritto se è accompagnatore OPPURE se è l'autore della gita
         $chk = mysqli_query($conn,
         "SELECT id
@@ -182,11 +182,11 @@ if ($res1g && mysqli_num_rows($res1g) > 0):
 ?>
     <tr>
         <td><?php echo $dest; ?></td>
-        <td><?php echo $mezzo ?: '—'; ?></td>
-        <td><?php echo $classi ?: '—'; ?></td>
+        <td><?php echo !empty($mezzo) ? $mezzo : '—'; ?></td>
+        <td><?php echo !empty($classi) ? $classi : '—'; ?></td>
         <td><?php echo $giorno; ?></td>
         <td><?php echo $costo; ?></td>
-        <td><?php echo $numAl ?: '—'; ?></td>
+        <td><?php echo !empty($numAl) ? $numAl : '—'; ?></td>
         <td><?php echo $autore; ?></td>
         <td style="display:flex;gap:0.4rem;flex-wrap:wrap;align-items:center;">
             <?php if ($isAccompagnatore): ?>
@@ -208,10 +208,10 @@ if ($res1g && mysqli_num_rows($res1g) > 0):
             <button type="button" class="button xs"
                 data-id="<?php echo $id; ?>"
                 data-dest="<?php echo $dJ; ?>"
-                data-desc="<?php echo htmlspecialchars($riga['descrizione'] ?? '', ENT_QUOTES); ?>"
-                data-mezzo="<?php echo htmlspecialchars($riga['mezzo'] ?? '', ENT_QUOTES); ?>"
-                data-periodo="<?php echo htmlspecialchars($riga['periodo'] ?? '', ENT_QUOTES); ?>"
-                data-classi="<?php echo htmlspecialchars($riga['classi'] ?? '', ENT_QUOTES); ?>"
+                data-desc="<?php echo htmlspecialchars(isset($riga['descrizione']) ? $riga['descrizione'] : ''); ?>"
+                data-mezzo="<?php echo htmlspecialchars(isset($riga['mezzo']) ? $riga['mezzo'] : ''); ?>"
+                data-periodo="<?php echo htmlspecialchars(isset($riga['periodo']) ? $riga['periodo'] : ''); ?>"
+                data-classi="<?php echo htmlspecialchars(isset($riga['classi']) ? $riga['classi'] : ''); ?>"
                 data-giorno="<?php echo $giornoV; ?>"
                 data-costo-mezzo="<?php echo $costoMV; ?>"
                 data-costo-att="<?php echo $costoAV; ?>"
@@ -245,19 +245,19 @@ if ($res1g && mysqli_num_rows($res1g) > 0):
 <?php
 if ($res5g && mysqli_num_rows($res5g) > 0):
     while ($riga = mysqli_fetch_assoc($res5g)):
-        $id     = intval($riga['idGita']);
-        $dest   = htmlspecialchars($riga['destinazione'] ?? '');
-        $mezzo  = htmlspecialchars($riga['mezzo']   ?? '');
-        $classi = htmlspecialchars($riga['classi']  ?? '');
+        $id     = (int)($riga['idGita']);
+        $dest   = htmlspecialchars(isset($riga['destinazione']) ? $riga['destinazione'] : '');
+        $mezzo  = htmlspecialchars(isset($riga['mezzo'])   ? $riga['mezzo']   : '');
+        $classi = htmlspecialchars(isset($riga['classi'])  ? $riga['classi']  : '');
         $gi     = $riga['giornoInizio'] ? (strtotime($riga['giornoInizio']) !== false ? date('d/m/Y', strtotime($riga['giornoInizio'])) : '—') : '—';
         $gf     = $riga['giornoFine']   ? (strtotime($riga['giornoFine'])   !== false ? date('d/m/Y', strtotime($riga['giornoFine']))   : '—') : '—';
-        $giV    = $riga['giornoInizio'] ?? '';
-        $gfV    = $riga['giornoFine']   ?? '';
+        $giV    = isset($riga['giornoInizio']) ? $riga['giornoInizio'] : '';
+        $gfV    = isset($riga['giornoFine'])   ? $riga['giornoFine']   : '';
         $costo  = $riga['costoAPersona'] !== null ? '&euro; ' . number_format($riga['costoAPersona'], 2, ',', '.') : '—';
-        $numAl  = $riga['numAlunni'] ?? '';
-        $autore = htmlspecialchars($riga['autore'] ?? '');
-        $costoPA = $riga['costoAPersona'] ?? '';
-        $dJ     = htmlspecialchars($riga['destinazione'] ?? '', ENT_QUOTES);
+        $numAl  = isset($riga['numAlunni']) ? $riga['numAlunni'] : '';
+        $autore = htmlspecialchars(isset($riga['autore']) ? $riga['autore'] : '');
+        $costoPA = isset($riga['costoAPersona']) ? $riga['costoAPersona'] : '';
+        $dJ     = htmlspecialchars(isset($riga['destinazione']) ? $riga['destinazione'] : '');
         // iscritto se è accompagnatore OPPURE se è l'autore della gita
         $chk = mysqli_query($conn, "SELECT id FROM accompagnatori WHERE idgita=$id AND idutente=$idUtenteLoggato AND tipo_gita='5g'");
         $isAccompagnatore = ($chk && mysqli_num_rows($chk) > 0);
@@ -265,12 +265,12 @@ if ($res5g && mysqli_num_rows($res5g) > 0):
 ?>
     <tr>
         <td><?php echo $dest; ?></td>
-        <td><?php echo $mezzo ?: '—'; ?></td>
-        <td><?php echo $classi ?: '—'; ?></td>
+        <td><?php echo !empty($mezzo) ? $mezzo : '—'; ?></td>
+        <td><?php echo !empty($classi) ? $classi : '—'; ?></td>
         <td><?php echo $gi; ?></td>
         <td><?php echo $gf; ?></td>
         <td><?php echo $costo; ?></td>
-        <td><?php echo $numAl ?: '—'; ?></td>
+        <td><?php echo !empty($numAl) ? $numAl : '—'; ?></td>
         <td><?php echo $autore; ?></td>
         <td style="display:flex;gap:0.4rem;flex-wrap:wrap;align-items:center;">
             <?php if ($isAccompagnatore): ?>
@@ -292,10 +292,10 @@ if ($res5g && mysqli_num_rows($res5g) > 0):
             <button type="button" class="button xs"
                 data-id="<?php echo $id; ?>"
                 data-dest="<?php echo $dJ; ?>"
-                data-desc="<?php echo htmlspecialchars($riga['descrizione'] ?? '', ENT_QUOTES); ?>"
-                data-mezzo="<?php echo htmlspecialchars($riga['mezzo'] ?? '', ENT_QUOTES); ?>"
-                data-periodo="<?php echo htmlspecialchars($riga['periodo'] ?? '', ENT_QUOTES); ?>"
-                data-classi="<?php echo htmlspecialchars($riga['classi'] ?? '', ENT_QUOTES); ?>"
+                data-desc="<?php echo htmlspecialchars(isset($riga['descrizione']) ? $riga['descrizione'] : ''); ?>"
+                data-mezzo="<?php echo htmlspecialchars(isset($riga['mezzo']) ? $riga['mezzo'] : ''); ?>"
+                data-periodo="<?php echo htmlspecialchars(isset($riga['periodo']) ? $riga['periodo'] : ''); ?>"
+                data-classi="<?php echo htmlspecialchars(isset($riga['classi']) ? $riga['classi'] : ''); ?>"
                 data-gi="<?php echo $giV; ?>"
                 data-gf="<?php echo $gfV; ?>"
                 data-costo-ap="<?php echo $costoPA; ?>"

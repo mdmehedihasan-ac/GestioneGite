@@ -1,14 +1,14 @@
 <?php
 include('nav.php');
 
-$idGita = isset($_GET['id']) ? intval($_GET['id']) : 0;
+$idGita = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if ($idGita === 0) {
     header("Location: mieGite.php");
     exit;
 }
 
-$idUtenteLoggato = intval($_SESSION['id_utente'] ?? 0);
-$ruolo           = $_SESSION['ruolo']     ?? 0;
+$idUtenteLoggato = isset($_SESSION['id_utente']) ? (int)$_SESSION['id_utente'] : 0;
+$ruolo           = isset($_SESSION['ruolo'])     ? $_SESSION['ruolo']     : 0;
 
 // verifica accesso autore o accompagnatore gita
 $sqlGita = "SELECT * FROM gite5 WHERE idGita = $idGita";
@@ -32,14 +32,14 @@ if (!$isAutore && !$isAccompagnatore && $ruolo != 2) {
 $messaggio = '';
 
 // aggiungi partecipante
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'aggiungi') {
-    $nome      = mysqli_real_escape_string($conn, trim($_POST['nome']       ?? ''));
-    $cognome   = mysqli_real_escape_string($conn, trim($_POST['cognome']    ?? ''));
-    $classe    = mysqli_real_escape_string($conn, trim($_POST['classe']     ?? ''));
-    $note      = mysqli_real_escape_string($conn, trim($_POST['note']       ?? ''));
-    $documento = mysqli_real_escape_string($conn, trim($_POST['documento']  ?? ''));
-    $nDoc      = mysqli_real_escape_string($conn, trim($_POST['nDocumento'] ?? ''));
-    $scadenza  = trim($_POST['scadenza'] ?? '');
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'aggiungi') {
+    $nome      = mysqli_real_escape_string($conn, trim(isset($_POST['nome'])       ? $_POST['nome']       : ''));
+    $cognome   = mysqli_real_escape_string($conn, trim(isset($_POST['cognome'])    ? $_POST['cognome']    : ''));
+    $classe    = mysqli_real_escape_string($conn, trim(isset($_POST['classe'])     ? $_POST['classe']     : ''));
+    $note      = mysqli_real_escape_string($conn, trim(isset($_POST['note'])       ? $_POST['note']       : ''));
+    $documento = mysqli_real_escape_string($conn, trim(isset($_POST['documento'])  ? $_POST['documento']  : ''));
+    $nDoc      = mysqli_real_escape_string($conn, trim(isset($_POST['nDocumento']) ? $_POST['nDocumento'] : ''));
+    $scadenza  = trim(isset($_POST['scadenza']) ? $_POST['scadenza'] : '');
     $scadenza_s = $scadenza ? "'$scadenza'" : 'NULL';
 
     if ($nome !== '' && $cognome !== '' && $classe !== '' && $documento !== '' && $nDoc !== '' && $scadenza !== '') {
@@ -51,8 +51,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'aggiu
 }
 
 // elimina partecipante
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'elimina') {
-    $idPart = intval($_POST['id_part'] ?? 0);
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'elimina') {
+    $idPart = isset($_POST['id_part']) ? (int)$_POST['id_part'] : 0;
     if ($idPart > 0) {
         mysqli_query($conn, "DELETE FROM partecipanti WHERE id = $idPart AND idgita = $idGita");
     }
@@ -61,8 +61,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'elimi
 }
 
 // elimina accompagnatore solo per commissione
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'elimina_acc' && $ruolo == 2) {
-    $idAcc = intval($_POST['id_acc'] ?? 0);
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'elimina_acc' && $ruolo == 2) {
+    $idAcc = isset($_POST['id_acc']) ? (int)$_POST['id_acc'] : 0;
     if ($idAcc > 0) {
         mysqli_query($conn, "DELETE FROM accompagnatori WHERE id = $idAcc AND idgita = $idGita");
     }
@@ -71,13 +71,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'elimi
 }
 
 // modifica dati accompagnatore
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'mod_acc') {
-    $accId     = intval($_POST['acc_id'] ?? 0);
-    $documento = mysqli_real_escape_string($conn, trim($_POST['acc_documento']  ?? ''));
-    $nDoc      = mysqli_real_escape_string($conn, trim($_POST['acc_nDocumento'] ?? ''));
-    $scadenza  = trim($_POST['acc_scadenza'] ?? '');
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'mod_acc') {
+    $accId     = isset($_POST['acc_id']) ? (int)$_POST['acc_id'] : 0;
+    $documento = mysqli_real_escape_string($conn, trim(isset($_POST['acc_documento'])  ? $_POST['acc_documento']  : ''));
+    $nDoc      = mysqli_real_escape_string($conn, trim(isset($_POST['acc_nDocumento']) ? $_POST['acc_nDocumento'] : ''));
+    $scadenza  = trim(isset($_POST['acc_scadenza']) ? $_POST['acc_scadenza'] : '');
     $scadenza_s = $scadenza ? "'$scadenza'" : 'NULL';
-    $note      = mysqli_real_escape_string($conn, trim($_POST['acc_note'] ?? ''));
+    $note      = mysqli_real_escape_string($conn, trim(isset($_POST['acc_note']) ? $_POST['acc_note'] : ''));
     if ($accId > 0) {
         mysqli_query($conn, "UPDATE accompagnatori SET documento='$documento', nDocumento='$nDoc', scadenza=$scadenza_s, note='$note' WHERE id=$accId AND idgita=$idGita");
     }
@@ -97,13 +97,13 @@ $resAcc = mysqli_query($conn,
 $resPart = mysqli_query($conn, "SELECT * FROM partecipanti WHERE idgita = $idGita ORDER BY cognome ASC, nome ASC");
 $totPart = $resPart ? mysqli_num_rows($resPart) : 0;
 
-$destDisplay = htmlspecialchars($gita['destinazione'] ?? '');
-$periodoDisp = htmlspecialchars($gita['periodo']      ?? '');
-$mezzoDisp   = htmlspecialchars($gita['mezzo']        ?? '');
-$classiDisp  = htmlspecialchars($gita['classi']       ?? '');
+$destDisplay = htmlspecialchars(isset($gita['destinazione']) ? $gita['destinazione'] : '');
+$periodoDisp = htmlspecialchars(isset($gita['periodo'])      ? $gita['periodo']      : '');
+$mezzoDisp   = htmlspecialchars(isset($gita['mezzo'])        ? $gita['mezzo']        : '');
+$classiDisp  = htmlspecialchars(isset($gita['classi'])       ? $gita['classi']       : '');
 $gi = $gita['giornoInizio'] ? date('d/m/Y', strtotime($gita['giornoInizio'])) : '';
 $gf = $gita['giornoFine']   ? date('d/m/Y', strtotime($gita['giornoFine']))   : '';
-$numAlunniDisp = $gita['numAlunni'] ?? '';
+$numAlunniDisp = isset($gita['numAlunni']) ? $gita['numAlunni'] : '';
 ?>
 <!DOCTYPE html>
 <html lang="it">
@@ -137,9 +137,9 @@ $numAlunniDisp = $gita['numAlunni'] ?? '';
         <?php if ($numAlunniDisp !== ''): ?><span style="font-size:0.9rem;"><strong>Alunni previsti:</strong> <?php echo $numAlunniDisp; ?></span><?php endif; ?>
     </div>
 
-    <?php if (($_GET['acc'] ?? '') === '1'): ?>
+    <?php if (isset($_GET['acc']) && $_GET['acc'] === '1'): ?>
         <div class="alert alert-success" style="margin-bottom:1rem;">Dati accompagnatore aggiornati.</div>
-    <?php elseif (($_GET['rem_acc'] ?? '') === '1'): ?>
+    <?php elseif (isset($_GET['rem_acc']) && $_GET['rem_acc'] === '1'): ?>
         <div class="alert alert-success" style="margin-bottom:1rem;">Accompagnatore rimosso con successo.</div>
     <?php endif; ?>
     <?php if ($messaggio === 'ok'): ?>
@@ -178,17 +178,17 @@ $numAlunniDisp = $gita['numAlunni'] ?? '';
                 if ($resAcc && mysqli_num_rows($resAcc) > 0):
                     $nAcc = 1;
                     while ($acc = mysqli_fetch_assoc($resAcc)):
-                        $aId      = intval($acc['id']);
-                        $aNome    = htmlspecialchars($acc['nome_u']    ?? '');
-                        $aCognome = htmlspecialchars($acc['cognome_u'] ?? '');
-                        $aDoc     = htmlspecialchars($acc['documento']  ?? '');
-                        $aNDoc    = htmlspecialchars($acc['nDocumento'] ?? '');
+                        $aId      = (int)($acc['id']);
+                        $aNome    = htmlspecialchars(isset($acc['nome_u'])    ? $acc['nome_u']    : '');
+                        $aCognome = htmlspecialchars(isset($acc['cognome_u']) ? $acc['cognome_u'] : '');
+                        $aDoc     = htmlspecialchars(isset($acc['documento'])  ? $acc['documento']  : '');
+                        $aNDoc    = htmlspecialchars(isset($acc['nDocumento']) ? $acc['nDocumento'] : '');
                         $aScad    = $acc['scadenza'] ? date('d/m/Y', strtotime($acc['scadenza'])) : '';
-                        $aNote    = htmlspecialchars($acc['note'] ?? '');
-                        $aDocJ    = htmlspecialchars($acc['documento']  ?? '', ENT_QUOTES);
-                        $aNDocJ   = htmlspecialchars($acc['nDocumento'] ?? '', ENT_QUOTES);
-                        $aScadV   = $acc['scadenza'] ?? '';
-                        $aNoteJ   = htmlspecialchars($acc['note'] ?? '', ENT_QUOTES);
+                        $aNote    = htmlspecialchars(isset($acc['note']) ? $acc['note'] : '');
+                        $aDocJ    = htmlspecialchars(isset($acc['documento'])  ? $acc['documento']  : '');
+                        $aNDocJ   = htmlspecialchars(isset($acc['nDocumento']) ? $acc['nDocumento'] : '');
+                        $aScadV   = isset($acc['scadenza']) ? $acc['scadenza'] : '';
+                        $aNoteJ   = htmlspecialchars(isset($acc['note']) ? $acc['note'] : '');
                         // solo accompagnatore o commissione puo modificare
                         $canEdit = ($acc['idutente'] == $idUtenteLoggato || $ruolo == 2);
                 ?>
@@ -196,10 +196,10 @@ $numAlunniDisp = $gita['numAlunni'] ?? '';
                         <td><?php echo $nAcc++; ?></td>
                         <td><?php echo $aNome; ?></td>
                         <td><?php echo $aCognome; ?></td>
-                        <td><?php echo $aDoc  ?: '<span style="color:#94a3b8;">—</span>'; ?></td>
-                        <td><?php echo $aNDoc ?: '<span style="color:#94a3b8;">—</span>'; ?></td>
-                        <td><?php echo $aScad ?: '<span style="color:#94a3b8;">—</span>'; ?></td>
-                        <td><?php echo $aNote ?: '<span style="color:#94a3b8;">—</span>'; ?></td>
+                        <td><?php echo !empty($aDoc)  ? $aDoc  : '<span style="color:#94a3b8;">—</span>'; ?></td>
+                        <td><?php echo !empty($aNDoc) ? $aNDoc : '<span style="color:#94a3b8;">—</span>'; ?></td>
+                        <td><?php echo !empty($aScad) ? $aScad : '<span style="color:#94a3b8;">—</span>'; ?></td>
+                        <td><?php echo !empty($aNote) ? $aNote : '<span style="color:#94a3b8;">—</span>'; ?></td>
                         <td style="display:flex;gap:0.4rem;">
                             <?php if ($canEdit): ?>
                             <button type="button" class="button xs"
@@ -253,24 +253,24 @@ $numAlunniDisp = $gita['numAlunni'] ?? '';
                 <?php if ($totPart > 0):
                     $n = 1;
                     while ($p = mysqli_fetch_assoc($resPart)):
-                        $pId      = intval($p['id']);
+                        $pId      = (int)($p['id']);
                         $pNome    = htmlspecialchars($p['nome']);
                         $pCognome = htmlspecialchars($p['cognome']);
                         $pClasse  = htmlspecialchars($p['classe']);
-                        $pDoc     = htmlspecialchars($p['documento']  ?? '');
-                        $pNDoc    = htmlspecialchars($p['nDocumento'] ?? '');
+                        $pDoc     = htmlspecialchars(isset($p['documento'])  ? $p['documento']  : '');
+                        $pNDoc    = htmlspecialchars(isset($p['nDocumento']) ? $p['nDocumento'] : '');
                         $pScad    = $p['scadenza'] ? date('d/m/Y', strtotime($p['scadenza'])) : '';
-                        $pNote    = htmlspecialchars($p['descrizione'] ?? '');
+                        $pNote    = htmlspecialchars(isset($p['descrizione']) ? $p['descrizione'] : '');
                 ?>
                     <tr>
                         <td><?php echo $n++; ?></td>
                         <td><?php echo $pCognome; ?></td>
                         <td><?php echo $pNome; ?></td>
                         <td><?php echo $pClasse; ?></td>
-                        <td><?php echo $pDoc  ?: ''; ?></td>
-                        <td><?php echo $pNDoc ?: ''; ?></td>
-                        <td><?php echo $pScad ?: ''; ?></td>
-                        <td><?php echo $pNote ?: ''; ?></td>
+                        <td><?php echo !empty($pDoc)  ? $pDoc  : ''; ?></td>
+                        <td><?php echo !empty($pNDoc) ? $pNDoc : ''; ?></td>
+                        <td><?php echo !empty($pScad) ? $pScad : ''; ?></td>
+                        <td><?php echo !empty($pNote) ? $pNote : ''; ?></td>
                         <td>
                             <button type="button" class="button cancel xs" onclick="apriRimuoviPart(<?php echo $pId; ?>, '<?php echo addslashes($pNome . ' ' . $pCognome); ?>')">Rimuovi</button>
                         </td>

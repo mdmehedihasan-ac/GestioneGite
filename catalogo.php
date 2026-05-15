@@ -9,22 +9,22 @@ function validaData($str) {
     if (empty($str)) return false;
     $ts = strtotime($str);
     if ($ts === false) return false;
-    $y = intval(date('Y', $ts));
+    $y = (int)date('Y', $ts);
     return ($y >= 2000 && $y <= 2100);
 }
 
 // nuova proposta gita 1 giorno
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'nuova_1g') {
     $idUtente     = $_SESSION['id_utente'];
-    $destinazione = trim($_POST['destinazione'] ?? '');
-    $descrizione  = trim($_POST['descrizione']  ?? '');
-    $mezzo        = trim($_POST['mezzo']        ?? '');
-    $periodo      = trim($_POST['periodo']      ?? '');
-    $classi       = trim($_POST['classi']       ?? '');
-    $costo        = floatval($_POST['costo'] ?? 0);
+    $destinazione = isset($_POST['destinazione']) ? trim($_POST['destinazione']) : '';
+    $descrizione  = isset($_POST['descrizione'])  ? trim($_POST['descrizione'])  : '';
+    $mezzo        = isset($_POST['mezzo'])        ? trim($_POST['mezzo'])        : '';
+    $periodo      = isset($_POST['periodo'])      ? trim($_POST['periodo'])      : '';
+    $classi       = isset($_POST['classi'])       ? trim($_POST['classi'])       : '';
+    $costo        = isset($_POST['costo']) ? (float)$_POST['costo'] : 0;
 
     // validazione input
-    if ($destinazione === '' || mb_strlen($destinazione) > 255) {
+    if ($destinazione === '' || strlen($destinazione) > 255) {
         $messaggio = "<div class='alert alert-error'>Destinazione obbligatoria (max 255 caratteri).</div>";
     } elseif ($costo < 0) {
         $messaggio = "<div class='alert alert-error'>Il costo non puo essere negativo.</div>";
@@ -46,15 +46,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 // nuova proposta gita piu giorni
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'nuova_5g') {
     $idUtente     = $_SESSION['id_utente'];
-    $destinazione = trim($_POST['destinazione'] ?? '');
-    $descrizione  = trim($_POST['descrizione']  ?? '');
-    $mezzo        = trim($_POST['mezzo']        ?? '');
-    $periodo      = trim($_POST['periodo']      ?? '');
-    $classi       = trim($_POST['classi']       ?? '');
-    $costo        = floatval($_POST['costo'] ?? 0);
+    $destinazione = isset($_POST['destinazione']) ? trim($_POST['destinazione']) : '';
+    $descrizione  = isset($_POST['descrizione'])  ? trim($_POST['descrizione'])  : '';
+    $mezzo        = isset($_POST['mezzo'])        ? trim($_POST['mezzo'])        : '';
+    $periodo      = isset($_POST['periodo'])      ? trim($_POST['periodo'])      : '';
+    $classi       = isset($_POST['classi'])       ? trim($_POST['classi'])       : '';
+    $costo        = isset($_POST['costo']) ? (float)$_POST['costo'] : 0;
 
     // validazione input
-    if ($destinazione === '' || mb_strlen($destinazione) > 255) {
+    if ($destinazione === '' || strlen($destinazione) > 255) {
         $messaggio = "<div class='alert alert-error'>Destinazione obbligatoria (max 255 caratteri).</div>";
     } elseif ($costo < 0) {
         $messaggio = "<div class='alert alert-error'>Il costo non puo essere negativo.</div>";
@@ -75,19 +75,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 // organizza gita 1 giorno (copia con stato 4)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'organizza_1g') {
-    $idGita    = intval($_POST['id_gita']);
+    $idGita    = (int)$_POST['id_gita'];
     $idUtente  = $_SESSION['id_utente'];
-    $periodo     = $_POST['org_periodo']    ?: null;
-    $mezzo       = $_POST['org_mezzo']      ?? '';
-    $descrizione = $_POST['org_descrizione'] ?? '';
-    $classi      = $_POST['org_classe']     ?? '';
-    $giorno      = $_POST['org_giorno']     ?: null;
-    $costoMezzo  = $_POST['org_costoMezzo']  !== '' ? floatval(str_replace(',', '.', $_POST['org_costoMezzo']))  : null;
-    $costoGiorno = $_POST['org_costoGiorno'] !== '' ? floatval(str_replace(',', '.', $_POST['org_costoGiorno'])) : null;
-    $numAlunni   = $_POST['org_numAlunni']   !== '' ? intval($_POST['org_numAlunni'])     : null;
+    $periodo     = isset($_POST['org_periodo'])    && $_POST['org_periodo']    !== '' ? $_POST['org_periodo']    : null;
+    $mezzo       = isset($_POST['org_mezzo'])      && $_POST['org_mezzo']      !== '' ? $_POST['org_mezzo']      : '';
+    $descrizione = isset($_POST['org_descrizione']) && $_POST['org_descrizione'] !== '' ? $_POST['org_descrizione'] : '';
+    $classi      = isset($_POST['org_classe'])      && $_POST['org_classe']      !== '' ? $_POST['org_classe']      : '';
+    $giorno      = isset($_POST['org_giorno'])      && $_POST['org_giorno']      !== '' ? $_POST['org_giorno']      : null;
+    $costoMezzo  = isset($_POST['org_costoMezzo'])  && $_POST['org_costoMezzo']  !== '' ? (float)str_replace(',', '.', $_POST['org_costoMezzo'])  : null;
+    $costoGiorno = isset($_POST['org_costoGiorno']) && $_POST['org_costoGiorno'] !== '' ? (float)str_replace(',', '.', $_POST['org_costoGiorno']) : null;
+    $numAlunni   = isset($_POST['org_numAlunni'])   && $_POST['org_numAlunni']   !== '' ? (int)$_POST['org_numAlunni']     : null;
 
     $valido = true;
-    if ($giorno && (strtotime($giorno) === false || intval(date('Y', strtotime($giorno))) < 2024 || intval(date('Y', strtotime($giorno))) > 2030)) {
+    if ($giorno && (strtotime($giorno) === false || (int)date('Y', strtotime($giorno)) < 2024 || (int)date('Y', strtotime($giorno)) > 2030)) {
         $valido = false;
     }
     if ($giorno && strtotime($giorno) <= strtotime(date('Y-m-d'))) {
@@ -102,14 +102,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         if ($orig) {
             $dest_s      = $conn->real_escape_string($orig['destinazione']);
             $desc_s      = $conn->real_escape_string($descrizione);
-            $mezzoFin_s  = $conn->real_escape_string($mezzo ?: ($orig['mezzo'] ?? ''));
-            $perFin_s    = $conn->real_escape_string($periodo ?? $orig['periodo'] ?? '');
+            $mezzoTmp    = !empty($mezzo) ? $mezzo : (isset($orig['mezzo']) ? $orig['mezzo'] : '');
+            $mezzoFin_s  = $conn->real_escape_string($mezzoTmp);
+            $perTmp      = !empty($periodo) ? $periodo : (isset($orig['periodo']) ? $orig['periodo'] : '');
+            $perFin_s    = $conn->real_escape_string($perTmp);
             $classi_s    = $conn->real_escape_string($classi);
-            $costoA_s    = floatval($orig['costoAPersona']);
+            $costoA_s    = (float)$orig['costoAPersona'];
             $giorno_s    = $giorno      ? "'" . $conn->real_escape_string($giorno) . "'" : "NULL";
-            $costoMezzo_s = $costoMezzo  !== null ? floatval($costoMezzo)  : "NULL";
-            $costoGiorno_s= $costoGiorno !== null ? floatval($costoGiorno) : "NULL";
-            $numAlunni_s = $numAlunni   !== null ? intval($numAlunni)     : "NULL";
+            $costoMezzo_s = $costoMezzo  !== null ? (float)$costoMezzo  : "NULL";
+            $costoGiorno_s= $costoGiorno !== null ? (float)$costoGiorno : "NULL";
+            $numAlunni_s = $numAlunni   !== null ? (int)$numAlunni     : "NULL";
 
             $sql = "INSERT INTO gita1g (idUtente, destinazione, descrizione, mezzo, periodo, classi, giorno, costoMezzo, costoAttivita, costoAPersona, numAlunni, idStato)
                     VALUES ($idUtente, '$dest_s', '$desc_s', '$mezzoFin_s', '$perFin_s', '$classi_s', $giorno_s, $costoMezzo_s, $costoGiorno_s, $costoA_s, $numAlunni_s, 4)";
@@ -124,23 +126,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 // organizza gita piu giorni (copia con stato 4)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'organizza_5g') {
-    $idGita       = intval($_POST['id_gita']);
+    $idGita       = (int)$_POST['id_gita'];
     $idUtente     = $_SESSION['id_utente'];
-    $periodo      = $_POST['org_periodo']      ?: null;
-    $giornoInizio = $_POST['org_giornoInizio'] ?: null;
-    $mezzo        = $_POST['org_mezzo']         ?? '';
-    $descrizione  = $_POST['org_descrizione']   ?? '';
-    $classi       = $_POST['org_classe']        ?? '';
-    $giornoInizio = $_POST['org_giornoInizio']  ?: null;
-    $giornoFine   = $_POST['org_giornoFine']    ?: null;
-    $costoAPersona= $_POST['org_costoAPersona'] !== '' ? floatval(str_replace(',', '.', $_POST['org_costoAPersona'])) : null;
-    $numAlunni    = $_POST['org_numAlunni']     !== '' ? intval($_POST['org_numAlunni'])       : null;
+    $periodo      = isset($_POST['org_periodo'])      && $_POST['org_periodo']      !== '' ? $_POST['org_periodo']      : null;
+    $giornoInizio = isset($_POST['org_giornoInizio']) && $_POST['org_giornoInizio'] !== '' ? $_POST['org_giornoInizio'] : null;
+    $mezzo        = isset($_POST['org_mezzo'])        && $_POST['org_mezzo']        !== '' ? $_POST['org_mezzo']        : '';
+    $descrizione  = isset($_POST['org_descrizione'])  && $_POST['org_descrizione']  !== '' ? $_POST['org_descrizione']  : '';
+    $classi       = isset($_POST['org_classe'])       && $_POST['org_classe']       !== '' ? $_POST['org_classe']       : '';
+    $giornoInizio = isset($_POST['org_giornoInizio']) && $_POST['org_giornoInizio'] !== '' ? $_POST['org_giornoInizio'] : null;
+    $giornoFine   = isset($_POST['org_giornoFine'])   && $_POST['org_giornoFine']   !== '' ? $_POST['org_giornoFine']   : null;
+    $costoAPersona= isset($_POST['org_costoAPersona']) && $_POST['org_costoAPersona'] !== '' ? (float)str_replace(',', '.', $_POST['org_costoAPersona']) : null;
+    $numAlunni    = isset($_POST['org_numAlunni'])   && $_POST['org_numAlunni']    !== '' ? (int)$_POST['org_numAlunni']       : null;
 
     $valido = true;
-    if ($giornoInizio && (strtotime($giornoInizio) === false || intval(date('Y', strtotime($giornoInizio))) < 2024 || intval(date('Y', strtotime($giornoInizio))) > 2030)) {
+    if ($giornoInizio && (strtotime($giornoInizio) === false || (int)date('Y', strtotime($giornoInizio)) < 2024 || (int)date('Y', strtotime($giornoInizio)) > 2030)) {
         $valido = false;
     }
-    if ($giornoFine && (strtotime($giornoFine) === false || intval(date('Y', strtotime($giornoFine))) < 2024 || intval(date('Y', strtotime($giornoFine))) > 2030)) {
+    if ($giornoFine && (strtotime($giornoFine) === false || (int)date('Y', strtotime($giornoFine)) < 2024 || (int)date('Y', strtotime($giornoFine)) > 2030)) {
         $valido = false;
     }
     if ($giornoInizio && strtotime($giornoInizio) <= strtotime(date('Y-m-d'))) {
@@ -157,13 +159,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         if ($orig) {
             $dest_s      = $conn->real_escape_string($orig['destinazione']);
             $desc_s      = $conn->real_escape_string($descrizione);
-            $mezzoFin_s  = $conn->real_escape_string($mezzo ?: ($orig['mezzo'] ?? ''));
-            $perFin_s    = $conn->real_escape_string($periodo ?? $orig['periodo'] ?? '');
+            $mezzoTmp    = !empty($mezzo) ? $mezzo : (isset($orig['mezzo']) ? $orig['mezzo'] : '');
+            $mezzoFin_s  = $conn->real_escape_string($mezzoTmp);
+            $perTmp      = !empty($periodo) ? $periodo : (isset($orig['periodo']) ? $orig['periodo'] : '');
+            $perFin_s    = $conn->real_escape_string($perTmp);
             $classi_s    = $conn->real_escape_string($classi);
             $gi_s        = $giornoInizio ? "'" . $conn->real_escape_string($giornoInizio) . "'" : "NULL";
             $gf_s        = $giornoFine   ? "'" . $conn->real_escape_string($giornoFine)   . "'" : "NULL";
-            $costoFin    = $costoAPersona !== null ? floatval($costoAPersona) : floatval($orig['costoAPersona'] ?? 0);
-            $numAlunni_s = $numAlunni !== null ? intval($numAlunni) : "NULL";
+            $costoOrig   = isset($orig['costoAPersona']) ? (float)$orig['costoAPersona'] : 0;
+            $costoFin    = $costoAPersona !== null ? (float)$costoAPersona : $costoOrig;
+            $numAlunni_s = $numAlunni !== null ? (int)$numAlunni : "NULL";
 
             $sql = "INSERT INTO gite5 (idUtente, destinazione, descrizione, mezzo, periodo, classi, giornoInizio, giornoFine, costoAPersona, numAlunni, idStato)
                     VALUES ($idUtente, '$dest_s', '$desc_s', '$mezzoFin_s', '$perFin_s', '$classi_s', $gi_s, $gf_s, $costoFin, $numAlunni_s, 4)";
@@ -179,13 +184,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 // modifica gita 1 giorno
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'modifica_1g') {
     if ($_SESSION['ruolo'] == 2) {
-        $idGita       = intval($_POST['id_gita']);
-        $destinazione = $conn->real_escape_string($_POST['mod_destinazione'] ?? '');
-        $descrizione  = $conn->real_escape_string($_POST['mod_descrizione']  ?? '');
-        $mezzo        = $conn->real_escape_string($_POST['mod_mezzo']        ?? '');
-        $periodo      = $conn->real_escape_string($_POST['mod_periodo']      ?? '');
-        $classi       = $conn->real_escape_string($_POST['mod_classi']       ?? '');
-        $costo        = floatval($_POST['mod_costo'] ?? 0);
+        $idGita       = (int)$_POST['id_gita'];
+        $destinazione = $conn->real_escape_string(isset($_POST['mod_destinazione']) ? $_POST['mod_destinazione'] : '');
+        $descrizione  = $conn->real_escape_string(isset($_POST['mod_descrizione'])  ? $_POST['mod_descrizione']  : '');
+        $mezzo        = $conn->real_escape_string(isset($_POST['mod_mezzo'])        ? $_POST['mod_mezzo']        : '');
+        $periodo      = $conn->real_escape_string(isset($_POST['mod_periodo'])      ? $_POST['mod_periodo']      : '');
+        $classi       = $conn->real_escape_string(isset($_POST['mod_classi'])       ? $_POST['mod_classi']       : '');
+        $costo        = isset($_POST['mod_costo']) ? (float)$_POST['mod_costo'] : 0;
         if ($conn->query("UPDATE gita1g SET destinazione='$destinazione', descrizione='$descrizione', mezzo='$mezzo', periodo='$periodo', classi='$classi', costoAPersona=$costo WHERE idGita=$idGita")) {
             $messaggio = "<div class='alert alert-success'>Gita 1 giorno modificata.</div>";
         } else {
@@ -197,7 +202,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 // elimina gita 1 giorno
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'elimina_1g') {
     if ($_SESSION['ruolo'] == 2) {
-        $idGita = intval($_POST['id_gita']);
+        $idGita = (int)$_POST['id_gita'];
         if ($conn->query("DELETE FROM gita1g WHERE idGita=$idGita")) {
             $messaggio = "<div class='alert alert-success'>Gita 1 giorno eliminata.</div>";
         } else {
@@ -209,13 +214,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 // modifica gita piu giorni
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'modifica_5g') {
     if ($_SESSION['ruolo'] == 2) {
-        $idGita       = intval($_POST['id_gita']);
-        $destinazione = $conn->real_escape_string($_POST['mod_destinazione'] ?? '');
-        $descrizione  = $conn->real_escape_string($_POST['mod_descrizione']  ?? '');
-        $mezzo        = $conn->real_escape_string($_POST['mod_mezzo']        ?? '');
-        $periodo      = $conn->real_escape_string($_POST['mod_periodo']      ?? '');
-        $classi       = $conn->real_escape_string($_POST['mod_classi']       ?? '');
-        $costo        = floatval($_POST['mod_costo'] ?? 0);
+        $idGita       = (int)$_POST['id_gita'];
+        $destinazione = $conn->real_escape_string(isset($_POST['mod_destinazione']) ? $_POST['mod_destinazione'] : '');
+        $descrizione  = $conn->real_escape_string(isset($_POST['mod_descrizione'])  ? $_POST['mod_descrizione']  : '');
+        $mezzo        = $conn->real_escape_string(isset($_POST['mod_mezzo'])        ? $_POST['mod_mezzo']        : '');
+        $periodo      = $conn->real_escape_string(isset($_POST['mod_periodo'])      ? $_POST['mod_periodo']      : '');
+        $classi       = $conn->real_escape_string(isset($_POST['mod_classi'])       ? $_POST['mod_classi']       : '');
+        $costo        = isset($_POST['mod_costo']) ? (float)$_POST['mod_costo'] : 0;
         if ($conn->query("UPDATE gite5 SET destinazione='$destinazione', descrizione='$descrizione', mezzo='$mezzo', periodo='$periodo', classi='$classi', costoAPersona=$costo WHERE idGita=$idGita")) {
             $messaggio = "<div class='alert alert-success'>Gita di più giorni modificata.</div>";
         } else {
@@ -227,7 +232,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 // elimina gita piu giorni
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'elimina_5g') {
     if ($_SESSION['ruolo'] == 2) {
-        $idGita = intval($_POST['id_gita']);
+        $idGita = (int)$_POST['id_gita'];
         if ($conn->query("DELETE FROM gite5 WHERE idGita=$idGita")) {
             $messaggio = "<div class='alert alert-success'>Gita di più giorni eliminata.</div>";
         } else {
@@ -448,17 +453,17 @@ if ($messaggio === 'organizza_ok') {
 if ($gite1g && $gite1g->num_rows > 0) {
     while ($r = $gite1g->fetch_assoc()) {
         $dest   = htmlspecialchars($r['destinazione']);
-        $mezzo  = htmlspecialchars($r['mezzo'] ?? '—');
-        $per    = htmlspecialchars($r['periodo'] ?? '—');
+        $mezzo  = htmlspecialchars(isset($r['mezzo']) ? $r['mezzo'] : '—');
+        $per    = htmlspecialchars(isset($r['periodo']) ? $r['periodo'] : '—');
         $costo  = number_format($r['costoAPersona'], 2, ',', '.');
         $autore = htmlspecialchars($r['Nome'] . ' ' . $r['Cognome']);
-        $id     = intval($r['idGita']);
-        $destJs       = htmlspecialchars($r['destinazione'], ENT_QUOTES);
-        $descJs       = htmlspecialchars($r['descrizione'] ?? '', ENT_QUOTES);
-        $mezzoJs      = htmlspecialchars($r['mezzo'] ?? '', ENT_QUOTES);
-        $perJs        = htmlspecialchars($r['periodo'] ?? '', ENT_QUOTES);
-        $classiJs     = htmlspecialchars($r['classi'] ?? '', ENT_QUOTES);
-        $costoJs      = floatval($r['costoAPersona']);
+        $id     = (int)$r['idGita'];
+        $destJs       = htmlspecialchars($r['destinazione']);
+        $descJs       = htmlspecialchars(isset($r['descrizione']) ? $r['descrizione'] : '');
+        $mezzoJs      = htmlspecialchars(isset($r['mezzo']) ? $r['mezzo'] : '');
+        $perJs        = htmlspecialchars(isset($r['periodo']) ? $r['periodo'] : '');
+        $classiJs     = htmlspecialchars(isset($r['classi']) ? $r['classi'] : '');
+        $costoJs      = (float)$r['costoAPersona'];
         $azioniCol = '';
         if ($_SESSION['ruolo'] == 2) {
             $azioniCol = "<td style='display:flex;gap:0.4rem;'>
@@ -519,17 +524,17 @@ if ($gite1g && $gite1g->num_rows > 0) {
 if ($gite5g && $gite5g->num_rows > 0) {
     while ($r = $gite5g->fetch_assoc()) {
         $dest   = htmlspecialchars($r['destinazione']);
-        $mezzo  = htmlspecialchars($r['mezzo'] ?? '—');
-        $per    = htmlspecialchars($r['periodo'] ?? '—');
+        $mezzo  = htmlspecialchars(isset($r['mezzo']) ? $r['mezzo'] : '—');
+        $per    = htmlspecialchars(isset($r['periodo']) ? $r['periodo'] : '—');
         $costo  = number_format($r['costoAPersona'], 2, ',', '.');
         $autore = htmlspecialchars($r['Nome'] . ' ' . $r['Cognome']);
-        $id     = intval($r['idGita']);
-        $destJs       = htmlspecialchars($r['destinazione'], ENT_QUOTES);
-        $descJs       = htmlspecialchars($r['descrizione'] ?? '', ENT_QUOTES);
-        $mezzoJs      = htmlspecialchars($r['mezzo'] ?? '', ENT_QUOTES);
-        $perJs        = htmlspecialchars($r['periodo'] ?? '', ENT_QUOTES);
-        $classiJs     = htmlspecialchars($r['classi'] ?? '', ENT_QUOTES);
-        $costoJs      = floatval($r['costoAPersona']);
+        $id     = (int)$r['idGita'];
+        $destJs       = htmlspecialchars($r['destinazione']);
+        $descJs       = htmlspecialchars(isset($r['descrizione']) ? $r['descrizione'] : '');
+        $mezzoJs      = htmlspecialchars(isset($r['mezzo']) ? $r['mezzo'] : '');
+        $perJs        = htmlspecialchars(isset($r['periodo']) ? $r['periodo'] : '');
+        $classiJs     = htmlspecialchars(isset($r['classi']) ? $r['classi'] : '');
+        $costoJs      = (float)$r['costoAPersona'];
         $azioniCol = '';
         if ($_SESSION['ruolo'] == 2) {
             $azioniCol = "<td style='display:flex;gap:0.4rem;'>

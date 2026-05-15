@@ -1,5 +1,5 @@
 <?php
-// funzione per formattare la data
+// funzione per formattare la data (trovata dall'ia per un bug di formattazione)
 function formattaData($data) {
     if ($data === null || $data === '') return '';
     $d = strtotime($data);
