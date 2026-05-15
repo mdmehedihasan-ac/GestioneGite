@@ -33,7 +33,7 @@
                         <p>Hai gia un account? Effettua il login per accedere alle funzionalita.</p>
                     </div>
                     <div class="card-footer">
-                        <a href="login.php" class="button full-width" style="text-align:center; display:block;">Accedi</a>
+                        <a href="login.php" class="button full-width home-button">Accedi</a>
                     </div>
                 </div>
 
@@ -45,7 +45,7 @@
                         <p>Non hai un account? Crea il tuo profilo per proporre e organizzare gite.</p>
                     </div>
                     <div class="card-footer">
-                        <a href="register.php" class="button full-width" style="text-align:center; display:block;">Registrati</a>
+                        <a href="register.php" class="button full-width home-button">Registrati</a>
                     </div>
                 </div>
             </div>

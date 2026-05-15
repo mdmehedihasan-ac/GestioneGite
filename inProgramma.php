@@ -135,11 +135,6 @@ $res5g = mysqli_query($conn,
 <div class="container">
 <main class="content bozze-padding">
 
-<div class="hero-section" style="margin-bottom:1.5rem;">
-    <h2 style="margin-bottom:0.25rem;color:var(--blue-700);">Gite in Programma</h2>
-    <p style="color:#64748b;margin:0;">Elenco di tutte le gite attualmente in organizzazione.</p>
-</div>
-
 <?php if (($_GET['partecipato'] ?? '') === '1'): ?>
 <div class="alert alert-success" style="margin-bottom:1rem;">
     Hai aderito alla gita come accompagnatore. La trovi ora in <a href="mieGite.php"><strong>Le Mie Gite</strong></a>.
@@ -153,16 +148,15 @@ $res5g = mysqli_query($conn,
 <?php endif; ?>
 
 <!-- gite 1 giorno -->
-<h3 style="color:var(--blue-700);margin-bottom:0.75rem;">Gite di 1 Giorno</h3>
+<h3 style="color:var(--blue-700);margin-bottom:0.75rem;">Gite di un giorno in programma</h3>
 <div class="table-section"><div class="table-container">
 <table>
 <thead><tr>
-    <th>#</th><th>Destinazione</th><th>Mezzo</th><th>Classi</th>
+    <th>Destinazione</th><th>Mezzo</th><th>Classi</th>
     <th>Giorno</th><th>Costo/Persona</th><th>N. Alunni</th><th>Docente</th><th>Azioni</th>
 </tr></thead>
 <tbody>
 <?php
-$n = 1;
 if ($res1g && mysqli_num_rows($res1g) > 0):
     while ($riga = mysqli_fetch_assoc($res1g)):
         $id      = intval($riga['idGita']);
@@ -179,12 +173,14 @@ if ($res1g && mysqli_num_rows($res1g) > 0):
         $costoPA = $riga['costoAPersona'] ?? '';
         $dJ      = htmlspecialchars($riga['destinazione'] ?? '', ENT_QUOTES);
         // iscritto se è accompagnatore OPPURE se è l'autore della gita
-        $chk = mysqli_query($conn, "SELECT id FROM accompagnatori WHERE idgita=$id AND idutente=$idUtenteLoggato AND tipo_gita='1g'");
+        $chk = mysqli_query($conn,
+        "SELECT id
+        FROM accompagnatori
+        WHERE idgita=$id AND idutente=$idUtenteLoggato AND tipo_gita='1g'");
         $isAccompagnatore = ($chk && mysqli_num_rows($chk) > 0);
         $isAutore = ($riga['idUtente'] == $idUtenteLoggato);
 ?>
     <tr>
-        <td><?php echo $n++; ?></td>
         <td><?php echo $dest; ?></td>
         <td><?php echo $mezzo ?: '—'; ?></td>
         <td><?php echo $classi ?: '—'; ?></td>
@@ -231,23 +227,22 @@ if ($res1g && mysqli_num_rows($res1g) > 0):
         </td>
     </tr>
 <?php endwhile; else: ?>
-    <tr><td colspan="9" style="text-align:center;color:#94a3b8;">Nessuna gita di 1 giorno in organizzazione.</td></tr>
+    <tr><td colspan="8" style="text-align:center;color:#94a3b8;">Nessuna gita di 1 giorno in organizzazione.</td></tr>
 <?php endif; ?>
 </tbody>
 </table>
 </div></div>
 
 <!-- gite piu giorni -->
-<h3 style="color:var(--blue-700);margin:2rem 0 0.75rem;">Gite di Più Giorni</h3>
+<h3 style="color:var(--blue-700);margin:2rem 0 0.75rem;">Gite per le quinte in programma</h3>
 <div class="table-section"><div class="table-container">
 <table>
 <thead><tr>
-    <th>#</th><th>Destinazione</th><th>Mezzo</th><th>Classi</th>
+    <th>Destinazione</th><th>Mezzo</th><th>Classi</th>
     <th>Dal</th><th>Al</th><th>Costo/Persona</th><th>N. Alunni</th><th>Docente</th><th>Azioni</th>
 </tr></thead>
 <tbody>
 <?php
-$n = 1;
 if ($res5g && mysqli_num_rows($res5g) > 0):
     while ($riga = mysqli_fetch_assoc($res5g)):
         $id     = intval($riga['idGita']);
@@ -269,7 +264,6 @@ if ($res5g && mysqli_num_rows($res5g) > 0):
         $isAutore = ($riga['idUtente'] == $idUtenteLoggato);
 ?>
     <tr>
-        <td><?php echo $n++; ?></td>
         <td><?php echo $dest; ?></td>
         <td><?php echo $mezzo ?: '—'; ?></td>
         <td><?php echo $classi ?: '—'; ?></td>
@@ -316,7 +310,8 @@ if ($res5g && mysqli_num_rows($res5g) > 0):
         </td>
     </tr>
 <?php endwhile; else: ?>
-    <tr><td colspan="10" style="text-align:center;color:#94a3b8;">Nessuna gita di più giorni in organizzazione.</td></tr>
+    <tr><td colspan="9" style="text-align:center;color:#94a3b8;">
+        Nessuna gita di più giorni in organizzazione.</td></tr>
 <?php endif; ?>
 </tbody>
 </table>

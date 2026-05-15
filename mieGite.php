@@ -5,12 +5,22 @@ include('utils.php');
 $idUtenteLoggato = $_SESSION['id_utente'];
 $messaggio = "";
 
+$conn->query("CREATE TABLE IF NOT EXISTS gite_archiviate_utente (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    idutente INT NOT NULL,
+    idgita INT NOT NULL,
+    tipo_gita ENUM('1g','5g') NOT NULL,
+    data_archiviazione TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_archivio (idutente, idgita, tipo_gita)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci");
+
 // disiscriviti da accompagnatore
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'disiscriviti') {
     $idGita   = intval($_POST['id_gita']);
     $tipoGita = ($_POST['tipo_gita'] ?? '') === '5g' ? '5g' : '1g';
     if ($idGita > 0 && $idUtenteLoggato > 0) {
-        $conn->query("DELETE FROM accompagnatori WHERE idgita = $idGita AND idutente = $idUtenteLoggato AND tipo_gita = '$tipoGita'");
+        $conn->query("
+        DELETE FROM accompagnatori WHERE idgita = $idGita AND idutente = $idUtenteLoggato AND tipo_gita = '$tipoGita'");
         $messaggio = "disiscritto_ok";
     }
 }
@@ -20,7 +30,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $idGita   = intval($_POST['id_gita']);
     $tipoGita = ($_POST['tipo_gita'] ?? '') === '5g' ? '5g' : '1g';
     if ($idGita > 0 && $idUtenteLoggato > 0) {
-        $conn->query("INSERT IGNORE INTO accompagnatori (idgita, idutente, tipo_gita) VALUES ($idGita, $idUtenteLoggato, '$tipoGita')");
+        $conn->query(
+            "INSERT IGNORE INTO accompagnatori (idgita, idutente, tipo_gita) VALUES ($idGita, $idUtenteLoggato, '$tipoGita')");
         $messaggio = "partecipato_ok";
     }
 }
@@ -31,12 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $tipoGita = ($_POST['tipo_gita'] ?? '') === '5g' ? '5g' : '1g';
     $sonoAutore = intval($_POST['sono_autore'] ?? 0);
     if ($idGita > 0 && $idUtenteLoggato > 0) {
-        if ($sonoAutore == 1) {
-            $tab = $tipoGita === '1g' ? 'gita1g' : 'gite5';
-            $conn->query("UPDATE $tab SET idStato = 6 WHERE idGita = $idGita");
-        } else {
-            $conn->query("DELETE FROM accompagnatori WHERE idgita = $idGita AND idutente = $idUtenteLoggato AND tipo_gita = '$tipoGita'");
-        }
+        $conn->query("INSERT IGNORE INTO gite_archiviate_utente (idutente, idgita, tipo_gita) VALUES ($idUtenteLoggato, $idGita, '$tipoGita')");
         $messaggio = "archiviata_ok";
     }
 }
@@ -276,7 +282,8 @@ $r3 = $conn->query("
     SELECT g.*, '1g' AS tipo, IF(g.idUtente = $idUtenteLoggato, 1, 0) AS sono_autore, IF(a.idutente IS NOT NULL, 1, 0) AS sono_accompagnatore
     FROM gita1g g
     LEFT JOIN accompagnatori a ON a.idgita = g.idGita AND a.tipo_gita = '1g' AND a.idutente = $idUtenteLoggato
-    WHERE g.idStato IN (4,5) AND (g.idUtente = $idUtenteLoggato OR a.idutente IS NOT NULL)
+    LEFT JOIN gite_archiviate_utente ar ON ar.idgita = g.idGita AND ar.tipo_gita = '1g' AND ar.idutente = $idUtenteLoggato
+    WHERE g.idStato IN (4,5) AND ar.id IS NULL AND (g.idUtente = $idUtenteLoggato OR a.idutente IS NOT NULL)
     ORDER BY g.idGita DESC
 ");
 if ($r3) { while ($riga = $r3->fetch_assoc()) $organizzate[] = $riga; }
@@ -284,7 +291,8 @@ $r4 = $conn->query("
     SELECT g.*, '5g' AS tipo, IF(g.idUtente = $idUtenteLoggato, 1, 0) AS sono_autore, IF(a.idutente IS NOT NULL, 1, 0) AS sono_accompagnatore
     FROM gite5 g
     LEFT JOIN accompagnatori a ON a.idgita = g.idGita AND a.tipo_gita = '5g' AND a.idutente = $idUtenteLoggato
-    WHERE g.idStato IN (4,5) AND (g.idUtente = $idUtenteLoggato OR a.idutente IS NOT NULL)
+    LEFT JOIN gite_archiviate_utente ar ON ar.idgita = g.idGita AND ar.tipo_gita = '5g' AND ar.idutente = $idUtenteLoggato
+    WHERE g.idStato IN (4,5) AND ar.id IS NULL AND (g.idUtente = $idUtenteLoggato OR a.idutente IS NOT NULL)
     ORDER BY g.idGita DESC
 ");
 if ($r4) { while ($riga = $r4->fetch_assoc()) $organizzate[] = $riga; }
@@ -326,12 +334,7 @@ function badgeClass($stato) {
 </head>
 <body>
 <div class="container">
-<main class="content bozze-padding">
-
-<div class="hero-section">
-    <h2 style="margin-bottom:0.5rem;color:var(--blue-700);">Le Mie Gite</h2>
-    <p>Tutte le gite che hai proposto o stai organizzando.</p>
-</div>
+<main class="content bozze-padding" style="display:flex;flex-direction:column;">
 
 <?php if ($messaggio === 'ok'): ?>
 <script>document.addEventListener('DOMContentLoaded',function(){ document.getElementById('modalRiproponiOk').classList.remove('hidden'); });</script>
@@ -367,8 +370,14 @@ function badgeClass($stato) {
 </div>
 <?php endif; ?>
 
+<?php if (isset($_GET['organizzata'])): ?>
+<div class="alert alert-success" style="margin-bottom:1rem;">
+    Gita messa in organizzazione con successo.
+</div>
+<?php endif; ?>
+
 <!-- sezione 1: proposte create da me -->
-<div class="table-section" style="margin-top:2rem;">
+<div class="table-section" style="margin-top:3rem;order:2;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem;">
         <h3 style="margin:0;color:var(--blue-700);">Proposte create da me</h3>
         <span style="font-size:0.85rem;color:var(--blue-400);"><?php echo count($proposte); ?> proposta<?php echo count($proposte) != 1 ? 'e' : ''; ?></span>
@@ -455,7 +464,7 @@ function badgeClass($stato) {
 </div>
 
 <!-- sezione 2: gite in organizzazione / concluse -->
-<div class="table-section" style="margin-top:3rem;">
+<div class="table-section" style="margin-top:0;order:1;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem;">
         <h3 style="margin:0;color:var(--blue-700);">Gite che sto organizzando</h3>
         <span style="font-size:0.85rem;color:var(--blue-400);"><?php echo count($organizzate); ?> gita<?php echo count($organizzate) != 1 ? 'e' : ''; ?></span>
@@ -834,7 +843,8 @@ function badgeClass($stato) {
         </div>
         <div class="form-group">
             <label>Giorno *</label>
-            <input type="date" name="org_giorno" id="org1g_giorno" class="form-control" required min="2024-01-01" max="2030-12-31">
+            <input type="date" name="org_giorno" id="org1g_giorno" class="form-control" required max="2030-12-31">
+            <small id="org1g_giorno_error" style="color:var(--hex-red);display:block;margin-top:0.25rem;"></small>
         </div>
         <div class="form-group">
             <label>Costo Mezzo (&euro;)</label>
@@ -901,11 +911,13 @@ function badgeClass($stato) {
         </div>
         <div class="form-group">
             <label>Giorno Inizio *</label>
-            <input type="date" name="org_giornoInizio" id="org5g_giornoInizio" class="form-control" required min="2024-01-01" max="2030-12-31">
+            <input type="date" name="org_giornoInizio" id="org5g_giornoInizio" class="form-control" required max="2030-12-31">
+            <small id="org5g_giornoInizio_error" style="color:var(--hex-red);display:block;margin-top:0.25rem;"></small>
         </div>
         <div class="form-group">
             <label>Giorno Fine *</label>
-            <input type="date" name="org_giornoFine" id="org5g_giornoFine" class="form-control" required min="2024-01-01" max="2030-12-31">
+            <input type="date" name="org_giornoFine" id="org5g_giornoFine" class="form-control" required max="2030-12-31">
+            <small id="org5g_giornoFine_error" style="color:var(--hex-red);display:block;margin-top:0.25rem;"></small>
         </div>
         <div class="form-group">
             <label>Costo a Persona (&euro;)</label>
@@ -1078,6 +1090,55 @@ function apriModOrg(btn) {
         document.getElementById('modalModOrg5g').classList.remove('hidden');
     }
 }
+function domaniISO() {
+    var d = new Date();
+    d.setDate(d.getDate() + 1);
+    var mese = String(d.getMonth() + 1).padStart(2, '0');
+    var giorno = String(d.getDate()).padStart(2, '0');
+    return d.getFullYear() + '-' + mese + '-' + giorno;
+}
+function impostaDateMinimeOrganizza() {
+    var min = domaniISO();
+    ['org1g_giorno', 'org5g_giornoInizio', 'org5g_giornoFine'].forEach(function(id) {
+        var campo = document.getElementById(id);
+        if (campo) campo.min = min;
+    });
+}
+function mostraErroreData(id, testo) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = testo;
+}
+function validaDateOrg1g() {
+    var campo = document.getElementById('org1g_giorno');
+    var min = domaniISO();
+    mostraErroreData('org1g_giorno_error', '');
+    if (campo && campo.value && campo.value < min) {
+        mostraErroreData('org1g_giorno_error', 'La data deve essere successiva ad oggi.');
+        return false;
+    }
+    return true;
+}
+function validaDateOrg5g() {
+    var inizio = document.getElementById('org5g_giornoInizio');
+    var fine = document.getElementById('org5g_giornoFine');
+    var min = domaniISO();
+    var ok = true;
+    mostraErroreData('org5g_giornoInizio_error', '');
+    mostraErroreData('org5g_giornoFine_error', '');
+    if (inizio && inizio.value && inizio.value < min) {
+        mostraErroreData('org5g_giornoInizio_error', 'La data deve essere successiva ad oggi.');
+        ok = false;
+    }
+    if (fine && fine.value && fine.value < min) {
+        mostraErroreData('org5g_giornoFine_error', 'La data deve essere successiva ad oggi.');
+        ok = false;
+    }
+    if (inizio && fine && inizio.value && fine.value && fine.value <= inizio.value) {
+        mostraErroreData('org5g_giornoFine_error', 'La data di fine deve essere successiva alla data di inizio.');
+        ok = false;
+    }
+    return ok;
+}
 function apriOrg(btn) {
     var d = btn.dataset;
     if (d.tipo === '1g') {
@@ -1093,6 +1154,8 @@ function apriOrg(btn) {
         document.getElementById('org1g_costoMezzo').value   = '';
         document.getElementById('org1g_costoGiorno').value  = '';
         document.getElementById('org1g_numAlunni').value    = '';
+        impostaDateMinimeOrganizza();
+        mostraErroreData('org1g_giorno_error', '');
         document.getElementById('modalOrg1g').classList.remove('hidden');
     } else {
         document.getElementById('org5g_id').value              = d.id;
@@ -1106,6 +1169,9 @@ function apriOrg(btn) {
         document.getElementById('org5g_giornoInizio').value    = '';
         document.getElementById('org5g_giornoFine').value      = '';
         document.getElementById('org5g_numAlunni').value       = '';
+        impostaDateMinimeOrganizza();
+        mostraErroreData('org5g_giornoInizio_error', '');
+        mostraErroreData('org5g_giornoFine_error', '');
         document.getElementById('modalOrg5g').classList.remove('hidden');
     }
 }
@@ -1139,6 +1205,27 @@ window.addEventListener('click', function(e) {
     if (e.target === document.getElementById('modalModOrg1g'))  document.getElementById('modalModOrg1g').classList.add('hidden');
     if (e.target === document.getElementById('modalModOrg5g'))  document.getElementById('modalModOrg5g').classList.add('hidden');
     if (e.target === document.getElementById('modalAccompagnatori')) document.getElementById('modalAccompagnatori').classList.add('hidden');
+});
+document.addEventListener('DOMContentLoaded', function() {
+    impostaDateMinimeOrganizza();
+    var form1g = document.getElementById('formOrg1g');
+    var form5g = document.getElementById('formOrg5g');
+    var giorno1g = document.getElementById('org1g_giorno');
+    var giornoInizio5g = document.getElementById('org5g_giornoInizio');
+    var giornoFine5g = document.getElementById('org5g_giornoFine');
+    if (form1g) {
+        form1g.addEventListener('submit', function(e) {
+            if (!validaDateOrg1g()) e.preventDefault();
+        });
+    }
+    if (form5g) {
+        form5g.addEventListener('submit', function(e) {
+            if (!validaDateOrg5g()) e.preventDefault();
+        });
+    }
+    if (giorno1g) giorno1g.addEventListener('input', validaDateOrg1g);
+    if (giornoInizio5g) giornoInizio5g.addEventListener('input', validaDateOrg5g);
+    if (giornoFine5g) giornoFine5g.addEventListener('input', validaDateOrg5g);
 });
 </script>
 </body>

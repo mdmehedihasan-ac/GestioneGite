@@ -1,6 +1,7 @@
 <?php
 // funzione per formattare la data
 function formattaData($data) {
+    if ($data === null || $data === '') return '';
     $d = strtotime($data);
     return $d ? date('d/m/Y', $d) : '';
 }

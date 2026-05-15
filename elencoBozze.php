@@ -88,22 +88,15 @@ $tot5g = $bozze5g ? $bozze5g->num_rows : 0;
 <div class="container">
 <main class="content bozze-padding">
 
-<div class="hero-section">
-    <h2 style="margin-bottom:0.5rem;color:var(--blue-700);">Bozze in Attesa</h2>
-    <p>Proposte in attesa di approvazione.</p>
-</div>
-
 <?php echo $messaggio; ?>
 
-// sezione bozze gite 1 giorno
-<div style="display:flex;align-items:center;justify-content:space-between;margin-top:2rem;margin-bottom:1rem;">
-    <h3 style="color:var(--blue-700);margin:0;">Gite di 1 Giorno <span style="font-size:.85rem;font-weight:400;color:#6b7280;">(<?= $tot1g ?> in attesa)</span></h3>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+    <h3 style="color:var(--blue-700);margin:0;">Bozze gite di un giorno</h3>
 </div>
 
 <div class="table-section" style="margin-bottom:3rem;"><div class="table-container">
 <table>
 <thead><tr>
-    <th>#</th>
     <th>Destinazione</th>
     <th>Mezzo</th>
     <th>Periodo</th>
@@ -113,7 +106,6 @@ $tot5g = $bozze5g ? $bozze5g->num_rows : 0;
 </tr></thead>
 <tbody>
 <?php
-$n = 1;
 if ($bozze1g && $bozze1g->num_rows > 0) {
     while ($r = $bozze1g->fetch_assoc()) {
         $dest   = htmlspecialchars($r['destinazione']);
@@ -123,7 +115,6 @@ if ($bozze1g && $bozze1g->num_rows > 0) {
         $autore = htmlspecialchars($r['Nome'] . ' ' . $r['Cognome']);
         $id     = intval($r['idGita']);
         echo "<tr>
-            <td>$n</td>
             <td>$dest</td>
             <td>$mezzo</td>
             <td>$per</td>
@@ -134,25 +125,22 @@ if ($bozze1g && $bozze1g->num_rows > 0) {
                 <button type='button' class='button cancel xs' onclick=\"apriConferma($id,'boccia','azione_1g','$dest')\">Boccia</button>
             </td>
         </tr>";
-        $n++;
     }
 } else {
-    echo "<tr><td colspan='7' style='text-align:center;'>Nessuna bozza di gita 1 giorno in attesa.</td></tr>";
+    echo "<tr><td colspan='6' style='text-align:center;'>Nessuna bozza di gita 1 giorno in attesa.</td></tr>";
 }
 ?>
 </tbody>
 </table>
 </div></div>
 
-// sezione bozze gite 5 giorni
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-    <h3 style="color:var(--blue-700);margin:0;">Gite di 5 Giorni <span style="font-size:.85rem;font-weight:400;color:#6b7280;">(<?= $tot5g ?> in attesa)</span></h3>
+    <h3 style="color:var(--blue-700);margin:0;">Bozze gite per le quinte</h3>
 </div>
 
 <div class="table-section"><div class="table-container">
 <table>
 <thead><tr>
-    <th>#</th>
     <th>Destinazione</th>
     <th>Mezzo</th>
     <th>Periodo</th>
@@ -162,7 +150,6 @@ if ($bozze1g && $bozze1g->num_rows > 0) {
 </tr></thead>
 <tbody>
 <?php
-$n = 1;
 if ($bozze5g && $bozze5g->num_rows > 0) {
     while ($r = $bozze5g->fetch_assoc()) {
         $dest   = htmlspecialchars($r['destinazione']);
@@ -172,7 +159,6 @@ if ($bozze5g && $bozze5g->num_rows > 0) {
         $autore = htmlspecialchars($r['Nome'] . ' ' . $r['Cognome']);
         $id     = intval($r['idGita']);
         echo "<tr>
-            <td>$n</td>
             <td>$dest</td>
             <td>$mezzo</td>
             <td>$per</td>
@@ -183,10 +169,9 @@ if ($bozze5g && $bozze5g->num_rows > 0) {
                 <button type='button' class='button cancel xs' onclick=\"apriConferma($id,'boccia','azione_5g','$dest')\">Boccia</button>
             </td>
         </tr>";
-        $n++;
     }
 } else {
-    echo "<tr><td colspan='7' style='text-align:center;'>Nessuna bozza di gita 5 giorni in attesa.</td></tr>";
+    echo "<tr><td colspan='6' style='text-align:center;'>Nessuna bozza di gita 5 giorni in attesa.</td></tr>";
 }
 ?>
 </tbody>

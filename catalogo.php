@@ -90,9 +90,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     if ($giorno && (strtotime($giorno) === false || intval(date('Y', strtotime($giorno))) < 2024 || intval(date('Y', strtotime($giorno))) > 2030)) {
         $valido = false;
     }
+    if ($giorno && strtotime($giorno) <= strtotime(date('Y-m-d'))) {
+        $valido = false;
+    }
 
     if (!$valido) {
-        $messaggio = "<div class='alert alert-error'>Errore di validazione: la data inserita non è valida.</div>";
+        $messaggio = "<div class='alert alert-error'>Errore di validazione: la data della gita deve essere successiva ad oggi.</div>";
     } else {
         // Leggi la riga originale
         $orig = $conn->query("SELECT * FROM gita1g WHERE idGita = $idGita")->fetch_assoc();
@@ -140,9 +143,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     if ($giornoFine && (strtotime($giornoFine) === false || intval(date('Y', strtotime($giornoFine))) < 2024 || intval(date('Y', strtotime($giornoFine))) > 2030)) {
         $valido = false;
     }
+    if ($giornoInizio && strtotime($giornoInizio) <= strtotime(date('Y-m-d'))) {
+        $valido = false;
+    }
+    if ($giornoInizio && $giornoFine && strtotime($giornoInizio) >= strtotime($giornoFine)) {
+        $valido = false;
+    }
 
     if (!$valido) {
-        $messaggio = "<div class='alert alert-error'>Errore di validazione: le date inserite non sono valide.</div>";
+        $messaggio = "<div class='alert alert-error'>Errore di validazione: la data di inizio deve essere successiva ad oggi e precedente alla data di fine.</div>";
     } else {
         $orig = $conn->query("SELECT * FROM gite5 WHERE idGita = $idGita")->fetch_assoc();
         if ($orig) {
@@ -276,6 +285,8 @@ $tot5g = $gite5g ? $gite5g->num_rows : 0;
         document.getElementById('org1g_costoMezzo').value     = '';
         document.getElementById('org1g_costoGiorno').value    = '';
         document.getElementById('org1g_numAlunni').value      = '';
+        impostaDateMinimeOrganizza();
+        mostraErroreData('org1g_giorno_error', '');
         document.getElementById('modalOrg1g').classList.remove('hidden');
     }
     function apriOrg5g(btn) {
@@ -291,6 +302,9 @@ $tot5g = $gite5g ? $gite5g->num_rows : 0;
         document.getElementById('org5g_giornoInizio').value   = '';
         document.getElementById('org5g_giornoFine').value     = '';
         document.getElementById('org5g_numAlunni').value      = '';
+        impostaDateMinimeOrganizza();
+        mostraErroreData('org5g_giornoInizio_error', '');
+        mostraErroreData('org5g_giornoFine_error', '');
         document.getElementById('modalOrg5g').classList.remove('hidden');
     }
     function apriModifica1g(btn) {
@@ -321,6 +335,76 @@ $tot5g = $gite5g ? $gite5g->num_rows : 0;
         document.getElementById('elimDest').textContent = dest;
         document.getElementById('modalElimina').classList.remove('hidden');
     }
+    function domaniISO() {
+        var d = new Date();
+        d.setDate(d.getDate() + 1);
+        var mese = String(d.getMonth() + 1).padStart(2, '0');
+        var giorno = String(d.getDate()).padStart(2, '0');
+        return d.getFullYear() + '-' + mese + '-' + giorno;
+    }
+    function impostaDateMinimeOrganizza() {
+        var min = domaniISO();
+        ['org1g_giorno', 'org5g_giornoInizio', 'org5g_giornoFine'].forEach(function(id) {
+            var campo = document.getElementById(id);
+            if (campo) campo.min = min;
+        });
+    }
+    function mostraErroreData(id, testo) {
+        var el = document.getElementById(id);
+        if (el) el.textContent = testo;
+    }
+    function validaDateOrg1g() {
+        var campo = document.getElementById('org1g_giorno');
+        var min = domaniISO();
+        mostraErroreData('org1g_giorno_error', '');
+        if (campo && campo.value && campo.value < min) {
+            mostraErroreData('org1g_giorno_error', 'La data deve essere successiva ad oggi.');
+            return false;
+        }
+        return true;
+    }
+    function validaDateOrg5g() {
+        var inizio = document.getElementById('org5g_giornoInizio');
+        var fine = document.getElementById('org5g_giornoFine');
+        var min = domaniISO();
+        var ok = true;
+        mostraErroreData('org5g_giornoInizio_error', '');
+        mostraErroreData('org5g_giornoFine_error', '');
+        if (inizio && inizio.value && inizio.value < min) {
+            mostraErroreData('org5g_giornoInizio_error', 'La data deve essere successiva ad oggi.');
+            ok = false;
+        }
+        if (fine && fine.value && fine.value < min) {
+            mostraErroreData('org5g_giornoFine_error', 'La data deve essere successiva ad oggi.');
+            ok = false;
+        }
+        if (inizio && fine && inizio.value && fine.value && fine.value <= inizio.value) {
+            mostraErroreData('org5g_giornoFine_error', 'La data di fine deve essere successiva alla data di inizio.');
+            ok = false;
+        }
+        return ok;
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        impostaDateMinimeOrganizza();
+        var form1g = document.getElementById('formOrg1g');
+        var form5g = document.getElementById('formOrg5g');
+        var giorno1g = document.getElementById('org1g_giorno');
+        var giornoInizio5g = document.getElementById('org5g_giornoInizio');
+        var giornoFine5g = document.getElementById('org5g_giornoFine');
+        if (form1g) {
+            form1g.addEventListener('submit', function(e) {
+                if (!validaDateOrg1g()) e.preventDefault();
+            });
+        }
+        if (form5g) {
+            form5g.addEventListener('submit', function(e) {
+                if (!validaDateOrg5g()) e.preventDefault();
+            });
+        }
+        if (giorno1g) giorno1g.addEventListener('input', validaDateOrg1g);
+        if (giornoInizio5g) giornoInizio5g.addEventListener('input', validaDateOrg5g);
+        if (giornoFine5g) giornoFine5g.addEventListener('input', validaDateOrg5g);
+    });
     </script>
 </head>
 <body>
@@ -333,26 +417,24 @@ $tot5g = $gite5g ? $gite5g->num_rows : 0;
 if ($messaggio && $messaggio !== 'organizza_ok') {
     echo $messaggio;
 }
-// se l'organizzazione e andata bene apri la modale di conferma
+// se l'organizzazione e andata bene reindirizza alle mie gite
 if ($messaggio === 'organizza_ok') {
     echo '<script>
     document.addEventListener("DOMContentLoaded", function() {
-        document.getElementById("modalOrganizzaOk").classList.remove("hidden");
+        window.location.href = "mieGite.php?organizzata=1";
     });
     </script>';
 }
 ?>
-<h2 style="color:var(--blue-700);margin:0;">Proposte Gite</h2>
 <!-- sezione gite 1 giorno -->
-<div style="display:flex;align-items:center;justify-content:space-between;margin-top:2rem;margin-bottom:1rem;">
-    <h3 style="color:var(--blue-700);margin:0;">Gite di 1 Giorno <span style="font-size:.85rem;font-weight:400;color:#6b7280;">(<?= $tot1g ?> approvate)</span></h3>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+    <h3 style="color:var(--blue-700);margin:0;">Proposte gite di un giorno</h3>
     <button class="button" onclick="document.getElementById('modal1g').classList.remove('hidden')">+ Nuova Proposta</button>
 </div>
 
 <div class="table-section" style="margin-bottom:3rem;"><div class="table-container">
 <table>
 <thead><tr>
-    <th>#</th>
     <th>Destinazione</th>
     <th>Mezzo</th>
     <th>Periodo</th>
@@ -363,7 +445,6 @@ if ($messaggio === 'organizza_ok') {
 </tr></thead>
 <tbody>
 <?php
-$n = 1;
 if ($gite1g && $gite1g->num_rows > 0) {
     while ($r = $gite1g->fetch_assoc()) {
         $dest   = htmlspecialchars($r['destinazione']);
@@ -391,7 +472,6 @@ if ($gite1g && $gite1g->num_rows > 0) {
             </td>";
         }
         echo "<tr>
-            <td>$n</td>
             <td>$dest</td>
             <td>$mezzo</td>
             <td>$per</td>
@@ -408,10 +488,9 @@ if ($gite1g && $gite1g->num_rows > 0) {
                 onclick=\"apriOrg1g(this)\">Organizza</button></td>
             $azioniCol
         </tr>";
-        $n++;
     }
 } else {
-    echo "<tr><td colspan='8' style='text-align:center;'>Nessuna gita di 1 giorno approvata al momento.</td></tr>";
+    echo "<tr><td colspan='7' style='text-align:center;'>Nessuna gita di 1 giorno approvata al momento.</td></tr>";
 }
 ?>
 </tbody>
@@ -420,14 +499,13 @@ if ($gite1g && $gite1g->num_rows > 0) {
 
 <!-- sezione gite piu giorni -->
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-    <h3 style="color:var(--blue-700);margin:0;">Gite di più Giorni <span style="font-size:.85rem;font-weight:400;color:#6b7280;">(<?= $tot5g ?> approvate)</span></h3>
+    <h3 style="color:var(--blue-700);margin:0;">Proposte gite per le quinte</h3>
     <button class="button" onclick="document.getElementById('modal5g').classList.remove('hidden')">+ Nuova Proposta</button>
 </div>
 
 <div class="table-section"><div class="table-container">
 <table>
 <thead><tr>
-    <th>#</th>
     <th>Destinazione</th>
     <th>Mezzo</th>
     <th>Periodo</th>
@@ -438,7 +516,6 @@ if ($gite1g && $gite1g->num_rows > 0) {
 </tr></thead>
 <tbody>
 <?php
-$n = 1;
 if ($gite5g && $gite5g->num_rows > 0) {
     while ($r = $gite5g->fetch_assoc()) {
         $dest   = htmlspecialchars($r['destinazione']);
@@ -466,7 +543,6 @@ if ($gite5g && $gite5g->num_rows > 0) {
             </td>";
         }
         echo "<tr>
-            <td>$n</td>
             <td>$dest</td>
             <td>$mezzo</td>
             <td>$per</td>
@@ -483,10 +559,9 @@ if ($gite5g && $gite5g->num_rows > 0) {
                 onclick=\"apriOrg5g(this)\">Organizza</button></td>
             $azioniCol
         </tr>";
-        $n++;
     }
 } else {
-    echo "<tr><td colspan='8' style='text-align:center;'>Nessuna gita di più giorni approvata al momento.</td></tr>";
+    echo "<tr><td colspan='7' style='text-align:center;'>Nessuna gita di più giorni approvata al momento.</td></tr>";
 }
 ?>
 </tbody>
@@ -641,7 +716,8 @@ if ($gite5g && $gite5g->num_rows > 0) {
         </div>
         <div class="form-group">
             <label>Giorno</label>
-            <input type="date" name="org_giorno" id="org1g_giorno" class="form-control" min="2024-01-01" max="2030-12-31">
+            <input type="date" name="org_giorno" id="org1g_giorno" class="form-control" max="2030-12-31">
+            <small id="org1g_giorno_error" style="color:var(--hex-red);display:block;margin-top:0.25rem;"></small>
         </div>
         <div class="form-group">
             <label>Costo Mezzo (&euro;)</label>
@@ -709,11 +785,13 @@ if ($gite5g && $gite5g->num_rows > 0) {
         </div>
         <div class="form-group">
             <label>Giorno Inizio</label>
-            <input type="date" name="org_giornoInizio" id="org5g_giornoInizio" class="form-control" min="2024-01-01" max="2030-12-31">
+            <input type="date" name="org_giornoInizio" id="org5g_giornoInizio" class="form-control" max="2030-12-31">
+            <small id="org5g_giornoInizio_error" style="color:var(--hex-red);display:block;margin-top:0.25rem;"></small>
         </div>
         <div class="form-group">
             <label>Giorno Fine</label>
-            <input type="date" name="org_giornoFine" id="org5g_giornoFine" class="form-control" min="2024-01-01" max="2030-12-31">
+            <input type="date" name="org_giornoFine" id="org5g_giornoFine" class="form-control" max="2030-12-31">
+            <small id="org5g_giornoFine_error" style="color:var(--hex-red);display:block;margin-top:0.25rem;"></small>
         </div>
         <div class="form-group">
             <label>Num. Alunni</label>
